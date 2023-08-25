@@ -10,11 +10,7 @@ Example of command using Terminal:
 mvn install:install-file -Dfile="YOURPATH\vscode-workspace\sim\lib\libsumo-1.18.0.jar" -DgroupId="libsumo-1.18.0" -DartifactId="libsumo-1.18.0" -Dversion="libsumo-1.18.0" -Dpackaging="jar" -DgeneratePom=true
 
 This command will enable what you can found in the Pom.xml file:
-****<dependency>****
-****  <groupId>libsumo-1.18.0</groupId>****
-  <artifactId>libsumo-1.18.0</artifactId>
-  <version>libsumo-1.18.0</version>
-</dependency>
+![image](https://github.com/21lab-technology/sim/assets/94874350/5f4e1f33-5a2b-4a5f-aacc-5ebf0c3b3df6)
 
 At YOURPATH\vscode-workspace\sim\src\main\java\sim\traci4j you will find support for TraCI - Interact with the Simulation in the source code. TraCI4J - A Java Package implementing the TraCI Protocol.
 

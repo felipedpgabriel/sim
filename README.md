@@ -15,7 +15,7 @@ This command will enable what you can found in the Pom.xml file:
 
 At YOURPATH\vscode-workspace\sim\src\main\java\sim\traci4j you will find support for TraCI - Interact with the Simulation in the source code. TraCI4J - A Java Package implementing the TraCI Protocol.
 
-![image](https://github.com/21lab-technology/sim/assets/94874350/bfb64597-a0f7-42cf-9a5d-01fd150a1026)
+![image](https://github.com/21lab-technology/sim/assets/94874350/9861cc7a-41ae-44b1-8b5f-fbc02865d611)
 
 *****To use it, make the necessary changes in the source code, starting with the correct way to connect with SUMO*****
 

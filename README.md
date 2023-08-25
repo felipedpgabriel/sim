@@ -4,7 +4,7 @@ You need to install Maven: https://maven.apache.org/
 
 You need to install VSCODE: https://code.visualstudio.com/download)https://code.visualstudio.com/download
 
-After that, use Maven commands using Terminal to install the dependencies found in the Pom.xml file (there are other ways to do this, look on the internet)
+After that, use Maven commands using Terminal to install the dependencies found in the Pom.xml file (there are other ways to do this on the internet)
 
 Example of command using Terminal:
 mvn install:install-file -Dfile="C:\dev\lib\sumo\libsumo-1.18.0.jar" -DgroupId="libsumo-1.18.0" -DartifactId="libsumo-1.18.0" -Dversion="libsumo-1.18.0" -Dpackaging="jar" -DgeneratePom=true

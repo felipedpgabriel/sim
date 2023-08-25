@@ -1,5 +1,7 @@
 You need to install SUMO: https://eclipse.dev/sumo/
+
 You need to install Maven: https://maven.apache.org/
+
 You need to install VSCODE: https://code.visualstudio.com/download)https://code.visualstudio.com/download
 
 After that, use Maven commands using Terminal to install the dependencies found in the Pom.xml file (there are other ways to do this, look on the internet)

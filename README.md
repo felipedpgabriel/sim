@@ -10,8 +10,8 @@ Example of command using Terminal:
 mvn install:install-file -Dfile="YOURPATH\vscode-workspace\sim\lib\libsumo-1.18.0.jar" -DgroupId="libsumo-1.18.0" -DartifactId="libsumo-1.18.0" -Dversion="libsumo-1.18.0" -Dpackaging="jar" -DgeneratePom=true
 
 This command will enable what you can found in the Pom.xml file:
-<dependency>
-  <groupId>libsumo-1.18.0</groupId>
+****<dependency>****
+****  <groupId>libsumo-1.18.0</groupId>****
   <artifactId>libsumo-1.18.0</artifactId>
   <version>libsumo-1.18.0</version>
 </dependency>

@@ -1,8 +1,7 @@
 package io.sim;
 
 /**
- * Hello world!
- *
+ * Classe Princiapl
  */
 public class App {
     public static void main( String[] args ) {

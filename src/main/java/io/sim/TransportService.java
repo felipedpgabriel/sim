@@ -5,66 +5,100 @@ import de.tudresden.sumo.cmd.Vehicle;
 import de.tudresden.sumo.objects.SumoStringList;
 import it.polito.appeal.traci.SumoTraciConnection;
 
+import io.sim.created.RouteN;
+
+/**Cria o objeto veiculo no SUMO
+ * Define cor e a rota.
+ */
 public class TransportService extends Thread {
 
 	private String idTransportService;
 	private boolean on_off;
 	private SumoTraciConnection sumo;
-	private Auto auto;
-	private Itinerary itinerary;
+	private Auto car; // Veiculo correspondente 
+	private RouteN route; // representa a rota a ser cumprida
+	private SumoStringList edge; // NEWF
+	private boolean finished = false; // chamado pelo Auto no caso Car
+	private boolean sumoInit = false;
 
-	public TransportService(boolean _on_off, String _idTransportService, Itinerary _itinerary, Auto _auto,
-			SumoTraciConnection _sumo) {
+	public TransportService(boolean _on_off, String _idTransportService, Auto _car,
+			SumoTraciConnection _sumo) { // tirei RouteN _route.
 
 		this.on_off = _on_off;
 		this.idTransportService = _idTransportService;
-		this.itinerary = _itinerary;
-		this.auto = _auto;
+		// this.route = _route;
+		this.car = _car;
 		this.sumo = _sumo;
 	}
 
 	@Override
 	public void run() {
-		try {
-			
-			this.initializeRoutes();
+		System.out.println("Iniciando TransportService.");
+		// logica para colocar num loop com while(!on_off), mas smp que sair, permanecer e 
+		while(!this.finished)
+		{
+			try {
+				// cuidar para fazer só quando receber rota
 
-			this.auto.start();
+				while (this.on_off) {
+					if(!this.sumoInit)
+					{
+						this.initializeRoutes();
+						System.out.println("TS - Rota: " + edge + " adcionada!");
+						String edgeFinal = edge.get(edge.size()-1);
+						System.out.println("TS - Edge final: "+edgeFinal);
+					}
+					try {
+						this.sumo.do_timestep(); // 
+					} catch (Exception e) {
+					}
+					String edgeAtual = (String) this.sumo.do_job_get(Vehicle.getRoadID(this.car.getIdAuto()));
+					System.out.println("TS - Edge atual: "+edgeAtual);
+					Thread.sleep(this.car.getAcquisitionRate());
+					// if(edgeAtual.equals(edgeFinal))
+					// {
+					// 	System.out.println("TS - "+car.getName() + " encerrou a rota.");
+					// 	this.car.setSpeed(0.0);
+					// }
+					if (this.getSumo().isClosed()) {
+						this.on_off = false;
+						System.out.println("TS - SUMO is closed...");
+					}
+				}
+				sumoInit = false;
 
-			while (this.on_off) {
-				try {
-					this.sumo.do_timestep();
-				} catch (Exception e) {
-				}
-				Thread.sleep(this.auto.getAcquisitionRate());
-				if (this.getSumo().isClosed()) {
-					this.on_off = false;
-					System.out.println("SUMO is closed...");
-				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
+
+		System.out.println("Encerrando TransportService.");
 	}
 
 	private void initializeRoutes() {
 
-		SumoStringList edge = new SumoStringList();
+		// Adiciona todas as edges em uma lista de Strings
+		edge = new SumoStringList(); // NEWF
 		edge.clear();
-		String[] aux = this.itinerary.getItinerary();
+		String aux = this.route.getEdges();// String[] aux = this.itinerary.getItinerary();
 
-		for (String e : aux[1].split(" ")) {
+		// for (String e : aux[1].split(" ")) {
+		// 	edge.add(e);
+		// }
+
+		for(String e : aux.split(" "))
+		{
 			edge.add(e);
 		}
 
-		try {
-			sumo.do_job_set(Route.add(this.itinerary.getIdItinerary(), edge));
+		try {// Inicializa a rota, veiculo e a cor do veiculo
+			sumo.do_job_set(Route.add(this.route.getRouteID(), edge)); // ROUTES trocar por this.route.getRouteID()
 			//sumo.do_job_set(Vehicle.add(this.auto.getIdAuto(), "DEFAULT_VEHTYPE", this.itinerary.getIdItinerary(), 0,
 			//		0.0, 0, (byte) 0));
 			
-			sumo.do_job_set(Vehicle.addFull(this.auto.getIdAuto(), 				//vehID
-											this.itinerary.getIdItinerary(), 	//routeID 
+			// MUDARF com Car herdando Vehicle, esse passo pode se tornar obsoleto
+			sumo.do_job_set(Vehicle.addFull(this.car.getIdAuto(), 				//vehID
+											this.route.getRouteID(), 	//routeID this.route.getRouteID()
 											"DEFAULT_VEHTYPE", 					//typeID 
 											"now", 								//depart  
 											"0", 								//departLane 
@@ -76,15 +110,16 @@ public class TransportService extends Thread {
 											"",									//fromTaz 
 											"",									//toTaz 
 											"", 								//line 
-											this.auto.getPersonCapacity(),		//personCapacity 
-											this.auto.getPersonNumber())		//personNumber
+											this.car.getPersonCapacity(),		//personCapacity 
+											this.car.getPersonNumber())		//personNumber
 					);
 			
-			sumo.do_job_set(Vehicle.setColor(this.auto.getIdAuto(), this.auto.getColorAuto()));
+			sumo.do_job_set(Vehicle.setColor(this.car.getIdAuto(), this.car.getColorAuto()));
 			
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
+		this.sumoInit = true;
 	}
 
 	public boolean isOn_off() {
@@ -95,6 +130,10 @@ public class TransportService extends Thread {
 		this.on_off = _on_off;
 	}
 
+	public void setFinished(boolean finished) {
+		this.finished = finished;
+	}
+
 	public String getIdTransportService() {
 		return this.idTransportService;
 	}
@@ -103,11 +142,15 @@ public class TransportService extends Thread {
 		return this.sumo;
 	}
 
-	public Auto getAuto() {
-		return this.auto;
+	public Auto getcar() {
+		return this.car;
 	}
 
-	public Itinerary getItinerary() {
-		return this.itinerary;
+	public RouteN getRoute() { // ROUTE
+		return this.route;
+	}
+
+	public void setRoute(RouteN route) {
+		this.route = route;
 	}
 }

@@ -12,28 +12,33 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+/**Representa um Itinerario de rota. PODE VIRAR A CLASSE ROUTE
+ *Contem um ID e as edges para seguir
+ */
 public class Itinerary {
 
-	private boolean on;
-	private String uriItineraryXML;
-	private String[] itinerary;
+	private boolean on; // indica se a classe esta ativa
+	private String uriItineraryXML; 
+	private String[] itinerary; // {id_do_itinerario, edges}
 	private String idItinerary;
 
 	public Itinerary(String _uriRoutesXML, String _idRoute) {
-		this.uriItineraryXML = _uriRoutesXML;
-		this.idItinerary = _idRoute;
+		this.uriItineraryXML = _uriRoutesXML; //Arquivo com as rotas
+		this.idItinerary = _idRoute; // id da rota para extracao
 		try {
+			// Armazena as rotas do arquivo em uma NodeList
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder builder = factory.newDocumentBuilder();
-			Document doc = builder.parse(this.uriItineraryXML);
-			NodeList nList = doc.getElementsByTagName("vehicle");
+			Document doc = builder.parse(this.uriItineraryXML); // arquivo das rotas no formato Documents
+			NodeList nList = doc.getElementsByTagName("vehicle"); // lista de rotas com a tag vehicle
+
 			for (int i = 0; i < nList.getLength(); i++) {
 				Node nNode = nList.item(i);
 				if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-					Element elem = (Element) nNode;
-					String idRouteAux = this.idItinerary;
+					Element elem = (Element) nNode; // pausa 
+					String idRouteAux = this.idItinerary; 
 					Node node = elem.getElementsByTagName("route").item(0);
-					Element edges = (Element) node;
+					Element edges = (Element) node; // extrai as edges -> FALTA ver se eh o primeiro ponto ou a edge toda
 					this.itinerary = new String[] { idRouteAux, edges.getAttribute("edges") };
 				}
 			}

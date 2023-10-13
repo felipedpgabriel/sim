@@ -1,32 +1,60 @@
 package io.sim;
 
 import de.tudresden.sumo.cmd.Vehicle;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import it.polito.appeal.traci.SumoTraciConnection;
 import de.tudresden.sumo.objects.SumoColor;
 import de.tudresden.sumo.objects.SumoPosition2D;
+import de.tudresden.sumo.objects.SumoStringList;
+import io.sim.created.RouteN;
 
-public class Auto extends Thread {
-
-	private String idAuto;
+/**Define os atributos que coracterizam um Carro.
+ * Por meio de metodos get da classe Vehicle, 
+ */
+public class Auto extends Thread
+{
+	// atributos de cliente
+    private Socket socket;
+    private int servPort;
+    private String carHost; 
+	private ObjectInputStream entrada;
+    private ObjectOutputStream saida;
+    // atributos de sincronizacao
+    // private boolean ocupado = false;
+    // private Object monitor = new Object(); // sincronizacao
+	// atributos da classe
+	private String idAuto; // id do carro
 	private SumoColor colorAuto;
-	private String driverID;
+	private String driverID; // id do motorista
 	private SumoTraciConnection sumo;
-
 	private boolean on_off;
-	private long acquisitionRate;
+	private boolean finished = false; // chamado pelo Driver
+	private long acquisitionRate; // taxa de aquisicao de dados dos sensores
 	private int fuelType; 			// 1-diesel, 2-gasoline, 3-ethanol, 4-hybrid
 	private int fuelPreferential; 	// 1-diesel, 2-gasoline, 3-ethanol, 4-hybrid
 	private double fuelPrice; 		// price in liters
 	private int personCapacity;		// the total number of persons that can ride in this vehicle
 	private int personNumber;		// the total number of persons which are riding in this vehicle
+	private double speed = 50; //NEWF
+	private RouteN route;
+	// private ArrayList<DrivingData> drivingRepport; // dados de conducao do veiculo
+	private DrivingData carRepport;
+	private TransportService ts;
 
-	private ArrayList<DrivingData> drivingRepport;
-	
-	public Auto(boolean _on_off, String _idAuto, SumoColor _colorAuto, String _driverID, SumoTraciConnection _sumo, long _acquisitionRate,
+	public Auto(String _carHost,int _servPort, boolean _on_off, String _idAuto, SumoColor _colorAuto, String _driverID, SumoTraciConnection _sumo, long _acquisitionRate,
 			int _fuelType, int _fuelPreferential, double _fuelPrice, int _personCapacity, int _personNumber) throws Exception {
 
+		this.servPort = _servPort;
+		this.carHost = _carHost;
 		this.on_off = _on_off;
 		this.idAuto = _idAuto;
 		this.colorAuto = _colorAuto;
@@ -49,43 +77,102 @@ public class Auto extends Thread {
 		this.fuelPrice = _fuelPrice;
 		this.personCapacity = _personCapacity;
 		this.personNumber = _personNumber;
-		this.drivingRepport = new ArrayList<DrivingData>();
+		this.carRepport = this.updateDrivingData("aguardando");
+		// this.drivingRepport = new ArrayList<DrivingData>();
+		ts = new TransportService(false, this.idAuto, this, _sumo);
+		this.start();
+		ts.start();
 	}
 
 	@Override
-	public void run() {
-		while (this.on_off) {
-			try {
-				//Auto.sleep(this.acquisitionRate);
-				this.atualizaSensores();
-			} catch (Exception e) {
-				e.printStackTrace();
+	public void run()
+	{
+		System.out.println(this.idAuto + " iniciado.");
+		try
+		{
+			System.out.println(this.idAuto + " no try.");
+            socket = new Socket(this.carHost, this.servPort); // IMP modificar o host (unico para cada)
+			System.out.println(this.idAuto + " passou do socket.");
+            entrada = new ObjectInputStream(socket.getInputStream());
+			System.out.println(this.idAuto + " passou da entrada.");
+            saida = new ObjectOutputStream(socket.getOutputStream());
+
+			System.out.println(this.idAuto + " conectado.");
+			saida.writeObject(this.carRepport);
+			while(!finished)
+			{
+				System.out.println(this.idAuto + " aguardando rota.");
+				route = (RouteN) entrada.readObject();
+				ts.setRoute(route);
+				ts.setOn_off(true);
+				String edgeFinal = this.getEdgeFinal(); 
+				this.on_off = true;
+				while (this.on_off) // mudar nome para on
+				{
+					String edgeAtual = (String) this.sumo.do_job_get(Vehicle.getRoadID(this.idAuto));
+					Auto.sleep(this.acquisitionRate);
+					if(isRouteFineshed(edgeAtual, edgeFinal))
+					{
+						this.on_off = false;
+						this.ts.setOn_off(false);
+						this.carRepport = this.updateDrivingData("finalizado");
+						saida.writeObject(this.carRepport);
+						break;
+					}
+					else
+					{
+						this.carRepport = this.atualizaSensores();
+						saida.writeObject(this.carRepport); // DESCOMENTAR QUANDO O RELATORIO ESTIVER OK
+					}
+				}
+				System.out.println(this.idAuto + " off.");
+
+				if(!finished)
+				{
+					this.carRepport = this.updateDrivingData("aguardando");
+				}
+				if(finished)
+				{
+					this.carRepport = this.updateDrivingData("encerrado");
+				}
 			}
-		}
+			System.out.println("Encerrando: " + idAuto);
+			entrada.close();
+			saida.close();
+			socket.close();
+			this.ts.setFinished(true);
+        }
+		catch (Exception e)
+		{
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+		System.out.println(this.idAuto + " encerrado.");
 	}
 
-	private void atualizaSensores() {
-
+	private DrivingData atualizaSensores() {
+		DrivingData repport = updateDrivingData("aguardando");
 		try {
-
 			if (!this.getSumo().isClosed()) {
 				SumoPosition2D sumoPosition2D;
 				sumoPosition2D = (SumoPosition2D) sumo.do_job_get(Vehicle.getPosition(this.idAuto));
 
-				System.out.println("AutoID: " + this.getIdAuto());
-				System.out.println("RoadID: " + (String) this.sumo.do_job_get(Vehicle.getRoadID(this.idAuto)));
-				System.out.println("RouteID: " + (String) this.sumo.do_job_get(Vehicle.getRouteID(this.idAuto)));
-				System.out.println("RouteIndex: " + this.sumo.do_job_get(Vehicle.getRouteIndex(this.idAuto)));
+				// System.out.println("AutoID: " + this.getIdAuto());
+				// System.out.println("RoadID: " + (String) this.sumo.do_job_get(Vehicle.getRoadID(this.idAuto)));
+				// System.out.println("RouteID: " + (String) this.sumo.do_job_get(Vehicle.getRouteID(this.idAuto)));
+				// System.out.println("RouteIndex: " + this.sumo.do_job_get(Vehicle.getRouteIndex(this.idAuto)));
 				
-				DrivingData _repport = new DrivingData(
+				// Criacao dos dados de conducao do veiculo
+				repport = updateDrivingData(
 
-						this.idAuto, this.driverID, System.currentTimeMillis(), sumoPosition2D.x, sumoPosition2D.y,
+						"rodando", this.idAuto, this.driverID, System.currentTimeMillis(), sumoPosition2D.x, sumoPosition2D.y,
 						(String) this.sumo.do_job_get(Vehicle.getRoadID(this.idAuto)),
 						(String) this.sumo.do_job_get(Vehicle.getRouteID(this.idAuto)),
-						(double) sumo.do_job_get(Vehicle.getSpeed(this.idAuto)),
-						(double) sumo.do_job_get(Vehicle.getDistance(this.idAuto)),
+						(double) this.sumo.do_job_get(Vehicle.getSpeed(this.idAuto)),
+						(double) this.sumo.do_job_get(Vehicle.getDistance(this.idAuto)),
 
-						(double) sumo.do_job_get(Vehicle.getFuelConsumption(this.idAuto)),
+						(double) this.sumo.do_job_get(Vehicle.getFuelConsumption(this.idAuto)),
 						// Vehicle's fuel consumption in ml/s during this time step,
 						// to get the value for one step multiply with the step length; error value:
 						// -2^30
@@ -94,12 +181,12 @@ public class Auto extends Thread {
 
 						this.fuelType, this.fuelPrice,
 
-						(double) sumo.do_job_get(Vehicle.getCO2Emission(this.idAuto)),
+						(double) this.sumo.do_job_get(Vehicle.getCO2Emission(this.idAuto)),
 						// Vehicle's CO2 emissions in mg/s during this time step,
 						// to get the value for one step multiply with the step length; error value:
 						// -2^30
 
-						(double) sumo.do_job_get(Vehicle.getHCEmission(this.idAuto)),
+						(double) this.sumo.do_job_get(Vehicle.getHCEmission(this.idAuto)),
 						// Vehicle's HC emissions in mg/s during this time step,
 						// to get the value for one step multiply with the step length; error value:
 						// -2^30
@@ -116,23 +203,23 @@ public class Auto extends Thread {
 				// velocidadePermitida = (double)
 				// sumo.do_job_get(Vehicle.getAllowedSpeed(this.idSumoVehicle));
 
-				this.drivingRepport.add(_repport);
+				// this.drivingRepport.add(repport);
 
 				//System.out.println("Data: " + this.drivingRepport.size());
-				System.out.println("idAuto = " + this.drivingRepport.get(this.drivingRepport.size() - 1).getAutoID());
+				// System.out.println("idAuto = " + this.drivingRepport.get(this.drivingRepport.size() - 1).getAutoID());
 				//System.out.println(
 				//		"timestamp = " + this.drivingRepport.get(this.drivingRepport.size() - 1).getTimeStamp());
 				//System.out.println("X=" + this.drivingRepport.get(this.drivingRepport.size() - 1).getX_Position() + ", "
 				//		+ "Y=" + this.drivingRepport.get(this.drivingRepport.size() - 1).getY_Position());
-				System.out.println("speed = " + this.drivingRepport.get(this.drivingRepport.size() - 1).getSpeed());
-				System.out.println("odometer = " + this.drivingRepport.get(this.drivingRepport.size() - 1).getOdometer());
-				System.out.println("Fuel Consumption = "
-						+ this.drivingRepport.get(this.drivingRepport.size() - 1).getFuelConsumption());
+				// System.out.println("speed = " + this.drivingRepport.get(this.drivingRepport.size() - 1).getSpeed());
+				// System.out.println("odometer = " + this.drivingRepport.get(this.drivingRepport.size() - 1).getOdometer());
+				// System.out.println("Fuel Consumption = "
+				// 		+ this.drivingRepport.get(this.drivingRepport.size() - 1).getFuelConsumption());
 				//System.out.println("Fuel Type = " + this.fuelType);
 				//System.out.println("Fuel Price = " + this.fuelPrice);
 
-				System.out.println(
-						"CO2 Emission = " + this.drivingRepport.get(this.drivingRepport.size() - 1).getCo2Emission());
+				// System.out.println(
+				// 		"CO2 Emission = " + this.drivingRepport.get(this.drivingRepport.size() - 1).getCo2Emission());
 
 				//System.out.println();
 				//System.out.println("************************");
@@ -158,21 +245,51 @@ public class Auto extends Thread {
 				//		"getSpeedDeviation = " + (double) sumo.do_job_get(Vehicle.getSpeedDeviation(this.idAuto)));
 				
 				
-				sumo.do_job_set(Vehicle.setSpeedMode(this.idAuto, 0));
-				sumo.do_job_set(Vehicle.setSpeed(this.idAuto, 6.95));
+				this.sumo.do_job_set(Vehicle.setSpeedMode(this.idAuto, 0));
+				this.setSpeed(speed); // NEWF
 
 				
-				System.out.println("getPersonNumber = " + sumo.do_job_get(Vehicle.getPersonNumber(this.idAuto)));
+				// System.out.println("getPersonNumber = " + sumo.do_job_get(Vehicle.getPersonNumber(this.idAuto)));
 				//System.out.println("getPersonIDList = " + sumo.do_job_get(Vehicle.getPersonIDList(this.idAuto)));
 				
-				System.out.println("************************");
+				// System.out.println("************************");
 
 			} else {
+				this.on_off = false;
 				System.out.println("SUMO is closed...");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		return repport;
+	}
+
+	private DrivingData updateDrivingData(String _carState, String _autoID, String _driverID, long _timeStamp, double _x_Position,
+	double _y_Position, String _roadIDSUMO, String _routeIDSUMO, double _speed, double _odometer, double _fuelConsumption,
+	double _averageFuelConsumption, int _fuelType, double _fuelPrice, double _co2Emission, double _HCEmission, int _personCapacity,
+	int _personNumber)
+	{
+		DrivingData _repport = new DrivingData(_carState, _autoID, _driverID, _timeStamp, _x_Position, _y_Position, _roadIDSUMO, _routeIDSUMO, _speed, _odometer, _fuelConsumption, _averageFuelConsumption, _fuelType, _fuelPrice, _co2Emission, _HCEmission, _personCapacity, _personNumber);
+		return _repport;
+	}
+
+	private DrivingData updateDrivingData(String _carState, String _routeIDSUMO)
+	{
+		DrivingData _repport = updateDrivingData(_carState, idAuto, driverID, 0, 0, 0, 
+		"", _routeIDSUMO, 0, 0, 0, 1, this.fuelType,
+		this.fuelPrice,0, 0, this.personCapacity, this.personNumber);
+		return _repport;	
+	}
+
+	private DrivingData updateDrivingData(String _carState)
+	{
+		DrivingData _repport = updateDrivingData(_carState, "");
+		return _repport;	
+	}
+
+	public RouteN getRoute() {
+		return route;
 	}
 
 	public boolean isOn_off() {
@@ -181,6 +298,10 @@ public class Auto extends Thread {
 
 	public void setOn_off(boolean _on_off) {
 		this.on_off = _on_off;
+	}
+
+	public void setfinished(boolean finished) {
+		this.finished = finished;
 	}
 
 	public long getAcquisitionRate() {
@@ -241,5 +362,40 @@ public class Auto extends Thread {
 
 	public int getPersonNumber() {
 		return this.personNumber;
+	}
+
+	public void setSpeed(double speed) throws Exception
+	{
+		this.sumo.do_job_set(Vehicle.setSpeed(this.idAuto, speed));
+	}
+
+	public DrivingData getCarRepport() {
+		return carRepport;
+	}
+
+	private boolean isRouteFineshed(String _edgeAtual, String _edgeFinal) throws Exception
+	{
+		SumoStringList lista = (SumoStringList) this.sumo.do_job_get(Vehicle.getIDList());
+		lista.contains(idAuto);
+		if(!lista.contains(idAuto) && (_edgeFinal.equals(_edgeAtual)))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	private String getEdgeFinal()
+	{
+		SumoStringList edge = new SumoStringList();
+		edge.clear();
+		String aux = this.route.getEdges();
+		for(String e : aux.split(" "))
+		{
+			edge.add(e);
+		}
+		return edge.get(edge.size()-1);
 	}
 }

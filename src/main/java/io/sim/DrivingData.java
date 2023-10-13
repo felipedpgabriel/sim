@@ -1,9 +1,15 @@
 package io.sim;
 
-public class DrivingData {
+import java.io.Serializable;
+
+/**Armazena dados do veiculo
+ * Funcao organizacional, para ser usada no relatorio via Excel.
+ */
+public class DrivingData implements Serializable{
 
 	/* SUMO's data */
 
+	private String carState;
 	private String autoID;
 	private String driverID;
 	private long timeStamp; 			// System.currentTimeMillis()
@@ -135,10 +141,11 @@ public class DrivingData {
 
 	public DrivingData(
 
-			String _autoID, String _driverID, long _timeStamp, double _x_Position, double _y_Position,
+			String _carState, String _autoID, String _driverID, long _timeStamp, double _x_Position, double _y_Position,
 			String _roadIDSUMO, String _routeIDSUMO, double _speed, double _odometer, double _fuelConsumption,
 			double _averageFuelConsumption, int _fuelType, double _fuelPrice, double _co2Emission, double _HCEmission, int _personCapacity, int _personNumber) {
 
+		this.carState = _carState;
 		this.autoID = _autoID;
 		this.driverID = _autoID;
 		this.timeStamp = _timeStamp;
@@ -157,6 +164,10 @@ public class DrivingData {
 		this.personCapacity = _personCapacity;
 		this.personNumber = _personNumber;
 
+	}
+
+	public String getCarState() {
+		return carState;
 	}
 
 	public double getSpeed() {

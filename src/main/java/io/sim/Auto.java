@@ -107,12 +107,12 @@ public class Auto extends Thread
 				System.out.println("CAR - ts on");
 				String edgeFinal = this.getEdgeFinal(); 
 				this.on_off = true;
-				sleep(500);
+				sleep(this.acquisitionRate);
 
 				while (this.on_off) // mudar nome para on
 				{
 					String edgeAtual = (String) this.sumo.do_job_get(Vehicle.getRoadID(this.idAuto));
-					Auto.sleep(this.acquisitionRate);
+					sleep(this.acquisitionRate);
 					if(isRouteFineshed(edgeAtual, edgeFinal))
 					{
 						System.out.println(this.idAuto + " acabou a rota.");

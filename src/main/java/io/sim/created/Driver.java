@@ -18,7 +18,6 @@ public class Driver extends Thread
     private ArrayList<RouteN> routesExecuted = new ArrayList<RouteN>();
     private ArrayList<RouteN> routesInExe = new ArrayList<RouteN>();
     private boolean initRoute = false;
-    private boolean carstopped = true;
 
     public Driver(String _driverID, Auto _car, long _acquisitionRate)
     {
@@ -34,54 +33,55 @@ public class Driver extends Thread
     @Override
     public void run()
     {
-        // try {
-        //     System.out.println("Iniciando " + this.driverID);
-        //     this.car.start();
-        //     while(MobilityCompany.areRoutesAvailable()) // retirar segundo termo
-        //     {
-        //         Thread.sleep(this.car.getAcquisitionRate());
-        //         if(this.car.getCarRepport().getCarState() == "finalizado")
-        //         {
-        //             // retirar de routesInExe e colocar em routesExecuted
-        //             System.out.println(this.driverID + " rota "+ this.routesInExe.get(0).getRouteID() +" finalizada");
-        //             this.routesExecuted.add((this.routesInExe.remove(0)));
-        //             initRoute = false;
-        //         }
-        //         else if((this.car.getCarRepport().getCarState() == "rodando") && !initRoute)
-        //         {
-        //             System.out.println(this.driverID + " rota "+ this.car.getRoute().getRouteID() +" iniciada");
-        //             this.routesInExe.add(this.car.getRoute());
-        //             initRoute = true; 
-        //         }
-        //     }
-        //     System.out.println("Encerrando " + this.driverID);
-        //     this.car.setfinished(true);  
-        // } catch (InterruptedException e) {
-        //     // TODO Auto-generated catch block
-        //     e.printStackTrace();
-        // }
-
-        System.out.println("Iniciando " + this.driverID);
-        this.car.start();
-        while(MobilityCompany.areRoutesAvailable()) // retirar segundo termo
-        {
-            // Thread.sleep(this.car.getAcquisitionRate());
-            if(this.car.getCarRepport().getCarState() == "finalizado")
+        try {
+            System.out.println("Iniciando " + this.driverID);
+            this.car.start();
+            while(MobilityCompany.areRoutesAvailable()) // retirar segundo termo
             {
-                // retirar de routesInExe e colocar em routesExecuted
-                System.out.println(this.driverID + " rota "+ this.routesInExe.get(0).getRouteID() +" finalizada");
-                this.routesExecuted.add((this.routesInExe.remove(0)));
-                initRoute = false;
+                Thread.sleep(this.car.getAcquisitionRate());
+                if(this.car.getCarRepport().getCarState() == "finalizado")
+                {
+                    // retirar de routesInExe e colocar em routesExecuted
+                    System.out.println(this.driverID + " rota "+ this.routesInExe.get(0).getRouteID() +" finalizada");
+                    this.routesExecuted.add((this.routesInExe.remove(0)));
+                    initRoute = false;
+                }
+                else if((this.car.getCarRepport().getCarState() == "rodando") && !initRoute)
+                {
+                    System.out.println(this.driverID + " rota "+ this.car.getRoute().getRouteID() +" iniciada");
+                    this.routesInExe.add(this.car.getRoute());
+                    initRoute = true; 
+                }
             }
-            else if((this.car.getCarRepport().getCarState() == "rodando") && !initRoute)
-            {
-                System.out.println(this.driverID + " rota "+ this.car.getRoute().getRouteID() +" iniciada");
-                this.routesInExe.add(this.car.getRoute());
-                initRoute = true; 
-            }
+            this.car.setfinished(true);  
+            System.out.println("Encerrando " + this.driverID);
+            // this.car.join();
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
-        System.out.println("Encerrando " + this.driverID);
-        this.car.setfinished(true);
+
+        // System.out.println("Iniciando " + this.driverID);
+        // this.car.start();
+        // while(MobilityCompany.areRoutesAvailable()) // retirar segundo termo
+        // {
+        //     // Thread.sleep(this.car.getAcquisitionRate());
+        //     if(this.car.getCarRepport().getCarState() == "finalizado")
+        //     {
+        //         // retirar de routesInExe e colocar em routesExecuted
+        //         System.out.println(this.driverID + " rota "+ this.routesInExe.get(0).getRouteID() +" finalizada");
+        //         this.routesExecuted.add((this.routesInExe.remove(0)));
+        //         initRoute = false;
+        //     }
+        //     else if((this.car.getCarRepport().getCarState() == "rodando") && !initRoute)
+        //     {
+        //         System.out.println(this.driverID + " rota "+ this.car.getRoute().getRouteID() +" iniciada");
+        //         this.routesInExe.add(this.car.getRoute());
+        //         initRoute = true; 
+        //     }
+        // }
+        // System.out.println("Encerrando " + this.driverID);
+        // this.car.setfinished(true);
 
     }
 }

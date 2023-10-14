@@ -44,6 +44,15 @@ public class MobilityCompany extends Thread {
 
             while (routesAvailable) // IMP tentar trocar para 
             {
+                if(allDriversCreated)
+                {
+                    try {
+                        sleep(500);
+                    } catch (InterruptedException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
                 if(routesToExe.size() == 0 && routesInExe.size() == 0)
                 {
                     System.out.println("Rotas terminadas");

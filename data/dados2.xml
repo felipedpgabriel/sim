@@ -8,7 +8,10 @@
     <vehicle id="1" depart="1.00">
         <route edges="341671964#3 341671964#4 341671964#5 341671964#6"/>
     </vehicle>
-    <!-- <vehicle id="2" depart="2.00">
-        <route edges="15469696#4 15240255#3 15240255#4 795084572#0 "/>
-    </vehicle> -->
+    <vehicle id="2" depart="2.00">
+        <route edges="15469696#4 15240255#3 15240255#4 795084572#0"/>
+    </vehicle>
+    <vehicle id="3" depart="3.00">
+        <route edges="75035877 207143229#1 207143229#2 207143229#3"/>
+    </vehicle>
 </raiz>

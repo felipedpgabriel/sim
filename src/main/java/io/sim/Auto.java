@@ -95,9 +95,10 @@ public class Auto extends Thread
             saida = new ObjectOutputStream(socket.getOutputStream());
 
 			System.out.println(this.idAuto + " conectado.");
-			saida.writeObject(this.carRepport);
+			// saida.writeObject(this.carRepport);
 			while(!finished)
 			{
+				saida.writeObject(this.carRepport);
 				System.out.println(this.idAuto + " aguardando rota.");
 				route = (RouteN) stringRouteN(entrada.readUTF());
 				System.out.println(this.idAuto + " leu " + route.getRouteID());
@@ -116,11 +117,19 @@ public class Auto extends Thread
 					if(isRouteFineshed(edgeAtual, edgeFinal))
 					{
 						System.out.println(this.idAuto + " acabou a rota.");
-						this.on_off = false;
 						this.ts.setOn_off(false);
 						this.carRepport = this.updateDrivingData("finalizado");
 						saida.writeObject(this.carRepport);
+						this.on_off = false;
 						break;
+						// String finalizacaoRecebida = entrada.readUTF();
+						// System.out.println(this.idAuto + " ouviu: " +finalizacaoRecebida);
+						// if(finalizacaoRecebida.equals("-1"))
+						// {
+						// 	this.on_off = false;
+						// 	break;
+						// }
+
 					}
 					else
 					{

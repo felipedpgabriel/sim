@@ -81,9 +81,11 @@ public class MobilityCompany extends Thread {
                                 String mensagem = "";
                                 while(!mensagem.equals("encerrado")) // loop do sistema
                                 {
+                                    System.out.println("Aguardando mensagem...");
                                     DrivingData objIn = (DrivingData) entrada.readObject();
                                     // verifica distancia para pagamento
                                     mensagem = objIn.getCarState(); // lê solicitacao do cliente
+                                    System.out.println("SMC ouviu " + mensagem);
                                     if (mensagem.equals("aguardando"))
                                     {
                                         synchronized (oWatch)
@@ -111,6 +113,7 @@ public class MobilityCompany extends Thread {
                                         this.arquivarRota(routeID);
                                         System.out.println("Rotas para executar: " + routesToExe.size() +"\nRotas em execucao: " 
                                         + routesInExe.size() + "\nRotas executadas: "+routesExecuted.size());
+                                        // saida.writeUTF("-1");
                                     }
                                     else if(mensagem.equals("rodando"))
                                     {

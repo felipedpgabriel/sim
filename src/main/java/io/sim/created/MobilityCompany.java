@@ -44,8 +44,9 @@ public class MobilityCompany extends Thread {
 
             while (routesAvailable) // IMP tentar trocar para 
             {
-                if(routesToExe.isEmpty() && routesInExe.isEmpty())
+                if(routesToExe.size() == 0 && routesInExe.size() == 0)
                 {
+                    System.out.println("Rotas terminadas");
                     routesAvailable = false;
                 }
                 if(!allDriversCreated) // delegar essa funcao para outra classe
@@ -53,6 +54,7 @@ public class MobilityCompany extends Thread {
                     for(int i=0; i<numDrivers;i++)
                     {
                         // conecta os clientes -> IMP mudar para ser feito paralelamente (ou n)
+                        System.out.println("MC - Aguardando conexao" + (i+1));
                         Socket socket = serverSocket.accept();
                         System.out.println("Car conectado");
 
@@ -61,11 +63,11 @@ public class MobilityCompany extends Thread {
                             try
                             {
                                 // variaveis de entrada e saida do servidor
-                                System.out.println("MC - entrou no try.");
+                                System.out.println("SMC - entrou no try.");
                                 ObjectInputStream entrada = new ObjectInputStream(socket.getInputStream());
-                                System.out.println("MC - passou da entrada.");
+                                System.out.println("SMC - passou da entrada.");
                                 DataOutputStream saida = new DataOutputStream(socket.getOutputStream());
-                                System.out.println("MC - passou da saida.");
+                                System.out.println("SMC - passou da saida.");
 
                                 String mensagem = "";
                                 while(!mensagem.equals("encerrado")) // loop do sistema
@@ -89,15 +91,17 @@ public class MobilityCompany extends Thread {
                                             //     System.out.println("Ocupado, aguarde a rota.");
                                             //     resposta = "ocupado";
                                             // }
-                                            System.out.println("Liberando rota:\n" + resposta.getRouteID());
+                                            System.out.println("SMC - Liberando rota:\n" + resposta.getRouteID());
                                             saida.writeUTF(routeNtoString(resposta));
                                         }
                                     }
                                     else if(mensagem.equals("finalizado"))
                                     {
                                         String routeID = objIn.getRouteIDSUMO();
-                                        System.out.println("Rota " + routeID + " finalizada.");
+                                        System.out.println("SMC - Rota " + routeID + " finalizada.");
                                         this.arquivarRota(routeID);
+                                        System.out.println("Rotas para executar: " + routesToExe.size() +"\nRotas em execucao: " 
+                                        + routesInExe.size() + "\nRotas executadas: "+routesExecuted.size());
                                     }
                                     else if(mensagem.equals("rodando"))
                                     {
@@ -121,6 +125,7 @@ public class MobilityCompany extends Thread {
                             }
                         });
                         mc.start();
+                        if(i == (numDrivers - 1)){System.out.println("MC - Todos os drivers criados.");};
                     }
                     allDriversCreated = true;
                 }
@@ -162,11 +167,12 @@ public class MobilityCompany extends Thread {
     {
         synchronized (oWatch)
         {
+            System.out.println("Arquivando rota: " + _routeID);
             for(int i=0;i<routesInExe.size();i++)
             {
                 if(routesInExe.get(i).getRouteID().equals(_routeID))
                 {
-                    routesInExe.add(routesInExe.remove(i));
+                    routesExecuted.add(routesInExe.remove(i));
                     break;
                 }
             }

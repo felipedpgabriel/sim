@@ -22,12 +22,12 @@ public class TransportService extends Thread {
 	private boolean sumoInit = false;
 	private boolean sumoReady = false;
 
-	public TransportService(boolean _on_off, String _idTransportService, Auto _car,
-			SumoTraciConnection _sumo) { // tirei RouteN _route.
+	public TransportService(boolean _on_off, String _idTransportService, RouteN _route,Auto _car,
+			SumoTraciConnection _sumo) {
 
 		this.on_off = _on_off;
 		this.idTransportService = _idTransportService;
-		// this.route = _route;
+		this.route = _route;
 		this.car = _car;
 		this.sumo = _sumo;
 	}
@@ -63,8 +63,8 @@ public class TransportService extends Thread {
 							this.sumo.do_timestep(); // 
 						} catch (Exception e) {
 						}
-						String edgeAtual = (String) this.sumo.do_job_get(Vehicle.getRoadID(this.car.getIdAuto()));
-						System.out.println("TS - Edge atual: "+edgeAtual);
+						// String edgeAtual = (String) this.sumo.do_job_get(Vehicle.getRoadID(this.car.getIdAuto()));
+						// System.out.println("TS - Edge atual: "+edgeAtual);
 						Thread.sleep(this.car.getAcquisitionRate());
 						// if(edgeAtual.equals(edgeFinal))
 						// {

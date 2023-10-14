@@ -77,10 +77,8 @@ public class Auto extends Thread
 		this.fuelPrice = _fuelPrice;
 		this.personCapacity = _personCapacity;
 		this.personNumber = _personNumber;
-		this.carRepport = this.updateDrivingData("aguardando");
+		this.carRepport = this.updateDrivingData("aguardando", "");
 		// this.drivingRepport = new ArrayList<DrivingData>();
-		ts = new TransportService(false, this.idAuto, this, _sumo);
-		ts.start();
 	}
 
 	@Override
@@ -103,20 +101,21 @@ public class Auto extends Thread
 				System.out.println(this.idAuto + " aguardando rota.");
 				route = (RouteN) stringRouteN(entrada.readUTF());
 				System.out.println(this.idAuto + " leu " + route.getRouteID());
-				ts.setRoute(route);
+				ts = new TransportService(true, this.idAuto, route,this, this.sumo);
+				ts.start();
 				System.out.println("CAR - ts com rota");
-				ts.setOn_off(true);
 				System.out.println("CAR - ts on");
 				String edgeFinal = this.getEdgeFinal(); 
 				this.on_off = true;
-				while(!ts.isSumoReady()){}
+				sleep(500);
 
-				while (this.on_off && ts.isSumoReady()) // mudar nome para on
+				while (this.on_off) // mudar nome para on
 				{
 					String edgeAtual = (String) this.sumo.do_job_get(Vehicle.getRoadID(this.idAuto));
 					Auto.sleep(this.acquisitionRate);
 					if(isRouteFineshed(edgeAtual, edgeFinal))
 					{
+						System.out.println(this.idAuto + " acabou a rota.");
 						this.on_off = false;
 						this.ts.setOn_off(false);
 						this.carRepport = this.updateDrivingData("finalizado");
@@ -125,6 +124,7 @@ public class Auto extends Thread
 					}
 					else
 					{
+						System.out.println(this.idAuto + " -> edge atual: " + edgeAtual);
 						this.carRepport = this.atualizaSensores();
 						saida.writeObject(this.carRepport); // DESCOMENTAR QUANDO O RELATORIO ESTIVER OK
 					}
@@ -156,7 +156,7 @@ public class Auto extends Thread
 	}
 
 	private DrivingData atualizaSensores() {
-		DrivingData repport = updateDrivingData("aguardando");
+		DrivingData repport = updateDrivingData("aguardando", "");
 		try {
 			if (!this.getSumo().isClosed()) {
 				SumoPosition2D sumoPosition2D;
@@ -274,7 +274,9 @@ public class Auto extends Thread
 	double _averageFuelConsumption, int _fuelType, double _fuelPrice, double _co2Emission, double _HCEmission, int _personCapacity,
 	int _personNumber)
 	{
-		DrivingData _repport = new DrivingData(_carState, _autoID, _driverID, _timeStamp, _x_Position, _y_Position, _roadIDSUMO, _routeIDSUMO, _speed, _odometer, _fuelConsumption, _averageFuelConsumption, _fuelType, _fuelPrice, _co2Emission, _HCEmission, _personCapacity, _personNumber);
+		DrivingData _repport = new DrivingData(_carState, _autoID, _driverID, _timeStamp, _x_Position, _y_Position, _roadIDSUMO, 
+		_routeIDSUMO, _speed, _odometer, _fuelConsumption, _averageFuelConsumption, _fuelType, _fuelPrice, _co2Emission, _HCEmission, 
+		_personCapacity, _personNumber);
 		return _repport;
 	}
 
@@ -288,7 +290,7 @@ public class Auto extends Thread
 
 	private DrivingData updateDrivingData(String _carState)
 	{
-		DrivingData _repport = updateDrivingData(_carState, "");
+		DrivingData _repport = updateDrivingData(_carState, this.route.getRouteID());
 		return _repport;	
 	}
 

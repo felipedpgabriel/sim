@@ -48,6 +48,7 @@ public class EnvSimulator extends Thread
 
 			// Itinerary i1 = new Itinerary(ROTAS_XML, "0");
 			ArrayList<RouteN> routes = RouteN.extractRoutes(ROTAS_XML);
+			System.out.println("ES - "+routes.size()+" rotas disponiveis.");
 			ServerSocket companyServer = new ServerSocket(PORT_COMPANY);
 			MobilityCompany company = new MobilityCompany(companyServer, routes, NUM_DRIVERS);
 			company.start();;

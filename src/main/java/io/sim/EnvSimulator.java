@@ -44,6 +44,7 @@ public class EnvSimulator extends Thread
 		{
 			sumo.runServer(PORT_SUMO); // porta servidor SUMO
 			System.out.println("SUMO conectado.");
+			Thread.sleep(5000);
 
 			// Itinerary i1 = new Itinerary(ROTAS_XML, "0");
 			ArrayList<RouteN> routes = RouteN.extractRoutes(ROTAS_XML);

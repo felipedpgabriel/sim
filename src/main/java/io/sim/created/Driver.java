@@ -36,6 +36,7 @@ public class Driver extends Thread
     {
         try {
             System.out.println("Iniciando " + this.driverID);
+            this.car.start();
             while(MobilityCompany.areRoutesAvailable() || !routesInExe.isEmpty()) // retirar segundo termo
             {
                 Thread.sleep(this.car.getAcquisitionRate());

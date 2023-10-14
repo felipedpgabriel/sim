@@ -1,7 +1,7 @@
 package io.sim.created;
 
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -17,9 +17,9 @@ public class MobilityCompany extends Thread {
     private static boolean liberado = true;
     // cliente AlphaBank
     // atributos da classe
-    private static ArrayList<RouteN> routesToExe;
-    private static ArrayList<RouteN> routesInExe;
-    private static ArrayList<RouteN> routesExecuted;
+    private static ArrayList<RouteN> routesToExe = new ArrayList<RouteN>();
+    private static ArrayList<RouteN> routesInExe = new ArrayList<RouteN>();
+    private static ArrayList<RouteN> routesExecuted = new ArrayList<RouteN>();
     // private static Account account;
     private static final double RUN_PRICE = 3.25;
     private static int numDrivers;
@@ -61,8 +61,11 @@ public class MobilityCompany extends Thread {
                             try
                             {
                                 // variaveis de entrada e saida do servidor
+                                System.out.println("MC - entrou no try.");
                                 ObjectInputStream entrada = new ObjectInputStream(socket.getInputStream());
-                                ObjectOutputStream saida = new ObjectOutputStream(socket.getOutputStream());
+                                System.out.println("MC - passou da entrada.");
+                                DataOutputStream saida = new DataOutputStream(socket.getOutputStream());
+                                System.out.println("MC - passou da saida.");
 
                                 String mensagem = "";
                                 while(!mensagem.equals("encerrado")) // loop do sistema
@@ -86,8 +89,8 @@ public class MobilityCompany extends Thread {
                                             //     System.out.println("Ocupado, aguarde a rota.");
                                             //     resposta = "ocupado";
                                             // }
-                                            System.out.println("Liberando rota:\n" + resposta);
-                                            saida.writeObject(resposta);
+                                            System.out.println("Liberando rota:\n" + resposta.getRouteID());
+                                            saida.writeUTF(routeNtoString(resposta));
                                         }
                                     }
                                     else if(mensagem.equals("finalizado"))
@@ -182,5 +185,12 @@ public class MobilityCompany extends Thread {
     // public static ArrayList<RouteN> getRoutesInExe() {
     //     return routesInExe;
     // }
+
+    private String routeNtoString(RouteN _route)
+    {
+        String convert;
+        convert = _route.getRouteID() + "," + _route.getEdges();
+        return convert;
+    }
 
 }

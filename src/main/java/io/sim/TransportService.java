@@ -20,6 +20,7 @@ public class TransportService extends Thread {
 	private SumoStringList edge; // NEWF
 	private boolean finished = false; // chamado pelo Auto no caso Car
 	private boolean sumoInit = false;
+	private boolean sumoReady = false;
 
 	public TransportService(boolean _on_off, String _idTransportService, Auto _car,
 			SumoTraciConnection _sumo) { // tirei RouteN _route.
@@ -39,33 +40,41 @@ public class TransportService extends Thread {
 		{
 			try {
 				// cuidar para fazer só quando receber rota
-
-				while (this.on_off) {
-					if(!this.sumoInit)
+				if(this.on_off)
+				{
+					System.out.println("TS - on");
+					while (this.on_off)
 					{
-						this.initializeRoutes();
-						System.out.println("TS - Rota: " + edge + " adcionada!");
-						String edgeFinal = edge.get(edge.size()-1);
-						System.out.println("TS - Edge final: "+edgeFinal);
+						if(!this.sumoInit)
+						{
+							System.out.println("TS - entrou na criacao");
+							this.initializeRoutes();
+							System.out.println("TS - Rota: " + edge + " adcionada!");
+							String edgeFinal = edge.get(edge.size()-1);
+							System.out.println("TS - Edge final: "+edgeFinal);
+							
+						}
+						if (this.getSumo().isClosed()) {
+							this.on_off = false;
+							this.sumoReady = false;
+							System.out.println("TS - SUMO is closed...");
+						}
+						try {
+							this.sumo.do_timestep(); // 
+						} catch (Exception e) {
+						}
+						String edgeAtual = (String) this.sumo.do_job_get(Vehicle.getRoadID(this.car.getIdAuto()));
+						System.out.println("TS - Edge atual: "+edgeAtual);
+						Thread.sleep(this.car.getAcquisitionRate());
+						// if(edgeAtual.equals(edgeFinal))
+						// {
+						// 	System.out.println("TS - "+car.getName() + " encerrou a rota.");
+						// 	this.car.setSpeed(0.0);
+						// }
 					}
-					try {
-						this.sumo.do_timestep(); // 
-					} catch (Exception e) {
-					}
-					String edgeAtual = (String) this.sumo.do_job_get(Vehicle.getRoadID(this.car.getIdAuto()));
-					System.out.println("TS - Edge atual: "+edgeAtual);
-					Thread.sleep(this.car.getAcquisitionRate());
-					// if(edgeAtual.equals(edgeFinal))
-					// {
-					// 	System.out.println("TS - "+car.getName() + " encerrou a rota.");
-					// 	this.car.setSpeed(0.0);
-					// }
-					if (this.getSumo().isClosed()) {
-						this.on_off = false;
-						System.out.println("TS - SUMO is closed...");
-					}
+					sumoInit = false;
+					sumoReady = false;
 				}
-				sumoInit = false;
 
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -120,6 +129,7 @@ public class TransportService extends Thread {
 			e1.printStackTrace();
 		}
 		this.sumoInit = true;
+		this.sumoReady = true;
 	}
 
 	public boolean isOn_off() {
@@ -153,4 +163,9 @@ public class TransportService extends Thread {
 	public void setRoute(RouteN route) {
 		this.route = route;
 	}
+
+	public boolean isSumoReady() {
+		return sumoReady;
+	}
+
 }

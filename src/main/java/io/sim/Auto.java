@@ -5,7 +5,7 @@ import de.tudresden.sumo.cmd.Vehicle;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.DataInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -26,7 +26,7 @@ public class Auto extends Thread
     private Socket socket;
     private int servPort;
     private String carHost; 
-	private ObjectInputStream entrada;
+	private DataInputStream entrada;
     private ObjectOutputStream saida;
     // atributos de sincronizacao
     // private boolean ocupado = false;
@@ -80,7 +80,6 @@ public class Auto extends Thread
 		this.carRepport = this.updateDrivingData("aguardando");
 		// this.drivingRepport = new ArrayList<DrivingData>();
 		ts = new TransportService(false, this.idAuto, this, _sumo);
-		this.start();
 		ts.start();
 	}
 
@@ -93,7 +92,7 @@ public class Auto extends Thread
 			System.out.println(this.idAuto + " no try.");
             socket = new Socket(this.carHost, this.servPort); // IMP modificar o host (unico para cada)
 			System.out.println(this.idAuto + " passou do socket.");
-            entrada = new ObjectInputStream(socket.getInputStream());
+            entrada = new DataInputStream(socket.getInputStream());
 			System.out.println(this.idAuto + " passou da entrada.");
             saida = new ObjectOutputStream(socket.getOutputStream());
 
@@ -102,12 +101,17 @@ public class Auto extends Thread
 			while(!finished)
 			{
 				System.out.println(this.idAuto + " aguardando rota.");
-				route = (RouteN) entrada.readObject();
+				route = (RouteN) stringRouteN(entrada.readUTF());
+				System.out.println(this.idAuto + " leu " + route.getRouteID());
 				ts.setRoute(route);
+				System.out.println("CAR - ts com rota");
 				ts.setOn_off(true);
+				System.out.println("CAR - ts on");
 				String edgeFinal = this.getEdgeFinal(); 
 				this.on_off = true;
-				while (this.on_off) // mudar nome para on
+				while(!ts.isSumoReady()){}
+
+				while (this.on_off && ts.isSumoReady()) // mudar nome para on
 				{
 					String edgeAtual = (String) this.sumo.do_job_get(Vehicle.getRoadID(this.idAuto));
 					Auto.sleep(this.acquisitionRate);
@@ -397,5 +401,12 @@ public class Auto extends Thread
 			edge.add(e);
 		}
 		return edge.get(edge.size()-1);
+	}
+
+	private RouteN stringRouteN(String _string)
+	{
+		String[] aux = _string.split(",");
+		RouteN route = new RouteN(aux[0], aux[1]);
+		return route;
 	}
 }

@@ -7,6 +7,7 @@ import io.sim.Auto;
 public class Driver extends Thread
 {
     private String driverID;
+
     // // Cliente de AlphaBank
     // private Account account;
     // private TransportService ts;
@@ -36,17 +37,17 @@ public class Driver extends Thread
         try {
             System.out.println("Iniciando " + this.driverID);
             this.car.start();
-            while(MobilityCompany.areRoutesAvailable()) // retirar segundo termo
+            while(MobilityCompany.areRoutesAvailable() || this.car.getCarRepport().getCarState().equals("rodando")) // retirar segundo termo
             {
                 Thread.sleep(this.car.getAcquisitionRate());
-                if(this.car.getCarRepport().getCarState() == "finalizado")
+                if(this.car.getCarRepport().getCarState().equals("finalizado"))
                 {
                     // retirar de routesInExe e colocar em routesExecuted
                     System.out.println(this.driverID + " rota "+ this.routesInExe.get(0).getRouteID() +" finalizada");
                     this.routesExecuted.add((this.routesInExe.remove(0)));
                     initRoute = false;
                 }
-                else if((this.car.getCarRepport().getCarState() == "rodando") && !initRoute)
+                else if(this.car.getCarRepport().getCarState().equals("rodando") && !initRoute)
                 {
                     System.out.println(this.driverID + " rota "+ this.car.getRoute().getRouteID() +" iniciada");
                     this.routesInExe.add(this.car.getRoute());
@@ -83,5 +84,9 @@ public class Driver extends Thread
         // System.out.println("Encerrando " + this.driverID);
         // this.car.setfinished(true);
 
+    }
+
+    public String getDriverID() {
+        return driverID;
     }
 }

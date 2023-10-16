@@ -87,20 +87,25 @@ public class Auto extends Thread
 		System.out.println(this.idAuto + " iniciado.");
 		try
 		{
-			System.out.println(this.idAuto + " no try.");
+			// System.out.println(this.idAuto + " no try.");
             socket = new Socket(this.carHost, this.servPort); // IMP modificar o host (unico para cada)
-			System.out.println(this.idAuto + " passou do socket.");
+			// System.out.println(this.idAuto + " passou do socket.");
             entrada = new DataInputStream(socket.getInputStream());
-			System.out.println(this.idAuto + " passou da entrada.");
+			// System.out.println(this.idAuto + " passou da entrada.");
             saida = new ObjectOutputStream(socket.getOutputStream());
 
-			System.out.println(this.idAuto + " conectado.");
+			// System.out.println(this.idAuto + " conectado.");
 			// saida.writeObject(this.carRepport);
 			while(!finished)
 			{
 				saida.writeObject(this.carRepport);
 				System.out.println(this.idAuto + " aguardando rota.");
 				route = (RouteN) stringRouteN(entrada.readUTF());
+				if(route.getRouteID().equals("-1"))
+				{
+					System.out.println(this.idAuto +" - Sem rotas a receber.");
+					break;
+				}
 				System.out.println(this.idAuto + " leu " + route.getRouteID());
 				ts = new TransportService(true, this.idAuto, route,this, this.sumo);
 				ts.start();
@@ -417,7 +422,7 @@ public class Auto extends Thread
 	private RouteN stringRouteN(String _string)
 	{
 		String[] aux = _string.split(",");
-		RouteN route = new RouteN(aux[0], aux[1]);
+		RouteN route = new RouteN(aux[0], aux[1]); //BOZASSO
 		return route;
 	}
 }

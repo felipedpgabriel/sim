@@ -53,7 +53,7 @@ public class MobilityCompany extends Thread {
                         e.printStackTrace();
                     }
                 }
-                if(routesToExe.size() == 0 && routesInExe.size() == 0)
+                if(routesToExe.isEmpty()) // && routesInExe.isEmpty()
                 {
                     System.out.println("Rotas terminadas");
                     routesAvailable = false;
@@ -88,22 +88,21 @@ public class MobilityCompany extends Thread {
                                     System.out.println("SMC ouviu " + mensagem);
                                     if (mensagem.equals("aguardando"))
                                     {
-                                        synchronized (oWatch)
+                                        if(routesToExe.isEmpty())
                                         {
-                                            RouteN resposta = liberarRota();
-                                            // if (isLiberado())
-                                            // {
-                                            //     // liberado = false;
-                                            //     System.out.println("Liberando rota...");
-                                            //     resposta = liberarRotas();
-                                            // }
-                                            // else
-                                            // {
-                                            //     System.out.println("Ocupado, aguarde a rota.");
-                                            //     resposta = "ocupado";
-                                            // }
-                                            System.out.println("SMC - Liberando rota:\n" + resposta.getRouteID());
-                                            saida.writeUTF(routeNtoString(resposta));
+                                            System.out.println("SMC - Sem mais rotas para liberar.");
+                                            RouteN route = new RouteN("-1", "00000");
+                                            saida.writeUTF(routeNtoString(route));
+                                            break;
+                                        }
+                                        else
+                                        {
+                                            synchronized (oWatch)
+                                            {
+                                                RouteN resposta = liberarRota();
+                                                System.out.println("SMC - Liberando rota:\n" + resposta.getRouteID());
+                                                saida.writeUTF(routeNtoString(resposta));
+                                            }
                                         }
                                     }
                                     else if(mensagem.equals("finalizado"))

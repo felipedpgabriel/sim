@@ -20,7 +20,7 @@ public class EnvSimulator extends Thread
 	private static final int PORT_COMPANY = 11111;
 	private static final String ROTAS_XML = "data/dados2.xml"; // NEWF
 	private static final int AQUISITION_RATE = 500;
-	private static final int NUM_DRIVERS = 1; // ideal 100
+	private static final int NUM_DRIVERS = 2; // ideal 100
 	private static final int FUEL_TYPE = 2;
 	private static final int FUEL_PREFERENTIAL = 2;
 	private static final double FUEL_PRICE = 3.40;
@@ -51,7 +51,7 @@ public class EnvSimulator extends Thread
 			System.out.println("ES - "+routes.size()+" rotas disponiveis.");
 			ServerSocket companyServer = new ServerSocket(PORT_COMPANY);
 			MobilityCompany company = new MobilityCompany(companyServer, routes, NUM_DRIVERS);
-			company.start();;
+			company.start();
 
 			// if (!routes.isEmpty()) //(routes.isEmpty())
 			// { //cria um carro e sua instancia no sumo
@@ -99,7 +99,9 @@ public class EnvSimulator extends Thread
     {
         for(int i=0;i<_lista.size();i++)
         {
-            _lista.get(i).join();
+			Driver d =_lista.get(i);
+			System.out.println("aguardar " + d.getDriverID());
+            d.join();
         }
     }
 

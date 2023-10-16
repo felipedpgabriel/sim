@@ -34,7 +34,7 @@ public class TransportService extends Thread {
 
 	@Override
 	public void run() {
-		System.out.println("Iniciando TransportService.");
+		System.out.println("Iniciando TransportService - " + this.car.getIdAuto());
 		// logica para colocar num loop com while(!on_off), mas smp que sair, permanecer e 
 		while(!this.finished)
 		{
@@ -47,7 +47,7 @@ public class TransportService extends Thread {
 					{
 						if(!this.sumoInit)
 						{
-							System.out.println("TS - entrou na criacao");
+							// System.out.println("TS - entrou na criacao");
 							this.initializeRoutes();
 							System.out.println("TS - Rota: " + edge + " adcionada!");
 							String edgeFinal = edge.get(edge.size()-1);
@@ -81,7 +81,7 @@ public class TransportService extends Thread {
 			}
 		}
 
-		System.out.println("Encerrando TransportService.");
+		System.out.println("Encerrando TransportService " + this.car.getIdAuto());
 	}
 
 	private void initializeRoutes() {

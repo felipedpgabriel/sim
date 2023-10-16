@@ -14,7 +14,6 @@ public class MobilityCompany extends Thread {
     private ServerSocket serverSocket;
     // atributos de sincronizacao
     private Object oWatch = new Object();
-    private static boolean liberado = true;
     // cliente AlphaBank
     // atributos da classe
     private static ArrayList<RouteN> routesToExe = new ArrayList<RouteN>();
@@ -42,7 +41,7 @@ public class MobilityCompany extends Thread {
         {
             System.out.println("MobilityCompany iniciada...");
 
-            while (routesAvailable) // IMP tentar trocar para 
+            while (routesAvailable || !routesInExe.isEmpty()) // IMP tentar trocar para aguardar as threads morrerem.
             {
                 if(allDriversCreated)
                 {
@@ -53,7 +52,7 @@ public class MobilityCompany extends Thread {
                         e.printStackTrace();
                     }
                 }
-                if(routesToExe.isEmpty()) // && routesInExe.isEmpty()
+                if(routesToExe.isEmpty() && routesAvailable) // && routesInExe.isEmpty()
                 {
                     System.out.println("Rotas terminadas");
                     routesAvailable = false;
@@ -72,23 +71,22 @@ public class MobilityCompany extends Thread {
                             try
                             {
                                 // variaveis de entrada e saida do servidor
-                                System.out.println("SMC - entrou no try.");
+                                // System.out.println("SMC - entrou no try.");
                                 ObjectInputStream entrada = new ObjectInputStream(socket.getInputStream());
-                                System.out.println("SMC - passou da entrada.");
+                                // System.out.println("SMC - passou da entrada.");
                                 DataOutputStream saida = new DataOutputStream(socket.getOutputStream());
-                                System.out.println("SMC - passou da saida.");
+                                // System.out.println("SMC - passou da saida.");
 
                                 String mensagem = "";
                                 while(!mensagem.equals("encerrado")) // loop do sistema
                                 {
-                                    System.out.println("Aguardando mensagem...");
                                     DrivingData objIn = (DrivingData) entrada.readObject();
                                     // verifica distancia para pagamento
                                     mensagem = objIn.getCarState(); // lê solicitacao do cliente
-                                    System.out.println("SMC ouviu " + mensagem);
+                                    // System.out.println("SMC ouviu " + mensagem);
                                     if (mensagem.equals("aguardando"))
                                     {
-                                        if(routesToExe.isEmpty())
+                                        if(!routesAvailable) // routesToExe.isEmpty()
                                         {
                                             System.out.println("SMC - Sem mais rotas para liberar.");
                                             RouteN route = new RouteN("-1", "00000");
@@ -113,6 +111,7 @@ public class MobilityCompany extends Thread {
                                         System.out.println("Rotas para executar: " + routesToExe.size() +"\nRotas em execucao: " 
                                         + routesInExe.size() + "\nRotas executadas: "+routesExecuted.size());
                                         // saida.writeUTF("-1");
+                                        System.out.println("Aguardando mensagem...");
                                     }
                                     else if(mensagem.equals("rodando"))
                                     {

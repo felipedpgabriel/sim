@@ -3,13 +3,8 @@ package io.sim;
 import de.tudresden.sumo.cmd.Vehicle;
 
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.DataInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
 
 import it.polito.appeal.traci.SumoTraciConnection;
 import de.tudresden.sumo.objects.SumoColor;
@@ -109,8 +104,8 @@ public class Auto extends Thread
 				System.out.println(this.idAuto + " leu " + route.getRouteID());
 				ts = new TransportService(true, this.idAuto, route,this, this.sumo);
 				ts.start();
-				System.out.println("CAR - ts com rota");
-				System.out.println("CAR - ts on");
+				// System.out.println("CAR - ts com rota");
+				// System.out.println("CAR - ts on");
 				String edgeFinal = this.getEdgeFinal(); 
 				this.on_off = true;
 				sleep(this.acquisitionRate);

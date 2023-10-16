@@ -108,12 +108,15 @@ public class Auto extends Thread
 				// System.out.println("CAR - ts on");
 				String edgeFinal = this.getEdgeFinal(); 
 				this.on_off = true;
-				sleep(this.acquisitionRate);
+				while(!this.estaNoSUMO())
+				{
+					sleep(this.acquisitionRate);
+				}
+				String edgeAtual = (String) this.sumo.do_job_get(Vehicle.getRoadID(this.idAuto));
 
 				while (this.on_off) // mudar nome para on
 				{
-					String edgeAtual = (String) this.sumo.do_job_get(Vehicle.getRoadID(this.idAuto));
-					sleep(this.acquisitionRate);
+					// sleep(this.acquisitionRate);
 					if(isRouteFineshed(edgeAtual, edgeFinal))
 					{
 						System.out.println(this.idAuto + " acabou a rota.");
@@ -122,14 +125,6 @@ public class Auto extends Thread
 						saida.writeObject(this.carRepport);
 						this.on_off = false;
 						break;
-						// String finalizacaoRecebida = entrada.readUTF();
-						// System.out.println(this.idAuto + " ouviu: " +finalizacaoRecebida);
-						// if(finalizacaoRecebida.equals("-1"))
-						// {
-						// 	this.on_off = false;
-						// 	break;
-						// }
-
 					}
 					else
 					{
@@ -137,6 +132,8 @@ public class Auto extends Thread
 						this.carRepport = this.atualizaSensores();
 						saida.writeObject(this.carRepport); // DESCOMENTAR QUANDO O RELATORIO ESTIVER OK
 					}
+					edgeAtual = (String) this.sumo.do_job_get(Vehicle.getRoadID(this.idAuto));
+					sleep(this.acquisitionRate);
 				}
 				System.out.println(this.idAuto + " off.");
 
@@ -390,9 +387,8 @@ public class Auto extends Thread
 
 	private boolean isRouteFineshed(String _edgeAtual, String _edgeFinal) throws Exception
 	{
-		SumoStringList lista = (SumoStringList) this.sumo.do_job_get(Vehicle.getIDList());
-		lista.contains(idAuto);
-		if(!lista.contains(idAuto) && (_edgeFinal.equals(_edgeAtual)))
+		boolean taNoSUMO = this.estaNoSUMO();
+		if(!taNoSUMO && (_edgeFinal.equals(_edgeAtual)))
 		{
 			return true;
 		}
@@ -400,6 +396,12 @@ public class Auto extends Thread
 		{
 			return false;
 		}
+	}
+
+	private boolean estaNoSUMO() throws Exception
+	{
+		SumoStringList lista = (SumoStringList) this.sumo.do_job_get(Vehicle.getIDList());
+		return lista.contains(this.idAuto);
 	}
 
 	private String getEdgeFinal()

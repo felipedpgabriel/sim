@@ -40,8 +40,8 @@ public class Driver extends Thread
             while(this.car.isAlive())
             // while(MobilityCompany.areRoutesAvailable() || !this.routesInExe.isEmpty()) // this.car.getCarRepport().getCarState().equals("rodando")
             {
-                String carState = this.car.getCarRepport().getCarState();
                 Thread.sleep(acquisitionRate);
+                String carState = this.car.getCarRepport().getCarState();
                 if(carState.equals("finalizado"))
                 {
                     System.out.println(this.driverID + " rota "+ this.routesInExe.get(0).getRouteID() +" finalizada");

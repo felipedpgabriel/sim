@@ -18,7 +18,7 @@ public class EnvSimulator extends Thread
     private SumoTraciConnection sumo;
 	private static final int PORT_SUMO = 12345; // NEWF
 	private static final int PORT_COMPANY = 11111;
-	private static final String ROTAS_XML = "data/dados2.xml"; // NEWF
+	private static final String ROTAS_XML = "data/dados3.xml"; // NEWF
 	private static final int AQUISITION_RATE = 500;
 	private static final int NUM_DRIVERS = 50; // ideal 100
 	private static final int FUEL_TYPE = 2;
@@ -50,7 +50,7 @@ public class EnvSimulator extends Thread
 			ArrayList<RouteN> routes = RouteN.extractRoutes(ROTAS_XML);
 			System.out.println("ES - "+routes.size()+" rotas disponiveis.");
 			ServerSocket companyServer = new ServerSocket(PORT_COMPANY);
-			MobilityCompany company = new MobilityCompany(companyServer, routes, NUM_DRIVERS, sumo);
+			MobilityCompany company = new MobilityCompany(companyServer, routes, NUM_DRIVERS, sumo, AQUISITION_RATE);
 			company.start();
 
 			// if (!routes.isEmpty()) //(routes.isEmpty())

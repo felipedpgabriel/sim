@@ -45,6 +45,7 @@ public class TransportService extends Thread {
 					System.out.println(this.car.getIdAuto() + " - TS - on");
 					while (this.on_off)
 					{
+						sleep(this.car.getAcquisitionRate());
 						if(!this.sumoInit)
 						{
 							// System.out.println("TS - entrou na criacao");
@@ -65,7 +66,7 @@ public class TransportService extends Thread {
 						// }
 						// String edgeAtual = (String) this.sumo.do_job_get(Vehicle.getRoadID(this.car.getIdAuto()));
 						// System.out.println("TS - Edge atual: "+edgeAtual);
-						Thread.sleep(this.car.getAcquisitionRate());
+						// Thread.sleep(this.car.getAcquisitionRate());
 						// if(edgeAtual.equals(edgeFinal))
 						// {
 						// 	System.out.println("TS - "+car.getName() + " encerrou a rota.");

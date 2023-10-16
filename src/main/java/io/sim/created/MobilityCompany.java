@@ -26,8 +26,9 @@ public class MobilityCompany extends Thread {
     private static int numDrivers;
     private static boolean routesAvailable = true;
     private static boolean allDriversCreated = false;
+    private long acquisitionRate; 
 
-    public MobilityCompany(ServerSocket _serverSocket, ArrayList<RouteN> _routes, int _numDrivers, SumoTraciConnection _sumo)
+    public MobilityCompany(ServerSocket _serverSocket, ArrayList<RouteN> _routes, int _numDrivers, SumoTraciConnection _sumo, long _acquisitionRate)
     {
         // BotPayment payment = new BotPayment(RUN_PRICE);
         // Adicionar as rotas em routesToExe a partir de um arquivo
@@ -35,6 +36,7 @@ public class MobilityCompany extends Thread {
         this.sumo = _sumo;
         numDrivers = _numDrivers;
         routesToExe = _routes;
+        this.acquisitionRate = _acquisitionRate;
     }
 
     @Override
@@ -47,14 +49,9 @@ public class MobilityCompany extends Thread {
             while (routesAvailable || !routesInExe.isEmpty()) // IMP tentar trocar para aguardar as threads morrerem.
             {
                 this.sumo.do_timestep();
-                if(allDriversCreated)
+                if(allDriversCreated) // manter freq de verificacao
                 {
-                    try {
-                        sleep(500);
-                    } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
+                    sleep(this.acquisitionRate);
                 }
                 if(routesToExe.isEmpty() && routesAvailable) // && routesInExe.isEmpty()
                 {
@@ -70,7 +67,7 @@ public class MobilityCompany extends Thread {
                         Socket socket = serverSocket.accept();
                         System.out.println("Car conectado");
 
-                        Thread mc = new Thread(() -> 
+                        Thread mc = new Thread(() -> // IMP nao tem sleep, tlvz devesse
                         { // lança uma thread para comunicacao -> IMP criar uma classe separada para melhor organizacao
                             try
                             {
@@ -102,7 +99,6 @@ public class MobilityCompany extends Thread {
                                             synchronized (oWatch)
                                             {
                                                 RouteN resposta = liberarRota();
-                                                System.out.println("SMC - Liberando rota:\n" + resposta.getRouteID());
                                                 saida.writeUTF(routeNtoString(resposta));
                                             }
                                         }
@@ -171,8 +167,16 @@ public class MobilityCompany extends Thread {
     {
         synchronized (oWatch)
         {
+            if(!routesAvailable) // entrou no liberarRota(), mas acabou durante a espera
+            {
+                System.out.println("SMC - Sem mais rotas para liberar.");
+                RouteN route = new RouteN("-1", "00000");
+                // saida.writeUTF(routeNtoString(route));
+                return route;
+            }
             RouteN route = routesToExe.remove(0);
             routesInExe.add(route); // mudar para routesInExe.add(car.getID(),route) ou route.getID()
+            System.out.println("SMC - Liberando rota:\n" + route.getRouteID());
             return route;
         }
     }

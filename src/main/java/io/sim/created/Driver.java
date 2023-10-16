@@ -25,7 +25,7 @@ public class Driver extends Thread
         this.driverID = _driverID;
         this.car = _car;
         this.acquisitionRate = _acquisitionRate;
-        this.start();
+        // this.start();
         // pensar na logica de inicializacao do TransporteService e do Car
         // this.car.start();
         // BotPayment payment = new BotPayment(fuelPrice);
@@ -37,7 +37,8 @@ public class Driver extends Thread
         try {
             System.out.println("Iniciando " + this.driverID);
             this.car.start();
-            while(MobilityCompany.areRoutesAvailable() || !this.routesInExe.isEmpty()) // this.car.getCarRepport().getCarState().equals("rodando")
+            while(this.car.isAlive())
+            // while(MobilityCompany.areRoutesAvailable() || !this.routesInExe.isEmpty()) // this.car.getCarRepport().getCarState().equals("rodando")
             {
                 String carState = this.car.getCarRepport().getCarState();
                 Thread.sleep(acquisitionRate);
@@ -54,7 +55,7 @@ public class Driver extends Thread
                     initRoute = true; 
                 }
             }
-            this.car.setfinished(true);  
+            // this.car.setfinished(true);
             System.out.println("Encerrando " + this.driverID);
             // this.car.join();
         } catch (InterruptedException e) {

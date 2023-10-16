@@ -20,7 +20,7 @@ public class EnvSimulator extends Thread
 	private static final int PORT_COMPANY = 11111;
 	private static final String ROTAS_XML = "data/dados2.xml"; // NEWF
 	private static final int AQUISITION_RATE = 500;
-	private static final int NUM_DRIVERS = 2; // ideal 100
+	private static final int NUM_DRIVERS = 50; // ideal 100
 	private static final int FUEL_TYPE = 2;
 	private static final int FUEL_PREFERENTIAL = 2;
 	private static final double FUEL_PRICE = 3.40;
@@ -50,7 +50,7 @@ public class EnvSimulator extends Thread
 			ArrayList<RouteN> routes = RouteN.extractRoutes(ROTAS_XML);
 			System.out.println("ES - "+routes.size()+" rotas disponiveis.");
 			ServerSocket companyServer = new ServerSocket(PORT_COMPANY);
-			MobilityCompany company = new MobilityCompany(companyServer, routes, NUM_DRIVERS);
+			MobilityCompany company = new MobilityCompany(companyServer, routes, NUM_DRIVERS, sumo);
 			company.start();
 
 			// if (!routes.isEmpty()) //(routes.isEmpty())
@@ -78,6 +78,7 @@ public class EnvSimulator extends Thread
 				Driver driver = new Driver(driverID, car, AQUISITION_RATE);
 				drivers.add(driver);
 			}
+			iniciaDrivers(drivers);
 			aguardaDrivers(drivers);
 			companyServer.close();
 		} catch (IOException e1) {
@@ -102,6 +103,16 @@ public class EnvSimulator extends Thread
 			Driver d =_lista.get(i);
 			System.out.println("aguardar " + d.getDriverID());
             d.join();
+        }
+    }
+
+	private static void iniciaDrivers(ArrayList<Driver> _lista) throws InterruptedException
+    {
+        for(int i=0;i<_lista.size();i++)
+        {
+			Driver d =_lista.get(i);
+			System.out.println("aguardar " + d.getDriverID());
+            d.start();
         }
     }
 

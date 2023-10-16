@@ -8,12 +8,14 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 import io.sim.DrivingData;
+import it.polito.appeal.traci.SumoTraciConnection;
 
 public class MobilityCompany extends Thread {
     // atributos de servidor
     private ServerSocket serverSocket;
     // atributos de sincronizacao
     private Object oWatch = new Object();
+    private SumoTraciConnection sumo;
     // cliente AlphaBank
     // atributos da classe
     private static ArrayList<RouteN> routesToExe = new ArrayList<RouteN>();
@@ -25,13 +27,14 @@ public class MobilityCompany extends Thread {
     private static boolean routesAvailable = true;
     private static boolean allDriversCreated = false;
 
-    public MobilityCompany(ServerSocket serverSocket, ArrayList<RouteN> routes, int _numDrivers)
+    public MobilityCompany(ServerSocket _serverSocket, ArrayList<RouteN> _routes, int _numDrivers, SumoTraciConnection _sumo)
     {
         // BotPayment payment = new BotPayment(RUN_PRICE);
         // Adicionar as rotas em routesToExe a partir de um arquivo
-        this.serverSocket = serverSocket;
+        this.serverSocket = _serverSocket;
+        this.sumo = _sumo;
         numDrivers = _numDrivers;
-        routesToExe = routes;
+        routesToExe = _routes;
     }
 
     @Override
@@ -43,6 +46,7 @@ public class MobilityCompany extends Thread {
 
             while (routesAvailable || !routesInExe.isEmpty()) // IMP tentar trocar para aguardar as threads morrerem.
             {
+                this.sumo.do_timestep();
                 if(allDriversCreated)
                 {
                     try {
@@ -141,7 +145,7 @@ public class MobilityCompany extends Thread {
                 }
             }
         }
-        catch (IOException e)
+        catch (Exception e)
         {
             e.printStackTrace();
         }

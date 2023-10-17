@@ -7,4 +7,4 @@ Este projeto simula o funcionamento de uma companhia de mobilidade, segundo o di
 
 Usa como base o repositório [21lab-technology/sim](https://github.com/21lab-technology/sim).
 * Drivers não observam corretamente os estados do carro. Ideias: fazer sistema de cliente e servidor com Drivers e Auto (IMP para o caso do abastecimento), ou ignorar as listas e fazer com flags.
-* Duas estratégias para testar: #1 tratar a exceção TraCIException, pedir pra extinguir o TransportService no catch e remover a segunda verificação das edges ou #2 manter só a análise das edges.
+* Tratamento de exceção não resolveu. Usando só edges, o método remove não funciona. 

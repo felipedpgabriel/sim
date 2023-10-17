@@ -15,7 +15,7 @@ public class Driver extends Thread
     // private static final double FUEL_PRICE = 5.87;
     // private Route route;
     private long acquisitionRate;
-    private ArrayList<RouteN> routeToExe = new ArrayList<RouteN>();
+    // private ArrayList<RouteN> routeToExe = new ArrayList<RouteN>();
     private ArrayList<RouteN> routesExecuted = new ArrayList<RouteN>();
     private ArrayList<RouteN> routesInExe = new ArrayList<RouteN>();
     private boolean initRoute = false;

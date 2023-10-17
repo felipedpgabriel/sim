@@ -10,6 +10,7 @@ import it.polito.appeal.traci.SumoTraciConnection;
 import de.tudresden.sumo.objects.SumoColor;
 import de.tudresden.sumo.objects.SumoPosition2D;
 import de.tudresden.sumo.objects.SumoStringList;
+import io.sim.created.MobilityCompany;
 import io.sim.created.RouteN;
 
 /**Define os atributos que coracterizam um Carro.
@@ -99,6 +100,7 @@ public class Auto extends Thread
 				if(route.getRouteID().equals("-1"))
 				{
 					System.out.println(this.idAuto +" - Sem rotas a receber.");
+					finished = true;
 					break;
 				}
 				System.out.println(this.idAuto + " leu " + route.getRouteID());
@@ -108,7 +110,7 @@ public class Auto extends Thread
 				// System.out.println("CAR - ts on");
 				String edgeFinal = this.getEdgeFinal(); 
 				this.on_off = true;
-				while(!this.estaNoSUMO())
+				while(!MobilityCompany.estaNoSUMO(this.idAuto, this.sumo))
 				{
 					sleep(this.acquisitionRate);
 				}
@@ -120,20 +122,28 @@ public class Auto extends Thread
 					if(isRouteFineshed(edgeAtual, edgeFinal))
 					{
 						System.out.println(this.idAuto + " acabou a rota.");
-						this.ts.setOn_off(false);
+						// this.ts.setOn_off(false);
 						this.carRepport = this.updateDrivingData("finalizado");
 						saida.writeObject(this.carRepport);
 						this.on_off = false;
 						break;
 					}
-					else
+					sleep(this.acquisitionRate);
+					if(!isRouteFineshed(edgeAtual, edgeFinal))
 					{
 						System.out.println(this.idAuto + " -> edge atual: " + edgeAtual);
 						this.carRepport = this.atualizaSensores();
-						saida.writeObject(this.carRepport); // DESCOMENTAR QUANDO O RELATORIO ESTIVER OK
+						saida.writeObject(this.carRepport);
+						if(this.carRepport.getCarState().equals("finalizado"))
+						{
+							this.on_off = false;
+							break;
+						}
+						else
+						{
+							edgeAtual = (String) this.sumo.do_job_get(Vehicle.getRoadID(this.idAuto));
+						}
 					}
-					edgeAtual = (String) this.sumo.do_job_get(Vehicle.getRoadID(this.idAuto));
-					sleep(this.acquisitionRate);
 				}
 				System.out.println(this.idAuto + " off.");
 
@@ -150,7 +160,7 @@ public class Auto extends Thread
 			entrada.close();
 			saida.close();
 			socket.close();
-			this.ts.setFinished(true);
+			// this.ts.setFinished(true);
         }
 		catch (Exception e)
 		{
@@ -270,6 +280,9 @@ public class Auto extends Thread
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			System.out.println(this.idAuto + " acabou a rota.");
+			// this.ts.setOn_off(false);
+			return this.updateDrivingData("finalizado");			
 		}
 
 		return repport;
@@ -385,9 +398,9 @@ public class Auto extends Thread
 		return carRepport;
 	}
 
-	private boolean isRouteFineshed(String _edgeAtual, String _edgeFinal) throws Exception
+	private boolean isRouteFineshed(String _edgeAtual, String _edgeFinal)
 	{
-		boolean taNoSUMO = this.estaNoSUMO();
+		boolean taNoSUMO = MobilityCompany.estaNoSUMO(this.idAuto, this.sumo);
 		if(!taNoSUMO && (_edgeFinal.equals(_edgeAtual)))
 		{
 			return true;
@@ -398,11 +411,11 @@ public class Auto extends Thread
 		}
 	}
 
-	private boolean estaNoSUMO() throws Exception
-	{
-		SumoStringList lista = (SumoStringList) this.sumo.do_job_get(Vehicle.getIDList());
-		return lista.contains(this.idAuto);
-	}
+	// private boolean estaNoSUMO() throws Exception
+	// {
+	// 	SumoStringList lista = (SumoStringList) this.sumo.do_job_get(Vehicle.getIDList());
+	// 	return lista.contains(this.idAuto);
+	// }
 
 	private String getEdgeFinal()
 	{

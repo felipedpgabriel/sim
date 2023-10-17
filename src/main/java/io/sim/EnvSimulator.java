@@ -19,9 +19,9 @@ public class EnvSimulator extends Thread
     private SumoTraciConnection sumo;
 	private static final int PORT_SUMO = 12345; // NEWF
 	private static final int PORT_COMPANY = 11111;
-	private static final String ROTAS_XML = "data/dados3.xml"; // NEWF
+	private static final String ROTAS_XML = "data/dados.xml"; // NEWF
 	private static final int ACQUISITION_RATE = 500;
-	private static final int NUM_DRIVERS = 50; // ideal 100
+	private static final int NUM_DRIVERS = 100; // ideal 100
 	private static final int FUEL_TYPE = 2;
 	private static final int FUEL_PREFERENTIAL = 2;
 	private static final double FUEL_PRICE = 3.40;

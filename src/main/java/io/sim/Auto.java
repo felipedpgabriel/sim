@@ -40,7 +40,7 @@ public class Auto extends Thread
 	private double fuelPrice; 		// price in liters
 	private int personCapacity;		// the total number of persons that can ride in this vehicle
 	private int personNumber;		// the total number of persons which are riding in this vehicle
-	private double speed = 50; //NEWF
+	private double speed = 40; //NEWF
 	private RouteN route;
 	// private ArrayList<DrivingData> drivingRepport; // dados de conducao do veiculo
 	private DrivingData carRepport;
@@ -116,7 +116,7 @@ public class Auto extends Thread
 				}
 				String edgeAtual = (String) this.sumo.do_job_get(Vehicle.getRoadID(this.idAuto));
 
-				while (this.on_off) // mudar nome para on
+				while (this.on_off) // && MobilityCompany.estaNoSUMO(this.idAuto, sumo) mudar nome para on
 				{
 					// sleep(this.acquisitionRate);
 					if(isRouteFineshed(edgeAtual, edgeFinal))
@@ -132,7 +132,7 @@ public class Auto extends Thread
 					if(!isRouteFineshed(edgeAtual, edgeFinal))
 					{
 						System.out.println(this.idAuto + " -> edge atual: " + edgeAtual);
-						this.carRepport = this.atualizaSensores();
+						this.carRepport = this.atualizaSensores(); // BOZASSO AQUI
 						saida.writeObject(this.carRepport);
 						if(this.carRepport.getCarState().equals("finalizado"))
 						{

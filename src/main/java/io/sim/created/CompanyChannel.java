@@ -2,7 +2,7 @@ package io.sim.created;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.DataInputStream;
 import java.net.Socket;
 
 import io.sim.DrivingData;
@@ -22,7 +22,7 @@ public class CompanyChannel extends Thread
         {
             // variaveis de entrada e saida do servidor
             // System.out.println("CC - entrou no try.");
-            ObjectInputStream entrada = new ObjectInputStream(socket.getInputStream());
+            DataInputStream entrada = new DataInputStream(socket.getInputStream());
             // System.out.println("CC - passou da entrada.");
             DataOutputStream saida = new DataOutputStream(socket.getOutputStream());
             // System.out.println("CC - passou da saida.");
@@ -30,9 +30,9 @@ public class CompanyChannel extends Thread
             String mensagem = "";
             while(!mensagem.equals("encerrado")) // loop do sistema
             {
-                DrivingData objIn = (DrivingData) entrada.readObject();
+                DrivingData ddIn = (DrivingData) stringToDrivingData(entrada.readUTF());
                 // verifica distancia para pagamento
-                mensagem = objIn.getCarState(); // lê solicitacao do cliente
+                mensagem = ddIn.getCarState(); // lê solicitacao do cliente
                 // System.out.println("CC ouviu " + mensagem);
                 if (mensagem.equals("aguardando"))
                 {
@@ -54,7 +54,7 @@ public class CompanyChannel extends Thread
                 }
                 else if(mensagem.equals("finalizado"))
                 {
-                    String routeID = objIn.getRouteIDSUMO();
+                    String routeID = ddIn.getRouteIDSUMO();
                     System.out.println("CC - Rota " + routeID + " finalizada.");
                     MobilityCompany.arquivarRota(routeID);
                     System.out.println("Rotas para executar: " + MobilityCompany.getRoutesToExeSize() +"\nRotas em execucao: " 
@@ -64,7 +64,7 @@ public class CompanyChannel extends Thread
                 }
                 else if(mensagem.equals("rodando"))
                 {
-                    // a principio, nao faz nada
+                    System.out.println(ddIn);
                 }
                 else if (mensagem.equals("encerrado"))
                 {
@@ -78,7 +78,7 @@ public class CompanyChannel extends Thread
             socket.close();
             // serverSocket.close();
         }
-        catch (IOException | ClassNotFoundException e)
+        catch (IOException e)
         {
             e.printStackTrace();
         }
@@ -90,4 +90,15 @@ public class CompanyChannel extends Thread
         convert = _route.getRouteID() + "," + _route.getEdges();
         return convert;
     }
+
+    private DrivingData stringToDrivingData(String _string)
+	{
+		String[] aux = _string.split(",");
+
+		DrivingData carRepport = new DrivingData(aux[0], aux[1], aux[2],Long.parseLong(aux[3]), Double.parseDouble(aux[4]), 
+        Double.parseDouble(aux[5]),aux[6], aux[7], Double.parseDouble(aux[8]), Double.parseDouble(aux[9]),
+        Double.parseDouble(aux[10]), Double.parseDouble(aux[11]), Integer.parseInt(aux[12]), Double.parseDouble(aux[13]),
+        Double.parseDouble(aux[14]), Double.parseDouble(aux[15]),Integer.parseInt(aux[16]), Integer.parseInt(aux[17])); //BOZASSO
+		return carRepport;
+	}
 }

@@ -147,7 +147,7 @@ public class DrivingData implements Serializable{
 
 		this.carState = _carState;
 		this.autoID = _autoID;
-		this.driverID = _autoID;
+		this.driverID = _driverID;
 		this.timeStamp = _timeStamp;
 		this.x_Position = _x_Position;
 		this.y_Position = _y_Position;

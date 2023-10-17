@@ -3,7 +3,7 @@ package io.sim;
 import de.tudresden.sumo.cmd.Vehicle;
 
 import java.io.DataInputStream;
-import java.io.ObjectOutputStream;
+import java.io.DataOutputStream;
 import java.net.Socket;
 
 import it.polito.appeal.traci.SumoTraciConnection;
@@ -23,7 +23,7 @@ public class Auto extends Thread
     private int servPort;
     private String carHost; 
 	private DataInputStream entrada;
-    private ObjectOutputStream saida;
+    private DataOutputStream saida;
     // atributos de sincronizacao
     // private boolean ocupado = false;
     // private Object monitor = new Object(); // sincronizacao
@@ -88,15 +88,13 @@ public class Auto extends Thread
 			// System.out.println(this.idAuto + " passou do socket.");
             entrada = new DataInputStream(socket.getInputStream());
 			// System.out.println(this.idAuto + " passou da entrada.");
-            saida = new ObjectOutputStream(socket.getOutputStream());
+            saida = new DataOutputStream(socket.getOutputStream());
 
-			// System.out.println(this.idAuto + " conectado.");
-			// saida.writeObject(this.carRepport);
 			while(!finished)
 			{
-				saida.writeObject(this.carRepport);
+				saida.writeUTF(drivingDataToString(this.carRepport));
 				System.out.println(this.idAuto + " aguardando rota.");
-				route = (RouteN) stringRouteN(entrada.readUTF());
+				route = (RouteN) stringToRouteN(entrada.readUTF());
 				if(route.getRouteID().equals("-1"))
 				{
 					System.out.println(this.idAuto +" - Sem rotas a receber.");
@@ -124,7 +122,7 @@ public class Auto extends Thread
 						System.out.println(this.idAuto + " acabou a rota.");
 						// this.ts.setOn_off(false);
 						this.carRepport = this.updateDrivingData("finalizado");
-						saida.writeObject(this.carRepport);
+						saida.writeUTF(drivingDataToString(this.carRepport));
 						this.on_off = false;
 						break;
 					}
@@ -133,7 +131,7 @@ public class Auto extends Thread
 					{
 						System.out.println(this.idAuto + " -> edge atual: " + edgeAtual);
 						this.carRepport = this.atualizaSensores(); // BOZASSO AQUI
-						saida.writeObject(this.carRepport);
+						saida.writeUTF(drivingDataToString(this.carRepport));
 						if(this.carRepport.getCarState().equals("finalizado"))
 						{
 							this.on_off = false;
@@ -429,10 +427,21 @@ public class Auto extends Thread
 		return edge.get(edge.size()-1);
 	}
 
-	private RouteN stringRouteN(String _string)
+	private RouteN stringToRouteN(String _string)
 	{
 		String[] aux = _string.split(",");
 		RouteN route = new RouteN(aux[0], aux[1]); //BOZASSO
 		return route;
+	}
+
+	private String drivingDataToString(DrivingData _carRepport)
+	{
+		String convert;
+        convert = _carRepport.getCarState() + "," + _carRepport.getAutoID() + "," + _carRepport.getDriverID() + "," + _carRepport.getTimeStamp()
+		+ "," + _carRepport.getX_Position() + "," + _carRepport.getY_Position() + "," + _carRepport.getRoadIDSUMO() + "," + _carRepport.getRouteIDSUMO()
+		+ "," + _carRepport.getSpeed() + "," + _carRepport.getOdometer() + "," + _carRepport.getFuelConsumption() + "," + _carRepport.getAverageFuelConsumption()
+		+ "," + _carRepport.getFuelType() + "," + _carRepport.getFuelPrice() + "," + _carRepport.getCo2Emission() + "," 
+		+ _carRepport.getHCEmission() + "," + _carRepport.getPersonCapacity() + "," + _carRepport.getPersonNumber();
+        return convert;
 	}
 }

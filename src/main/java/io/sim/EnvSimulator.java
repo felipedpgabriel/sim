@@ -21,7 +21,7 @@ public class EnvSimulator extends Thread
 	private static final int PORT_COMPANY = 11111;
 	private static final String ROTAS_XML = "data/dados.xml"; // NEWF
 	private static final int ACQUISITION_RATE = 500;
-	private static final int NUM_DRIVERS = 100; // ideal 100
+	private static final int NUM_DRIVERS = 1; // ideal 100
 	private static final int FUEL_TYPE = 2;
 	private static final int FUEL_PREFERENTIAL = 2;
 	private static final double FUEL_PRICE = 3.40;
@@ -61,7 +61,7 @@ public class EnvSimulator extends Thread
 				SumoColor cor = new SumoColor(0, 255, 0, 126);// funcao para cria cor
 				String driverID = "D" + (i+1);
 				String carHost = "localhost";// + i+1;
-				Auto car = new Auto(carHost,PORT_COMPANY,true, "CAR" + (i+1), cor, driverID, sumo, ACQUISITION_RATE, FUEL_TYPE, FUEL_PREFERENTIAL, FUEL_PRICE,
+				Auto car = new Auto(carHost,PORT_COMPANY,true, ("CAR" + (i+1)), cor, driverID, sumo, ACQUISITION_RATE, FUEL_TYPE, FUEL_PREFERENTIAL, FUEL_PRICE,
 				PERSON_CAPACITY, PERSON_NUMBER);
 				Driver driver = new Driver(driverID, car, ACQUISITION_RATE);
 				drivers.add(driver);

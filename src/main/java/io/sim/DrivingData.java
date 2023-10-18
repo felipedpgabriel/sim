@@ -2,7 +2,7 @@ package io.sim;
 
 import java.io.Serializable;
 
-/**Armazena dados do veiculo
+/**Armazena dados do veiculo IMP# arrumar os dados necessarios para o relatorio
  * Funcao organizacional, para ser usada no relatorio via Excel.
  */
 public class DrivingData implements Serializable{
@@ -35,20 +35,23 @@ public class DrivingData implements Serializable{
 			double _averageFuelConsumption, int _fuelType, double _fuelPrice, double _co2Emission, double _HCEmission, int _personCapacity, int _personNumber) {
 
 		this.carState = _carState;
-		this.autoID = _autoID;
+		this.timeStamp = _timeStamp; // #1 nanosegundo
+		this.autoID = _autoID; // #2
+		this.routeIDSUMO = _routeIDSUMO; // #3
+		this.speed = _speed; // #4
+		// distance #5
+		this.fuelConsumption = _fuelConsumption; // #6
+		this.fuelType = _fuelType; // #7
+		this.co2Emission = _co2Emission; // #8
+		// longitude #9
+		// latitude #10
 		this.driverID = _driverID;
-		this.timeStamp = _timeStamp;
 		this.x_Position = _x_Position;
 		this.y_Position = _y_Position;
 		this.roadIDSUMO = _roadIDSUMO;
-		this.routeIDSUMO = _routeIDSUMO;
-		this.speed = _speed;
 		this.odometer = _odometer;
-		this.fuelConsumption = _fuelConsumption;
 		this.averageFuelConsumption = _averageFuelConsumption;
-		this.fuelType = _fuelType;
 		this.fuelPrice = _fuelPrice;
-		this.co2Emission = _co2Emission;
 		this.HCEmission = _HCEmission;
 		this.personCapacity = _personCapacity;
 		this.personNumber = _personNumber;

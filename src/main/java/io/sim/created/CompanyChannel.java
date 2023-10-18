@@ -9,7 +9,7 @@ import io.sim.DrivingData;
 
 public class CompanyChannel extends Thread
 {
-    private static Object oWatch = new Object();
+    // private static Object oWatch = new Object();
     private Socket socket;
     
     public CompanyChannel(Socket _socket) {
@@ -46,11 +46,14 @@ public class CompanyChannel extends Thread
                     }
                     if(MobilityCompany.areRoutesAvailable())
                     {
-                        synchronized (oWatch)
-                        {
-                            RouteN resposta = MobilityCompany.liberarRota();
-                            saida.writeUTF(JSONConverter.routeNtoString(resposta));
-                        }
+                        RouteN resposta = MobilityCompany.liberarRota();
+                        saida.writeUTF(JSONConverter.routeNtoString(resposta));
+
+                        // synchronized (oWatch)
+                        // {
+                        //     RouteN resposta = MobilityCompany.liberarRota();
+                        //     saida.writeUTF(JSONConverter.routeNtoString(resposta));
+                        // }
                     }
                 }
                 else if(mensagem.equals("finalizado"))

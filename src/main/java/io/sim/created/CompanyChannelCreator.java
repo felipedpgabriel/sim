@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class ChannelCreator extends Thread
+public class CompanyChannelCreator extends Thread
 {
     private ServerSocket serverSocket;
     private int numDrivers;
 
-    public ChannelCreator(ServerSocket _serverSocket, int _numDrivers)
+    public CompanyChannelCreator(ServerSocket _serverSocket, int _numDrivers)
     {
         this.serverSocket = _serverSocket;
         this.numDrivers = _numDrivers;

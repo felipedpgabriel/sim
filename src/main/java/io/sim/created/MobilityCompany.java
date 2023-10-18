@@ -1,6 +1,7 @@
 package io.sim.created;
 
 import java.net.ServerSocket;
+// import java.net.Socket;
 import java.util.ArrayList;
 
 import de.tudresden.sumo.cmd.Vehicle;
@@ -9,17 +10,19 @@ import it.polito.appeal.traci.SumoTraciConnection;
 
 public class MobilityCompany extends Thread
 {
-    // atributos de servidor
+    // Atributos de servidor
     private ServerSocket serverSocket;
-    // atributos de sincronizacao
-    private static Object oWatch = new Object();
-    // private SumoTraciConnection sumo;
-    // cliente AlphaBank
-    // atributos da classe
+    // Atributos de cliente
+    // private String companyHost;
+	// private int bankPort;
+    // private Socket socket;
+    // private static Account account;
+    // Atributos de sincronizacao
+    private static Thread oWatch = new Thread();
+    // Atributos da classe
     private static ArrayList<RouteN> routesToExe = new ArrayList<RouteN>();
     private static ArrayList<RouteN> routesInExe = new ArrayList<RouteN>();
     private static ArrayList<RouteN> routesExecuted = new ArrayList<RouteN>();
-    // private static Account account;
     // private static final double RUN_PRICE = 3.25;
     private static int numDrivers;
     private static boolean routesAvailable = true;
@@ -41,8 +44,8 @@ public class MobilityCompany extends Thread
         {
             System.out.println("MobilityCompany iniciada...");
 
-            ChannelCreator cc = new ChannelCreator(serverSocket, numDrivers);
-            cc.start();
+            CompanyChannelCreator ccc = new CompanyChannelCreator(serverSocket, numDrivers);
+            ccc.start();
 
             while (routesAvailable) // || !routesInExe.isEmpty() IMP trocar para pagamentos
             {

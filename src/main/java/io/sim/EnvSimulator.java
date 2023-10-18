@@ -21,7 +21,7 @@ public class EnvSimulator extends Thread
 	private static final int PORT_COMPANY = 11111;
 	private static final String ROTAS_XML = "data/dados.xml"; // NEWF
 	private static final int ACQUISITION_RATE = 500;
-	private static final int NUM_DRIVERS = 1; // ideal 100
+	private static final int NUM_DRIVERS = 100; // ideal 100
 	private static final int FUEL_TYPE = 2;
 	private static final int FUEL_PREFERENTIAL = 2;
 	private static final double FUEL_PRICE = 3.40;
@@ -39,7 +39,7 @@ public class EnvSimulator extends Thread
 		// Sumo connection
 		this.sumo = new SumoTraciConnection(sumo_bin, config_file);
 		sumo.addOption("start", "1"); // auto-run on GUI show
-		sumo.addOption("quit-on-end", "1"); // auto-close on end
+		sumo.addOption("quit-on-end", "1"); // auto-close on end IMP# para testes remover
 
 		try
 		{

@@ -108,7 +108,7 @@ public class MobilityCompany extends Thread
         synchronized(oWatch){
             try {
                 SumoStringList lista;
-                lista = (SumoStringList) _sumo.do_job_get(Vehicle.getIDList());
+                lista = (SumoStringList) _sumo.do_job_get(Vehicle.getIDList()); // IMP# IllegalStateException
                 return lista.contains(_idCar);
             } catch (Exception e) {
                 // TODO Auto-generated catch block

@@ -2,8 +2,6 @@ package io.sim;
 
 import de.tudresden.sumo.cmd.Vehicle;
 
-import org.json.JSONObject;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
@@ -12,6 +10,7 @@ import it.polito.appeal.traci.SumoTraciConnection;
 import de.tudresden.sumo.objects.SumoColor;
 import de.tudresden.sumo.objects.SumoPosition2D;
 import de.tudresden.sumo.objects.SumoStringList;
+import io.sim.created.JSONConverter;
 import io.sim.created.MobilityCompany;
 import io.sim.created.RouteN;
 
@@ -84,9 +83,9 @@ public class Auto extends Thread // IMP# Car extends Vehicle implements Runnable
 
 			while(!finished)
 			{
-				saida.writeUTF(drivingDataToString(this.carRepport));
+				saida.writeUTF(JSONConverter.drivingDataToString(this.carRepport));
 				System.out.println(this.idAuto + " aguardando rota.");
-				route = (RouteN) stringToRouteN(entrada.readUTF());
+				route = (RouteN) JSONConverter.stringToRouteN(entrada.readUTF());
 				if(route.getRouteID().equals("-1"))
 				{
 					System.out.println(this.idAuto +" - Sem rotas a receber.");
@@ -106,11 +105,11 @@ public class Auto extends Thread // IMP# Car extends Vehicle implements Runnable
 
 				while (this.on_off) // && MobilityCompany.estaNoSUMO(this.idAuto, sumo) mudar nome para on
 				{
-					if(isRouteFineshed(edgeAtual, edgeFinal))
+					if(isRouteFineshed(edgeAtual, edgeFinal)) // IMP# IllegalStateException
 					{
 						System.out.println(this.idAuto + " acabou a rota " + this.route.getRouteID());
 						this.carRepport = this.updateDrivingData("finalizado");
-						saida.writeUTF(drivingDataToString(this.carRepport));
+						saida.writeUTF(JSONConverter.drivingDataToString(this.carRepport));
 						this.on_off = false;
 						break;
 					}
@@ -119,7 +118,7 @@ public class Auto extends Thread // IMP# Car extends Vehicle implements Runnable
 					{
 						// System.out.println(this.idAuto + " -> edge atual: " + edgeAtual);
 						this.carRepport = this.atualizaSensores(); // IMP# tentar trocar para TransportService
-						saida.writeUTF(drivingDataToString(this.carRepport));
+						saida.writeUTF(JSONConverter.drivingDataToString(this.carRepport));
 						if(this.carRepport.getCarState().equals("finalizado"))
 						{
 							this.on_off = false;
@@ -327,7 +326,7 @@ public class Auto extends Thread // IMP# Car extends Vehicle implements Runnable
 
 	private boolean isRouteFineshed(String _edgeAtual, String _edgeFinal)
 	{
-		boolean taNoSUMO = MobilityCompany.estaNoSUMO(this.idAuto, this.sumo);
+		boolean taNoSUMO = MobilityCompany.estaNoSUMO(this.idAuto, this.sumo); //IMP# IllegalStateException
 		if(!taNoSUMO && (_edgeFinal.equals(_edgeAtual)))
 		{
 			return true;
@@ -348,43 +347,5 @@ public class Auto extends Thread // IMP# Car extends Vehicle implements Runnable
 			edge.add(e);
 		}
 		return edge.get(edge.size()-1);
-	}
-
-	private RouteN stringToRouteN(String _string)
-	{
-		JSONObject jsonOut = new JSONObject(_string);
-		String jsRouteID = jsonOut.getString("RouteID");
-		String jsEdges = jsonOut.getString("Edges");
-		RouteN route = new RouteN(jsRouteID, jsEdges);
-		return route;
-	}
-
-	/**Converte um objeto do tipo DrivingData para uma string no formato JSON
-	 * @param _carRepport DrivingData - 
-	 * @return
-	 */
-	private String drivingDataToString(DrivingData _carRepport)
-	{
-        JSONObject jsonOut = new JSONObject();
-        jsonOut.put("CarState",_carRepport.getCarState());
-        jsonOut.put("AutoID",_carRepport.getAutoID());
-		jsonOut.put("DriverID",_carRepport.getDriverID());
-		jsonOut.put("TimeStamp",_carRepport.getTimeStamp());
-		jsonOut.put("X_Position",_carRepport.getX_Position());
-		jsonOut.put("Y_Position",_carRepport.getY_Position());
-		jsonOut.put("RoadIDSUMO",_carRepport.getRoadIDSUMO());
-		jsonOut.put("RouteIDSUMO",_carRepport.getRouteIDSUMO());
-		jsonOut.put("Speed",_carRepport.getSpeed());
-		jsonOut.put("Odometer",_carRepport.getOdometer());
-		jsonOut.put("FuelConsumption",_carRepport.getFuelConsumption());
-		jsonOut.put("AverageFuelConsumption",_carRepport.getAverageFuelConsumption());
-		jsonOut.put("FuelType",_carRepport.getFuelType());
-		jsonOut.put("FuelPrice",_carRepport.getFuelPrice());
-		jsonOut.put("Co2Emission",_carRepport.getCo2Emission());
-		jsonOut.put("HCEmission",_carRepport.getHCEmission());
-		jsonOut.put("PersonCapacity",_carRepport.getPersonCapacity());
-		jsonOut.put("PersonNumber",_carRepport.getPersonNumber());
-
-        return jsonOut.toString();
 	}
 }

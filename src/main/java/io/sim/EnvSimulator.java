@@ -58,10 +58,10 @@ public class EnvSimulator extends Thread
 			ArrayList<Driver> drivers = new ArrayList<Driver>();
 			for(int i=0;i<NUM_DRIVERS;i++)
 			{
-				SumoColor cor = new SumoColor(0, 255, 0, 126);// funcao para cria cor
+				SumoColor cor = new SumoColor(0, 255, 0, 126);// IMP# funcao para cria cor
 				String driverID = "D" + (i+1);
-				String carHost = "localhost";// + i+1;
-				Auto car = new Auto(carHost,PORT_COMPANY,true, ("CAR" + (i+1)), cor, driverID, sumo, ACQUISITION_RATE, FUEL_TYPE, FUEL_PREFERENTIAL, FUEL_PRICE,
+				String carHost = "localhost";// IMP# host unico para cada;
+				Auto car = new Auto(true,carHost,PORT_COMPANY, ("CAR" + (i+1)), cor, driverID, sumo, ACQUISITION_RATE, FUEL_TYPE, FUEL_PREFERENTIAL, FUEL_PRICE,
 				PERSON_CAPACITY, PERSON_NUMBER);
 				Driver driver = new Driver(driverID, car, ACQUISITION_RATE);
 				drivers.add(driver);

@@ -2,6 +2,8 @@ package io.sim;
 
 import de.tudresden.sumo.cmd.Vehicle;
 
+import org.json.JSONObject;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
@@ -16,65 +18,55 @@ import io.sim.created.RouteN;
 /**Define os atributos que coracterizam um Carro.
  * Por meio de metodos get da classe Vehicle, 
  */
-public class Auto extends Thread
+public class Auto extends Thread // IMP# Car extends Vehicle implements Runnable
 {
 	// atributos de cliente
+	private String carHost;
+	private int servPort;
     private Socket socket;
-    private int servPort;
-    private String carHost; 
 	private DataInputStream entrada;
     private DataOutputStream saida;
     // atributos de sincronizacao
     // private boolean ocupado = false;
     // private Object monitor = new Object(); // sincronizacao
 	// atributos da classe
+	private boolean on_off;
 	private String idAuto; // id do carro
 	private SumoColor colorAuto;
 	private String driverID; // id do motorista
 	private SumoTraciConnection sumo;
-	private boolean on_off;
-	private boolean finished = false; // chamado pelo Driver
 	private long acquisitionRate; // taxa de aquisicao de dados dos sensores
 	private int fuelType; 			// 1-diesel, 2-gasoline, 3-ethanol, 4-hybrid
 	private int fuelPreferential; 	// 1-diesel, 2-gasoline, 3-ethanol, 4-hybrid
 	private double fuelPrice; 		// price in liters
 	private int personCapacity;		// the total number of persons that can ride in this vehicle
 	private int personNumber;		// the total number of persons which are riding in this vehicle
-	private double speed = 40; //NEWF
-	private RouteN route;
-	// private ArrayList<DrivingData> drivingRepport; // dados de conducao do veiculo
+
 	private DrivingData carRepport;
+	private RouteN route;
 	private TransportService ts;
 
-	public Auto(String _carHost,int _servPort, boolean _on_off, String _idAuto, SumoColor _colorAuto, String _driverID, SumoTraciConnection _sumo, long _acquisitionRate,
-			int _fuelType, int _fuelPreferential, double _fuelPrice, int _personCapacity, int _personNumber) throws Exception {
+	private double speed = 40;
+	private boolean finished = false;
 
-		this.servPort = _servPort;
+	public Auto(boolean _on_off, String _carHost,int _servPort, String _idAuto, SumoColor _colorAuto, String _driverID, 
+	SumoTraciConnection _sumo, long _acquisitionRate, int _fuelType, int _fuelPreferential, double _fuelPrice, int _personCapacity,
+	int _personNumber) throws Exception
+	{
 		this.carHost = _carHost;
+		this.servPort = _servPort;
 		this.on_off = _on_off;
 		this.idAuto = _idAuto;
 		this.colorAuto = _colorAuto;
 		this.driverID = _driverID;
 		this.sumo = _sumo;
 		this.acquisitionRate = _acquisitionRate;
-		
-		if((_fuelType < 0) || (_fuelType > 4)) {
-			this.fuelType = 4;
-		} else {
-			this.fuelType = _fuelType;
-		}
-		
-		if((_fuelPreferential < 0) || (_fuelPreferential > 4)) {
-			this.fuelPreferential = 4;
-		} else {
-			this.fuelPreferential = _fuelPreferential;
-		}
-
+		this.setFuelType(_fuelType);
+		this.setFuelPreferential(_fuelPreferential);
 		this.fuelPrice = _fuelPrice;
 		this.personCapacity = _personCapacity;
 		this.personNumber = _personNumber;
 		this.carRepport = this.updateDrivingData("aguardando", "");
-		// this.drivingRepport = new ArrayList<DrivingData>();
 	}
 
 	@Override
@@ -84,7 +76,7 @@ public class Auto extends Thread
 		try
 		{
 			// System.out.println(this.idAuto + " no try.");
-            socket = new Socket(this.carHost, this.servPort); // IMP modificar o host (unico para cada)
+            socket = new Socket(this.carHost, this.servPort);
 			// System.out.println(this.idAuto + " passou do socket.");
             entrada = new DataInputStream(socket.getInputStream());
 			// System.out.println(this.idAuto + " passou da entrada.");
@@ -101,11 +93,9 @@ public class Auto extends Thread
 					finished = true;
 					break;
 				}
-				System.out.println(this.idAuto + " leu " + route.getRouteID());
-				ts = new TransportService(true, this.idAuto, route,this, this.sumo);
+				System.out.println(this.idAuto + " iniciando rota " + route.getRouteID());
+				ts = new TransportService(this.idAuto, route,this, this.sumo);
 				ts.start();
-				// System.out.println("CAR - ts com rota");
-				// System.out.println("CAR - ts on");
 				String edgeFinal = this.getEdgeFinal(); 
 				this.on_off = true;
 				while(!MobilityCompany.estaNoSUMO(this.idAuto, this.sumo))
@@ -116,11 +106,9 @@ public class Auto extends Thread
 
 				while (this.on_off) // && MobilityCompany.estaNoSUMO(this.idAuto, sumo) mudar nome para on
 				{
-					// sleep(this.acquisitionRate);
 					if(isRouteFineshed(edgeAtual, edgeFinal))
 					{
-						System.out.println(this.idAuto + " acabou a rota.");
-						// this.ts.setOn_off(false);
+						System.out.println(this.idAuto + " acabou a rota " + this.route.getRouteID());
 						this.carRepport = this.updateDrivingData("finalizado");
 						saida.writeUTF(drivingDataToString(this.carRepport));
 						this.on_off = false;
@@ -129,8 +117,8 @@ public class Auto extends Thread
 					sleep(this.acquisitionRate);
 					if(!isRouteFineshed(edgeAtual, edgeFinal))
 					{
-						System.out.println(this.idAuto + " -> edge atual: " + edgeAtual);
-						this.carRepport = this.atualizaSensores(); // BOZASSO AQUI
+						// System.out.println(this.idAuto + " -> edge atual: " + edgeAtual);
+						this.carRepport = this.atualizaSensores(); // IMP# tentar trocar para TransportService
 						saida.writeUTF(drivingDataToString(this.carRepport));
 						if(this.carRepport.getCarState().equals("finalizado"))
 						{
@@ -158,7 +146,6 @@ public class Auto extends Thread
 			entrada.close();
 			saida.close();
 			socket.close();
-			// this.ts.setFinished(true);
         }
 		catch (Exception e)
 		{
@@ -175,11 +162,6 @@ public class Auto extends Thread
 			if (!this.getSumo().isClosed()) {
 				SumoPosition2D sumoPosition2D;
 				sumoPosition2D = (SumoPosition2D) sumo.do_job_get(Vehicle.getPosition(this.idAuto));
-
-				// System.out.println("AutoID: " + this.getIdAuto());
-				// System.out.println("RoadID: " + (String) this.sumo.do_job_get(Vehicle.getRoadID(this.idAuto)));
-				// System.out.println("RouteID: " + (String) this.sumo.do_job_get(Vehicle.getRouteID(this.idAuto)));
-				// System.out.println("RouteIndex: " + this.sumo.do_job_get(Vehicle.getRouteIndex(this.idAuto)));
 				
 				// Criacao dos dados de conducao do veiculo
 				repport = updateDrivingData(
@@ -217,60 +199,8 @@ public class Auto extends Thread
 
 				);
 
-				// Criar relat�rio auditoria / alertas
-				// velocidadePermitida = (double)
-				// sumo.do_job_get(Vehicle.getAllowedSpeed(this.idSumoVehicle));
-
-				// this.drivingRepport.add(repport);
-
-				//System.out.println("Data: " + this.drivingRepport.size());
-				// System.out.println("idAuto = " + this.drivingRepport.get(this.drivingRepport.size() - 1).getAutoID());
-				//System.out.println(
-				//		"timestamp = " + this.drivingRepport.get(this.drivingRepport.size() - 1).getTimeStamp());
-				//System.out.println("X=" + this.drivingRepport.get(this.drivingRepport.size() - 1).getX_Position() + ", "
-				//		+ "Y=" + this.drivingRepport.get(this.drivingRepport.size() - 1).getY_Position());
-				// System.out.println("speed = " + this.drivingRepport.get(this.drivingRepport.size() - 1).getSpeed());
-				// System.out.println("odometer = " + this.drivingRepport.get(this.drivingRepport.size() - 1).getOdometer());
-				// System.out.println("Fuel Consumption = "
-				// 		+ this.drivingRepport.get(this.drivingRepport.size() - 1).getFuelConsumption());
-				//System.out.println("Fuel Type = " + this.fuelType);
-				//System.out.println("Fuel Price = " + this.fuelPrice);
-
-				// System.out.println(
-				// 		"CO2 Emission = " + this.drivingRepport.get(this.drivingRepport.size() - 1).getCo2Emission());
-
-				//System.out.println();
-				//System.out.println("************************");
-				//System.out.println("testes: ");
-				//System.out.println("getAngle = " + (double) sumo.do_job_get(Vehicle.getAngle(this.idAuto)));
-				//System.out
-				//		.println("getAllowedSpeed = " + (double) sumo.do_job_get(Vehicle.getAllowedSpeed(this.idAuto)));
-				//System.out.println("getSpeed = " + (double) sumo.do_job_get(Vehicle.getSpeed(this.idAuto)));
-				//System.out.println(
-				//		"getSpeedDeviation = " + (double) sumo.do_job_get(Vehicle.getSpeedDeviation(this.idAuto)));
-				//System.out.println("getMaxSpeedLat = " + (double) sumo.do_job_get(Vehicle.getMaxSpeedLat(this.idAuto)));
-				//System.out.println("getSlope = " + (double) sumo.do_job_get(Vehicle.getSlope(this.idAuto))
-				//		+ " the slope at the current position of the vehicle in degrees");
-				//System.out.println(
-				//		"getSpeedWithoutTraCI = " + (double) sumo.do_job_get(Vehicle.getSpeedWithoutTraCI(this.idAuto))
-				//				+ " Returns the speed that the vehicle would drive if no speed-influencing\r\n"
-				//				+ "command such as setSpeed or slowDown was given.");
-
-				//sumo.do_job_set(Vehicle.setSpeed(this.idAuto, (1000 / 3.6)));
-				//double auxspeed = (double) sumo.do_job_get(Vehicle.getSpeed(this.idAuto));
-				//System.out.println("new speed = " + (auxspeed * 3.6));
-				//System.out.println(
-				//		"getSpeedDeviation = " + (double) sumo.do_job_get(Vehicle.getSpeedDeviation(this.idAuto)));
-				
-				
 				this.sumo.do_job_set(Vehicle.setSpeedMode(this.idAuto, 0));
-				this.setSpeed(speed); // NEWF
-
-				
-				// System.out.println("getPersonNumber = " + sumo.do_job_get(Vehicle.getPersonNumber(this.idAuto)));
-				//System.out.println("getPersonIDList = " + sumo.do_job_get(Vehicle.getPersonIDList(this.idAuto)));
-				
-				// System.out.println("************************");
+				this.setSpeed(speed);
 
 			} else {
 				this.on_off = false;
@@ -278,9 +208,8 @@ public class Auto extends Thread
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println(this.idAuto + " acabou a rota.");
-			// this.ts.setOn_off(false);
-			return this.updateDrivingData("finalizado");			
+			System.out.println(this.idAuto + " erro no sumo.");
+			return this.updateDrivingData("encerrado");			
 		}
 
 		return repport;
@@ -409,12 +338,6 @@ public class Auto extends Thread
 		}
 	}
 
-	// private boolean estaNoSUMO() throws Exception
-	// {
-	// 	SumoStringList lista = (SumoStringList) this.sumo.do_job_get(Vehicle.getIDList());
-	// 	return lista.contains(this.idAuto);
-	// }
-
 	private String getEdgeFinal()
 	{
 		SumoStringList edge = new SumoStringList();
@@ -429,19 +352,39 @@ public class Auto extends Thread
 
 	private RouteN stringToRouteN(String _string)
 	{
-		String[] aux = _string.split(",");
-		RouteN route = new RouteN(aux[0], aux[1]); //BOZASSO
+		JSONObject jsonOut = new JSONObject(_string);
+		String jsRouteID = jsonOut.getString("RouteID");
+		String jsEdges = jsonOut.getString("Edges");
+		RouteN route = new RouteN(jsRouteID, jsEdges);
 		return route;
 	}
 
+	/**Converte um objeto do tipo DrivingData para uma string no formato JSON
+	 * @param _carRepport DrivingData - 
+	 * @return
+	 */
 	private String drivingDataToString(DrivingData _carRepport)
 	{
-		String convert;
-        convert = _carRepport.getCarState() + "," + _carRepport.getAutoID() + "," + _carRepport.getDriverID() + "," + _carRepport.getTimeStamp()
-		+ "," + _carRepport.getX_Position() + "," + _carRepport.getY_Position() + "," + _carRepport.getRoadIDSUMO() + "," + _carRepport.getRouteIDSUMO()
-		+ "," + _carRepport.getSpeed() + "," + _carRepport.getOdometer() + "," + _carRepport.getFuelConsumption() + "," + _carRepport.getAverageFuelConsumption()
-		+ "," + _carRepport.getFuelType() + "," + _carRepport.getFuelPrice() + "," + _carRepport.getCo2Emission() + "," 
-		+ _carRepport.getHCEmission() + "," + _carRepport.getPersonCapacity() + "," + _carRepport.getPersonNumber();
-        return convert;
+        JSONObject jsonOut = new JSONObject();
+        jsonOut.put("CarState",_carRepport.getCarState());
+        jsonOut.put("AutoID",_carRepport.getAutoID());
+		jsonOut.put("DriverID",_carRepport.getDriverID());
+		jsonOut.put("TimeStamp",_carRepport.getTimeStamp());
+		jsonOut.put("X_Position",_carRepport.getX_Position());
+		jsonOut.put("Y_Position",_carRepport.getY_Position());
+		jsonOut.put("RoadIDSUMO",_carRepport.getRoadIDSUMO());
+		jsonOut.put("RouteIDSUMO",_carRepport.getRouteIDSUMO());
+		jsonOut.put("Speed",_carRepport.getSpeed());
+		jsonOut.put("Odometer",_carRepport.getOdometer());
+		jsonOut.put("FuelConsumption",_carRepport.getFuelConsumption());
+		jsonOut.put("AverageFuelConsumption",_carRepport.getAverageFuelConsumption());
+		jsonOut.put("FuelType",_carRepport.getFuelType());
+		jsonOut.put("FuelPrice",_carRepport.getFuelPrice());
+		jsonOut.put("Co2Emission",_carRepport.getCo2Emission());
+		jsonOut.put("HCEmission",_carRepport.getHCEmission());
+		jsonOut.put("PersonCapacity",_carRepport.getPersonCapacity());
+		jsonOut.put("PersonNumber",_carRepport.getPersonNumber());
+
+        return jsonOut.toString();
 	}
 }

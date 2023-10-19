@@ -42,27 +42,19 @@ public class JSONConverter
 	{
 		JSONObject jsonOut = new JSONObject(_string);
 		String jsCarState = jsonOut.getString("CarState");
-		String jsAutoID = jsonOut.getString("AutoID");
-        String jsDriverID = jsonOut.getString("DriverID");
         long jsTimeStamp = jsonOut.getLong("TimeStamp");
-        double jsX_Position = jsonOut.getDouble("X_Position");
-        double jsY_Position = jsonOut.getDouble("Y_Position");
-        String jsRoadIDSUMO = jsonOut.getString("RoadIDSUMO");
+		String jsAutoID = jsonOut.getString("AutoID");
         String jsRouteIDSUMO = jsonOut.getString("RouteIDSUMO");
         double jsSpeed = jsonOut.getDouble("Speed");
-        double jsOdometer = jsonOut.getDouble("Odometer");
+        double jsDistance = jsonOut.getDouble("Distance");
         double jsFuelConsumption = jsonOut.getDouble("FuelConsumption");
-        double jsAverageFuelConsumption = jsonOut.getDouble("AverageFuelConsumption");
         int jsFuelType = jsonOut.getInt("FuelType");
-        double jsFuelPrice = jsonOut.getDouble("FuelPrice");
         double jsCo2Emission = jsonOut.getDouble("Co2Emission");
-        double jsHCEmission = jsonOut.getDouble("HCEmission");
-        int jsPersonCapacity = jsonOut.getInt("PersonCapacity");
-        int jsPersonNumber = jsonOut.getInt("PersonNumber");
+        long jsLongitude = jsonOut.getLong("Longitude");
+        long jsLatitude = jsonOut.getLong("Latitude");
 
-        DrivingData carRepport = new DrivingData(jsCarState, jsAutoID, jsDriverID, jsTimeStamp, jsX_Position, jsY_Position, jsRoadIDSUMO,
-        jsRouteIDSUMO, jsSpeed, jsOdometer, jsFuelConsumption, jsAverageFuelConsumption, jsFuelType, jsFuelPrice, jsCo2Emission, jsHCEmission,
-        jsPersonCapacity, jsPersonNumber);
+        DrivingData carRepport = new DrivingData(jsCarState, jsTimeStamp, jsAutoID, jsRouteIDSUMO, jsSpeed, jsDistance, jsFuelConsumption,
+        jsFuelType, jsCo2Emission,jsLongitude, jsLatitude);
 
 		return carRepport;
 	}
@@ -75,23 +67,16 @@ public class JSONConverter
 	{
         JSONObject jsonOut = new JSONObject();
         jsonOut.put("CarState",_carRepport.getCarState());
+        jsonOut.put("TimeStamp",_carRepport.getTimeStamp());
         jsonOut.put("AutoID",_carRepport.getAutoID());
-		jsonOut.put("DriverID",_carRepport.getDriverID());
-		jsonOut.put("TimeStamp",_carRepport.getTimeStamp());
-		jsonOut.put("X_Position",_carRepport.getX_Position());
-		jsonOut.put("Y_Position",_carRepport.getY_Position());
-		jsonOut.put("RoadIDSUMO",_carRepport.getRoadIDSUMO());
-		jsonOut.put("RouteIDSUMO",_carRepport.getRouteIDSUMO());
-		jsonOut.put("Speed",_carRepport.getSpeed());
-		jsonOut.put("Odometer",_carRepport.getOdometer());
-		jsonOut.put("FuelConsumption",_carRepport.getFuelConsumption());
-		jsonOut.put("AverageFuelConsumption",_carRepport.getAverageFuelConsumption());
-		jsonOut.put("FuelType",_carRepport.getFuelType());
-		jsonOut.put("FuelPrice",_carRepport.getFuelPrice());
-		jsonOut.put("Co2Emission",_carRepport.getCo2Emission());
-		jsonOut.put("HCEmission",_carRepport.getHCEmission());
-		jsonOut.put("PersonCapacity",_carRepport.getPersonCapacity());
-		jsonOut.put("PersonNumber",_carRepport.getPersonNumber());
+        jsonOut.put("RouteIDSUMO",_carRepport.getRouteIDSUMO());
+        jsonOut.put("Speed",_carRepport.getSpeed());
+		jsonOut.put("Distance",_carRepport.getDistance());
+        jsonOut.put("FuelConsumption",_carRepport.getFuelConsumption());
+        jsonOut.put("FuelType",_carRepport.getFuelType());
+        jsonOut.put("Co2Emission",_carRepport.getCo2Emission());
+		jsonOut.put("Longitude",_carRepport.getLongitude());
+		jsonOut.put("Latitude",_carRepport.getLatitude());
 
         return jsonOut.toString();
 	}

@@ -26,7 +26,6 @@ public class Auto extends Thread // IMP# Car extends Vehicle implements Runnable
 	private boolean on_off;
 	private String idAuto; // id do carro
 	private SumoColor colorAuto;
-	private String driverID; // id do motorista
 	private SumoTraciConnection sumo;
 	private long acquisitionRate; // taxa de aquisicao de dados dos sensores
 	private int fuelType; 			// 1-diesel, 2-gasoline, 3-ethanol, 4-hybrid
@@ -36,11 +35,12 @@ public class Auto extends Thread // IMP# Car extends Vehicle implements Runnable
 	private int personNumber;		// the total number of persons which are riding in this vehicle
 
 	private DrivingData carRepport;
-	private RouteN route;
 	private TransportService ts;
+	private RouteN route;
+	private double distance;
 
-	private double speed = 40;
-	private boolean finished = false;
+	private double speed;
+	private boolean finished;
 
 	public Auto(boolean _on_off, String _carHost,int _servPort, String _idAuto, SumoColor _colorAuto, String _driverID, 
 	SumoTraciConnection _sumo, long _acquisitionRate, int _fuelType, int _fuelPreferential, double _fuelPrice, int _personCapacity,
@@ -51,7 +51,6 @@ public class Auto extends Thread // IMP# Car extends Vehicle implements Runnable
 		this.on_off = _on_off;
 		this.idAuto = _idAuto;
 		this.colorAuto = _colorAuto;
-		this.driverID = _driverID;
 		this.sumo = _sumo;
 		this.acquisitionRate = _acquisitionRate;
 		this.setFuelType(_fuelType);
@@ -59,6 +58,8 @@ public class Auto extends Thread // IMP# Car extends Vehicle implements Runnable
 		this.fuelPrice = _fuelPrice;
 		this.personCapacity = _personCapacity;
 		this.personNumber = _personNumber;
+		this.speed = 40;
+		this.finished = false;
 		this.carRepport = this.updateDrivingData("aguardando", "");
 	}
 
@@ -96,6 +97,9 @@ public class Auto extends Thread // IMP# Car extends Vehicle implements Runnable
 					sleep(this.acquisitionRate);
 				}
 				String edgeAtual = (String) this.sumo.do_job_get(Vehicle.getRoadID(this.idAuto));
+				double[] coordGeo = this.convertGeo();
+				double initialLat = coordGeo[0];
+				double initialLon = coordGeo[1];
 
 				while (this.on_off) // && MobilityCompany.estaNoSUMO(this.idAuto, sumo) mudar nome para on
 				{
@@ -111,7 +115,7 @@ public class Auto extends Thread // IMP# Car extends Vehicle implements Runnable
 					if(!isRouteFineshed(edgeAtual, edgeFinal))
 					{
 						// System.out.println(this.idAuto + " -> edge atual: " + edgeAtual);
-						this.carRepport = this.atualizaSensores(); // IMP# tentar trocar para TransportService
+						this.carRepport = this.atualizaSensores(initialLat, initialLon); // IMP# tentar trocar para TransportService
 						saida.writeUTF(JSONConverter.drivingDataToString(this.carRepport));
 						if(this.carRepport.getCarState().equals("finalizado"))
 						{
@@ -149,48 +153,29 @@ public class Auto extends Thread // IMP# Car extends Vehicle implements Runnable
 		System.out.println(this.idAuto + " encerrado.");
 	}
 
-	private DrivingData atualizaSensores() {
+	private DrivingData atualizaSensores(double _latitude, double _longitude) {
 		DrivingData repport = updateDrivingData("aguardando", "");
 		try {
 			if (!this.getSumo().isClosed()) {
-				SumoPosition2D sumoPosition2D;
-				sumoPosition2D = (SumoPosition2D) sumo.do_job_get(Vehicle.getPosition(this.idAuto));
+				long longitude = 0;
+				long latitude = 0;
 				
 				// Criacao dos dados de conducao do veiculo
-				repport = updateDrivingData(
-
-						"rodando", this.idAuto, this.driverID, System.currentTimeMillis(), sumoPosition2D.x, sumoPosition2D.y,
-						(String) this.sumo.do_job_get(Vehicle.getRoadID(this.idAuto)),
-						(String) this.sumo.do_job_get(Vehicle.getRouteID(this.idAuto)),
-						(double) this.sumo.do_job_get(Vehicle.getSpeed(this.idAuto)),
-						(double) this.sumo.do_job_get(Vehicle.getDistance(this.idAuto)),
-
-						(double) this.sumo.do_job_get(Vehicle.getFuelConsumption(this.idAuto)),
-						// Vehicle's fuel consumption in ml/s during this time step,
-						// to get the value for one step multiply with the step length; error value:
-						// -2^30
+				repport = updateDrivingData("rodando", System.currentTimeMillis(), this.idAuto,
+				(String) this.sumo.do_job_get(Vehicle.getRouteID(this.idAuto)), (double) this.sumo.do_job_get(Vehicle.getSpeed(this.idAuto)),
+				this.distance, // IMP# alterar para calculo
+				(double) this.sumo.do_job_get(Vehicle.getFuelConsumption(this.idAuto)), this.fuelType,
+				(double) this.sumo.do_job_get(Vehicle.getCO2Emission(this.idAuto)), longitude, latitude);
 						
-						1/*averageFuelConsumption (calcular)*/,
+				// Vehicle's fuel consumption in ml/s during this time step,
+				// to get the value for one step multiply with the step length; error value:
+				// -2^30
 
-						this.fuelType, this.fuelPrice,
-
-						(double) this.sumo.do_job_get(Vehicle.getCO2Emission(this.idAuto)),
-						// Vehicle's CO2 emissions in mg/s during this time step,
-						// to get the value for one step multiply with the step length; error value:
-						// -2^30
-
-						(double) this.sumo.do_job_get(Vehicle.getHCEmission(this.idAuto)),
-						// Vehicle's HC emissions in mg/s during this time step,
-						// to get the value for one step multiply with the step length; error value:
-						// -2^30
-						
-						this.personCapacity,
-						// the total number of persons that can ride in this vehicle
-						
-						this.personNumber
-						// the total number of persons which are riding in this vehicle
-
-				);
+				// Vehicle's CO2 emissions in mg/s during this time step,
+				// to get the value for one step multiply with the step length; error value:
+				// -2^30
+				
+				// 1/*averageFuelConsumption (calcular)*/,
 
 				this.sumo.do_job_set(Vehicle.setSpeedMode(this.idAuto, 0));
 				this.setSpeed(speed);
@@ -208,22 +193,68 @@ public class Auto extends Thread // IMP# Car extends Vehicle implements Runnable
 		return repport;
 	}
 
-	private DrivingData updateDrivingData(String _carState, String _autoID, String _driverID, long _timeStamp, double _x_Position,
-	double _y_Position, String _roadIDSUMO, String _routeIDSUMO, double _speed, double _odometer, double _fuelConsumption,
-	double _averageFuelConsumption, int _fuelType, double _fuelPrice, double _co2Emission, double _HCEmission, int _personCapacity,
-	int _personNumber)
+	private double[] convertGeo() throws Exception {
+		SumoPosition2D sumoPosition2D = (SumoPosition2D) sumo.do_job_get(Vehicle.getPosition(this.idAuto));
+
+		double x = sumoPosition2D.x; // coordenada X em metros
+		double y = sumoPosition2D.y; // coordenada Y em metros
+
+		double raioTerra = 6371000; // raio medio da Terra em metros
+		
+		// retirados do sumo
+		double latRef = -22.986731;
+		double lonRef = -43.217054;
+
+		// Conversao de metros para graus
+		double lat = latRef + (y / raioTerra) * (180 / Math.PI);
+		double lon = lonRef + (x / raioTerra) * (180 / Math.PI) / Math.cos(latRef * Math.PI / 180);
+
+		double[] coordGeo = new double[] { lat, lon };
+		return coordGeo;
+	}
+
+	private double calcDistance(double lat1, double lon1, double lat2, double lon2) {
+		double raioTerra = 6371000;
+	
+		// Diferenças das latitudes e longitudes
+		double latDiff = Math.toRadians(lat2 - lat1);
+		double lonDiff = Math.toRadians(lon2 - lon1);
+	
+		// Fórmula de Haversine
+		double a = Math.sin(latDiff / 2) * Math.sin(latDiff / 2) +
+		Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.sin(lonDiff / 2) * Math.sin(lonDiff / 2);
+		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+		double distancia = raioTerra * c;
+	
+		return distancia;
+	}
+
+	private void updateDistance(double latInicial, double lonInicial) throws Exception {
+		double[] coordGeo = convertGeo();
+
+		double latAtual = coordGeo[0];
+		double lonAtual = coordGeo[1];
+
+		double distanceCovered = calcDistance(latInicial, lonInicial, latAtual, lonAtual);
+
+		System.out.println(idAuto + " percorreu " + distanceCovered + " metros");
+		if (distanceCovered > (distance + 1000)) {
+			distance += 1000;
+		}
+	}
+
+	private DrivingData updateDrivingData(String _carState, long _timeStamp, String _autoID, String _routeIDSUMO, double _speed,
+	double _distance, double _fuelConsumption, int _fuelType, double _co2Emission, long _longitude, long _latitude)
 	{
-		DrivingData _repport = new DrivingData(_carState, _autoID, _driverID, _timeStamp, _x_Position, _y_Position, _roadIDSUMO, 
-		_routeIDSUMO, _speed, _odometer, _fuelConsumption, _averageFuelConsumption, _fuelType, _fuelPrice, _co2Emission, _HCEmission, 
-		_personCapacity, _personNumber);
+		DrivingData _repport = new DrivingData(_carState, _timeStamp, _autoID, _routeIDSUMO, _speed, _distance, _fuelConsumption, _fuelType,
+		_co2Emission,_longitude, _latitude);
 		return _repport;
 	}
 
 	private DrivingData updateDrivingData(String _carState, String _routeIDSUMO)
 	{
-		DrivingData _repport = updateDrivingData(_carState, idAuto, driverID, 0, 0, 0, 
-		"", _routeIDSUMO, 0, 0, 0, 1, this.fuelType,
-		this.fuelPrice,0, 0, this.personCapacity, this.personNumber);
+		DrivingData _repport = updateDrivingData(_carState, 0 , this.idAuto, _routeIDSUMO, 0, 0, 0,
+		this.fuelType, 0,0,0);
 		return _repport;	
 	}
 

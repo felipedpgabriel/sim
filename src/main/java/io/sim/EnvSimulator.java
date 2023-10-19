@@ -19,6 +19,7 @@ public class EnvSimulator extends Thread
     private SumoTraciConnection sumo;
 	private static final int PORT_SUMO = 12345; // NEWF
 	private static final int PORT_COMPANY = 11111;
+	private static final int PORT_BANK = 22222;
 	private static final String ROTAS_XML = "data/dados.xml"; // NEWF
 	private static final int ACQUISITION_RATE = 500;
 	private static final int NUM_DRIVERS = 100; // ideal 100
@@ -49,10 +50,11 @@ public class EnvSimulator extends Thread
 			TimeStep tStep = new TimeStep(this.sumo, ACQUISITION_RATE);
 			tStep.start();
 
+			String lHost = "localhost";
 			ArrayList<RouteN> routes = RouteN.extractRoutes(ROTAS_XML);
 			System.out.println("ES - " + routes.size() + " rotas disponiveis.");
 			ServerSocket companyServer = new ServerSocket(PORT_COMPANY);
-			MobilityCompany company = new MobilityCompany(companyServer, routes, NUM_DRIVERS, sumo, ACQUISITION_RATE);
+			MobilityCompany company = new MobilityCompany(lHost, PORT_BANK,companyServer, routes, NUM_DRIVERS, sumo, ACQUISITION_RATE);
 			company.start();
 
 			ArrayList<Driver> drivers = new ArrayList<Driver>();
@@ -60,10 +62,10 @@ public class EnvSimulator extends Thread
 			{
 				SumoColor cor = new SumoColor(0, 255, 0, 126);// IMP# funcao para cria cor
 				String driverID = "D" + (i+1);
-				String carHost = "localhost";// IMP# host unico para cada;
-				Auto car = new Auto(true,carHost,PORT_COMPANY, ("CAR" + (i+1)), cor, driverID, sumo, ACQUISITION_RATE, FUEL_TYPE, FUEL_PREFERENTIAL, FUEL_PRICE,
+				//String lHost = "localhost"; // IMP# host unico para cada e outros para drivers;
+				Auto car = new Auto(true,lHost,PORT_COMPANY, ("CAR" + (i+1)), cor, driverID, sumo, ACQUISITION_RATE, FUEL_TYPE, FUEL_PREFERENTIAL, FUEL_PRICE,
 				PERSON_CAPACITY, PERSON_NUMBER);
-				Driver driver = new Driver(driverID, car, ACQUISITION_RATE);
+				Driver driver = new Driver(lHost, PORT_BANK, driverID, car, ACQUISITION_RATE);
 				drivers.add(driver);
 			}
 			iniciaDrivers(drivers);

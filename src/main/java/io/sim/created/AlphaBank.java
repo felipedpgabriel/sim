@@ -1,6 +1,7 @@
 package io.sim.created;
 
 import java.net.ServerSocket;
+import java.util.ArrayList;
 
 public class AlphaBank extends Thread
 {
@@ -8,7 +9,8 @@ public class AlphaBank extends Thread
     private ServerSocket serverSocket;
     private int numAccounts;
     // Atributos de sincronizacao
-    private static Thread oWatch = new Thread();
+    private static Thread oWatch;
+    private static ArrayList<Transaction> transactions;
 
     @Override
     public void run()
@@ -17,5 +19,9 @@ public class AlphaBank extends Thread
 
         BankChannelCreator bc = new BankChannelCreator(serverSocket, numAccounts);
         bc.start();
+
+        // IMP# while() para manter classe ativa.
+
+        System.out.println("MobilityCompany encerrada...");
     }
 }

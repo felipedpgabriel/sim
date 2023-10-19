@@ -22,12 +22,6 @@ public class Auto extends Thread // IMP# Car extends Vehicle implements Runnable
 	// atributos de cliente
 	private String carHost;
 	private int servPort;
-    private Socket socket;
-	private DataInputStream entrada;
-    private DataOutputStream saida;
-    // atributos de sincronizacao
-    // private boolean ocupado = false;
-    // private Object monitor = new Object(); // sincronizacao
 	// atributos da classe
 	private boolean on_off;
 	private String idAuto; // id do carro
@@ -75,11 +69,11 @@ public class Auto extends Thread // IMP# Car extends Vehicle implements Runnable
 		try
 		{
 			// System.out.println(this.idAuto + " no try.");
-            socket = new Socket(this.carHost, this.servPort);
+            Socket socket = new Socket(this.carHost, this.servPort);
 			// System.out.println(this.idAuto + " passou do socket.");
-            entrada = new DataInputStream(socket.getInputStream());
+            DataInputStream entrada = new DataInputStream(socket.getInputStream());
 			// System.out.println(this.idAuto + " passou da entrada.");
-            saida = new DataOutputStream(socket.getOutputStream());
+            DataOutputStream saida = new DataOutputStream(socket.getOutputStream());
 
 			while(!finished)
 			{

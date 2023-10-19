@@ -13,24 +13,30 @@ public class MobilityCompany extends Thread
     // Atributos de servidor
     private ServerSocket serverSocket;
     // Atributos de cliente
-    // private String companyHost;
-	// private int bankPort;
+    private String companyHost;
+	private int bankPort;
     // private Socket socket;
     // private static Account account;
     // Atributos de sincronizacao
-    private static Thread oWatch = new Thread();
+    private static Thread oWatch;
     // Atributos da classe
-    private static ArrayList<RouteN> routesToExe = new ArrayList<RouteN>();
-    private static ArrayList<RouteN> routesInExe = new ArrayList<RouteN>();
-    private static ArrayList<RouteN> routesExecuted = new ArrayList<RouteN>();
+    private static ArrayList<RouteN> routesToExe;
+    private static ArrayList<RouteN> routesInExe;
+    private static ArrayList<RouteN> routesExecuted;
     // private static final double RUN_PRICE = 3.25;
     private static int numDrivers;
     private static boolean routesAvailable = true;
     private long acquisitionRate; 
 
-    public MobilityCompany(ServerSocket _serverSocket, ArrayList<RouteN> _routes, int _numDrivers, SumoTraciConnection _sumo, long _acquisitionRate)
+    public MobilityCompany(String _companyHost, int _bankPort, ServerSocket _serverSocket, ArrayList<RouteN> _routes, int _numDrivers, SumoTraciConnection _sumo, long _acquisitionRate)
     {
+        oWatch = new Thread();
+        routesToExe = new ArrayList<RouteN>();
+        routesInExe = new ArrayList<RouteN>();
+        routesExecuted = new ArrayList<RouteN>();
         // BotPayment payment = new BotPayment(RUN_PRICE);
+        this.companyHost = _companyHost;
+        this.bankPort = _bankPort;
         this.serverSocket = _serverSocket;
         numDrivers = _numDrivers;
         routesToExe = _routes;

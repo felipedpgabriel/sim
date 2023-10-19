@@ -1,40 +1,48 @@
 package io.sim.created;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
 import java.util.ArrayList;
 
 import io.sim.Auto;
 
 public class Driver extends Thread
 {
+	// atributos de cliente
+	private String driverHost;
+	private int servPort;
+    // atributos da classe
     private String driverID;
-
-    // // Cliente de AlphaBank
     // private Account account;
-    // private TransportService ts;
     private Auto car; // private Car car;
     // private static final double FUEL_PRICE = 5.87;
-    // private Route route;
     private long acquisitionRate;
     // private ArrayList<RouteN> routeToExe = new ArrayList<RouteN>();
     private ArrayList<RouteN> routesExecuted = new ArrayList<RouteN>();
     private ArrayList<RouteN> routesInExe = new ArrayList<RouteN>();
     private boolean initRoute = false;
 
-    public Driver(String _driverID, Auto _car, long _acquisitionRate)
-    {
-        this.driverID = _driverID;
-        this.car = _car;
-        this.acquisitionRate = _acquisitionRate;
-        // this.start();
-        // pensar na logica de inicializacao do TransporteService e do Car
-        // this.car.start();
-        // BotPayment payment = new BotPayment(fuelPrice);
+    public Driver(String driverHost, int servPort, String driverID, Auto car, long acquisitionRate) {
+        this.driverHost = driverHost;
+        this.servPort = servPort;
+        this.driverID = driverID;
+        this.car = car;
+        this.acquisitionRate = acquisitionRate;
     }
 
     @Override
     public void run()
     {
         try {
+            // System.out.println(this.idAuto + " no try.");
+            Socket socket = new Socket(this.driverHost, this.servPort);
+			// System.out.println(this.idAuto + " passou do socket.");
+            DataInputStream entrada = new DataInputStream(socket.getInputStream());
+			// System.out.println(this.idAuto + " passou da entrada.");
+            DataOutputStream saida = new DataOutputStream(socket.getOutputStream());
+            
             System.out.println("Iniciando " + this.driverID);
             this.car.start();
             while(this.car.isAlive())
@@ -55,36 +63,14 @@ public class Driver extends Thread
                     initRoute = true; 
                 }
             }
-            // this.car.setfinished(true);
             System.out.println("Encerrando " + this.driverID);
-            // this.car.join();
-        } catch (InterruptedException e) {
+            entrada.close();
+			saida.close();
+			socket.close();
+        } catch (InterruptedException | IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
-        // System.out.println("Iniciando " + this.driverID);
-        // this.car.start();
-        // while(MobilityCompany.areRoutesAvailable()) // retirar segundo termo
-        // {
-        //     // Thread.sleep(this.car.getAcquisitionRate());
-        //     if(this.car.getCarRepport().getCarState() == "finalizado")
-        //     {
-        //         // retirar de routesInExe e colocar em routesExecuted
-        //         System.out.println(this.driverID + " rota "+ this.routesInExe.get(0).getRouteID() +" finalizada");
-        //         this.routesExecuted.add((this.routesInExe.remove(0)));
-        //         initRoute = false;
-        //     }
-        //     else if((this.car.getCarRepport().getCarState() == "rodando") && !initRoute)
-        //     {
-        //         System.out.println(this.driverID + " rota "+ this.car.getRoute().getRouteID() +" iniciada");
-        //         this.routesInExe.add(this.car.getRoute());
-        //         initRoute = true; 
-        //     }
-        // }
-        // System.out.println("Encerrando " + this.driverID);
-        // this.car.setfinished(true);
-
     }
 
     public String getDriverID() {

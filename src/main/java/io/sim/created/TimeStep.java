@@ -1,14 +1,15 @@
 package io.sim.created;
 
+import io.sim.EnvSimulator;
 import it.polito.appeal.traci.SumoTraciConnection;
 
-public class TimeStep extends Thread{
+public class TimeStep extends Thread
+{
     private SumoTraciConnection sumo;
-    private long acquisitionRate;
-    public TimeStep(SumoTraciConnection _sumo, long _acquisitionRate)
+    
+    public TimeStep(SumoTraciConnection _sumo)
     {
         this.sumo = _sumo;
-        this.acquisitionRate = _acquisitionRate;
     }
 
     @Override
@@ -18,7 +19,7 @@ public class TimeStep extends Thread{
         {
             try {
                 this.sumo.do_timestep();
-                sleep(acquisitionRate);
+                sleep(EnvSimulator.ACQUISITION_RATE);
             } catch (Exception e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

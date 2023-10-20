@@ -5,8 +5,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-import io.sim.DrivingData;
-
 public class BankChannel extends Thread
 {
     private Socket socket;
@@ -20,21 +18,31 @@ public class BankChannel extends Thread
         try
         {
             // variaveis de entrada e saida do servidor
-            // System.out.println("CC - entrou no try.");
+            System.out.println("BC - entrou no try.");
             DataInputStream entrada = new DataInputStream(socket.getInputStream());
-            // System.out.println("CC - passou da entrada.");
+            System.out.println("BC - passou da entrada.");
             DataOutputStream saida = new DataOutputStream(socket.getOutputStream());
-            // System.out.println("CC - passou da saida.");
-            // JSONObject jsonOut = new JSONObject();
+            System.out.println("BC - passou da saida.");
 
-            String mensagem = "";
-            // while(true) // loop do sistema #IMP# adicionar logica
-            // {
-            //     DrivingData ddIn = (DrivingData) JSONConverter.stringToDrivingData(entrada.readUTF());
-            //     saida.writeUTF(JSONConverter.routeNtoString(route));
-            // }
+            String service = "";
+            while(!service.equals("Encerrar"))
+            {
+                if(service.equals("Pagamento"))
+                {
+                    saida.writeUTF(JSONConverter.setJSONboolean(true));
+                    Transaction transaction = (Transaction) JSONConverter.stringToTransaction(entrada.readUTF());
+                    AlphaBank.transfer(transaction);
+                    transaction.setTimeStamp(System.nanoTime());
+                    AlphaBank.addTransaction(transaction);
+                }
+                else if(service.equals("Encerrar"))
+                {
+                    break;
+                }
+                service = (String) JSONConverter.getJSONservice(entrada.readUTF());
+            }
 
-            System.out.println("Encerrando canal.");
+            System.out.println("Encerrando canal BC.");
             entrada.close();
             saida.close();
             socket.close();

@@ -8,7 +8,7 @@ import it.polito.appeal.traci.SumoTraciConnection;
 import io.sim.created.RouteN;
 
 /**Cria o objeto veiculo no SUMO
- * Define cor e a rota. IMP# ALTERAR PARA FAZER ATUALIZA SENSORES E REMOVER CRIACAO DE VEICULOS (TLVZ).
+ * Define cor e a rota. TODO ALTERAR PARA FAZER ATUALIZA SENSORES E REMOVER CRIACAO DE VEICULOS (TLVZ).
  */
 public class TransportService extends Thread {
 
@@ -44,7 +44,7 @@ public class TransportService extends Thread {
 		System.out.println("Encerrando TransportService " + this.car.getIdAuto());
 	}
 
-	private void initializeRoutes() { // IMP# investigar se existe um retorno para saber se foi bem suscedido
+	private void initializeRoutes() { // TODO investigar se existe um retorno para saber se foi bem suscedido
 
 		// Adiciona todas as edges em uma lista de Strings
 		edge = new SumoStringList();
@@ -58,7 +58,7 @@ public class TransportService extends Thread {
 		try {// Inicializa a rota, veiculo e a cor do veiculo
 			sumo.do_job_set(Route.add(this.route.getRouteID(), edge));
 			
-			// IMP# com Car herdando Vehicle, esse passo pode se tornar obsoleto
+			// TODO com Car herdando Vehicle, esse passo pode se tornar obsoleto
 			sumo.do_job_set(Vehicle.addFull(this.car.getIdAuto(), 				//vehID
 											this.route.getRouteID(), 			//routeID 
 											"DEFAULT_VEHTYPE", 					//typeID 

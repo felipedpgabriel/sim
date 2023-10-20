@@ -17,14 +17,15 @@ import io.sim.created.RouteN;
 /**Define os atributos que coracterizam um Carro.
  * Por meio de metodos get da classe Vehicle, 
  */
-public class Auto extends Thread // IMP# Car extends Vehicle implements Runnable
+public class Auto extends Thread // TODO Car extends Vehicle implements Runnable
 {
 	// atributos de cliente
 	private String carHost;
 	private int servPort;
 	// atributos da classe
-	private boolean on_off;
+	private boolean carOn;
 	private String idAuto; // id do carro
+	private String driverLogin;
 	private SumoColor colorAuto;
 	private SumoTraciConnection sumo;
 	private long acquisitionRate; // taxa de aquisicao de dados dos sensores
@@ -42,14 +43,15 @@ public class Auto extends Thread // IMP# Car extends Vehicle implements Runnable
 	private double speed;
 	private boolean finished;
 
-	public Auto(boolean _on_off, String _carHost,int _servPort, String _idAuto, SumoColor _colorAuto, String _driverID, 
+	public Auto(boolean _carOn, String _carHost,int _servPort, String _idAuto, String _driverLogin,SumoColor _colorAuto, String _driverID, 
 	SumoTraciConnection _sumo, long _acquisitionRate, int _fuelType, int _fuelPreferential, double _fuelPrice, int _personCapacity,
 	int _personNumber) throws Exception
 	{
 		this.carHost = _carHost;
 		this.servPort = _servPort;
-		this.on_off = _on_off;
+		this.carOn = _carOn;
 		this.idAuto = _idAuto;
+		this.driverLogin = _driverLogin;
 		this.colorAuto = _colorAuto;
 		this.sumo = _sumo;
 		this.acquisitionRate = _acquisitionRate;
@@ -69,6 +71,7 @@ public class Auto extends Thread // IMP# Car extends Vehicle implements Runnable
 		System.out.println(this.idAuto + " iniciado.");
 		try
 		{
+			// Conexoes cliente
 			// System.out.println(this.idAuto + " no try.");
             Socket socket = new Socket(this.carHost, this.servPort);
 			// System.out.println(this.idAuto + " passou do socket.");
@@ -86,40 +89,41 @@ public class Auto extends Thread // IMP# Car extends Vehicle implements Runnable
 					System.out.println(this.idAuto +" - Sem rotas a receber.");
 					finished = true;
 					break;
-				}
+				} // TODO avaliar necessidade de um else
 				System.out.println(this.idAuto + " iniciando rota " + route.getRouteID());
 				ts = new TransportService(this.idAuto, route,this, this.sumo);
 				ts.start();
 				String edgeFinal = this.getEdgeFinal(); 
-				this.on_off = true;
-				while(!MobilityCompany.estaNoSUMO(this.idAuto, this.sumo))
+				this.carOn = true;
+				while(!MobilityCompany.estaNoSUMO(this.idAuto, this.sumo)) //esperar estar no SUMO
 				{
 					sleep(this.acquisitionRate);
 				}
+				// atualiza informacoes iniciais
 				String edgeAtual = (String) this.sumo.do_job_get(Vehicle.getRoadID(this.idAuto));
 				double[] coordGeo = this.convertGeo();
 				double initialLat = coordGeo[0];
 				double initialLon = coordGeo[1];
 
-				while (this.on_off) // && MobilityCompany.estaNoSUMO(this.idAuto, sumo) mudar nome para on
+				while (this.carOn) // && MobilityCompany.estaNoSUMO(this.idAuto, sumo)
 				{
-					if(isRouteFineshed(edgeAtual, edgeFinal)) // IMP# IllegalStateException
+					if(isRouteFineshed(edgeAtual, edgeFinal)) // TODO IllegalStateException
 					{
 						System.out.println(this.idAuto + " acabou a rota " + this.route.getRouteID());
 						this.carRepport = this.updateDrivingData("finalizado");
 						saida.writeUTF(JSONConverter.drivingDataToString(this.carRepport));
-						this.on_off = false;
+						this.carOn = false;
 						break;
 					}
 					sleep(this.acquisitionRate);
 					if(!isRouteFineshed(edgeAtual, edgeFinal))
 					{
 						// System.out.println(this.idAuto + " -> edge atual: " + edgeAtual);
-						this.carRepport = this.atualizaSensores(initialLat, initialLon); // IMP# tentar trocar para TransportService
+						this.carRepport = this.atualizaSensores(initialLat, initialLon); // TODO tentar trocar para TransportService
 						saida.writeUTF(JSONConverter.drivingDataToString(this.carRepport));
 						if(this.carRepport.getCarState().equals("finalizado"))
 						{
-							this.on_off = false;
+							this.carOn = false;
 							break;
 						}
 						else
@@ -153,19 +157,20 @@ public class Auto extends Thread // IMP# Car extends Vehicle implements Runnable
 		System.out.println(this.idAuto + " encerrado.");
 	}
 
-	private DrivingData atualizaSensores(double _latitude, double _longitude) {
+	private DrivingData atualizaSensores(double _initiLat, double _initLon) {
 		DrivingData repport = updateDrivingData("aguardando", "");
 		try {
 			if (!this.getSumo().isClosed()) {
-				long longitude = 0;
-				long latitude = 0;
+				double[] coordGeo = this.convertGeo();
+				double currentLat = coordGeo[0];
+				double currentLon = coordGeo[1];
+				this.updateDistance(currentLat,currentLon,_initiLat, _initLon);
 				
 				// Criacao dos dados de conducao do veiculo
-				repport = updateDrivingData("rodando", System.currentTimeMillis(), this.idAuto,
+				repport = updateDrivingData("rodando", this.driverLogin, System.nanoTime(), this.idAuto,
 				(String) this.sumo.do_job_get(Vehicle.getRouteID(this.idAuto)), (double) this.sumo.do_job_get(Vehicle.getSpeed(this.idAuto)),
-				this.distance, // IMP# alterar para calculo
-				(double) this.sumo.do_job_get(Vehicle.getFuelConsumption(this.idAuto)), this.fuelType,
-				(double) this.sumo.do_job_get(Vehicle.getCO2Emission(this.idAuto)), longitude, latitude);
+				this.distance, (double) this.sumo.do_job_get(Vehicle.getFuelConsumption(this.idAuto)), this.fuelType,
+				(double) this.sumo.do_job_get(Vehicle.getCO2Emission(this.idAuto)), currentLon, currentLat);
 						
 				// Vehicle's fuel consumption in ml/s during this time step,
 				// to get the value for one step multiply with the step length; error value:
@@ -181,7 +186,7 @@ public class Auto extends Thread // IMP# Car extends Vehicle implements Runnable
 				this.setSpeed(speed);
 
 			} else {
-				this.on_off = false;
+				this.carOn = false;
 				System.out.println("SUMO is closed...");
 			}
 		} catch (Exception e) {
@@ -229,32 +234,28 @@ public class Auto extends Thread // IMP# Car extends Vehicle implements Runnable
 		return distancia;
 	}
 
-	private void updateDistance(double latInicial, double lonInicial) throws Exception {
-		double[] coordGeo = convertGeo();
+	private void updateDistance(double _initiLat, double _initLon,double _currentLat, double _currentLon) throws Exception {
 
-		double latAtual = coordGeo[0];
-		double lonAtual = coordGeo[1];
-
-		double distanceCovered = calcDistance(latInicial, lonInicial, latAtual, lonAtual);
+		double distanceCovered = calcDistance(_initiLat, _initLon, _currentLat, _currentLon);
 
 		System.out.println(idAuto + " percorreu " + distanceCovered + " metros");
-		if (distanceCovered > (distance + 1000)) {
-			distance += 1000;
+		if (distanceCovered > (this.distance + EnvSimulator.PAYABLE_DISTANCE)) {
+			this.distance += (EnvSimulator.PAYABLE_DISTANCE);
 		}
 	}
 
-	private DrivingData updateDrivingData(String _carState, long _timeStamp, String _autoID, String _routeIDSUMO, double _speed,
-	double _distance, double _fuelConsumption, int _fuelType, double _co2Emission, long _longitude, long _latitude)
+	private DrivingData updateDrivingData(String _carState, String _driverLogin,long _timeStamp, String _autoID, String _routeIDSUMO,
+	double _speed, double _distance, double _fuelConsumption, int _fuelType, double _co2Emission, double _longitude, double _latitude)
 	{
-		DrivingData _repport = new DrivingData(_carState, _timeStamp, _autoID, _routeIDSUMO, _speed, _distance, _fuelConsumption, _fuelType,
-		_co2Emission,_longitude, _latitude);
+		DrivingData _repport = new DrivingData(_carState, _driverLogin, _timeStamp, _autoID, _routeIDSUMO, _speed, _distance, _fuelConsumption,
+		_fuelType, _co2Emission,_longitude, _latitude);
 		return _repport;
 	}
 
 	private DrivingData updateDrivingData(String _carState, String _routeIDSUMO)
 	{
-		DrivingData _repport = updateDrivingData(_carState, 0 , this.idAuto, _routeIDSUMO, 0, 0, 0,
-		this.fuelType, 0,0,0);
+		DrivingData _repport = updateDrivingData(_carState, this.driverLogin, 0 , this.idAuto, _routeIDSUMO, 0, 0,
+		0, this.fuelType, 0,0,0);
 		return _repport;	
 	}
 
@@ -264,16 +265,24 @@ public class Auto extends Thread // IMP# Car extends Vehicle implements Runnable
 		return _repport;	
 	}
 
+	public String getDriverLogin() {
+		return driverLogin;
+	}
+
+	public double getDistance() {
+		return distance;
+	}
+
 	public RouteN getRoute() {
 		return route;
 	}
 
-	public boolean isOn_off() {
-		return this.on_off;
+	public boolean iscarOn() {
+		return this.carOn;
 	}
 
-	public void setOn_off(boolean _on_off) {
-		this.on_off = _on_off;
+	public void setcarOn(boolean _carOn) {
+		this.carOn = _carOn;
 	}
 
 	public void setfinished(boolean finished) {
@@ -351,7 +360,7 @@ public class Auto extends Thread // IMP# Car extends Vehicle implements Runnable
 
 	private boolean isRouteFineshed(String _edgeAtual, String _edgeFinal)
 	{
-		boolean taNoSUMO = MobilityCompany.estaNoSUMO(this.idAuto, this.sumo); //IMP# IllegalStateException
+		boolean taNoSUMO = MobilityCompany.estaNoSUMO(this.idAuto, this.sumo); //TODO IllegalStateException
 		if(!taNoSUMO && (_edgeFinal.equals(_edgeAtual)))
 		{
 			return true;

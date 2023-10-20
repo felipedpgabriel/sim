@@ -5,7 +5,7 @@ import org.json.JSONObject;
 import io.sim.DrivingData;
 
 /**Classe para tratar as comunicacoes de Cl
- * IMP# Falta acrescentar metodos para converter transacoes financeiras
+ * TODO Falta acrescentar metodos para converter transacoes financeiras
  */
 public class JSONConverter
 {
@@ -15,9 +15,9 @@ public class JSONConverter
      */
     public static RouteN stringToRouteN(String _string)
 	{
-		JSONObject jsonOut = new JSONObject(_string);
-		String jsRouteID = jsonOut.getString("RouteID");
-		String jsEdges = jsonOut.getString("Edges");
+		JSONObject jsonIn = new JSONObject(_string);
+		String jsRouteID = jsonIn.getString("RouteID");
+		String jsEdges = jsonIn.getString("Edges");
 		RouteN route = new RouteN(jsRouteID, jsEdges);
 		return route;
 	}
@@ -40,20 +40,21 @@ public class JSONConverter
      */
     public static DrivingData stringToDrivingData(String _string)
 	{
-		JSONObject jsonOut = new JSONObject(_string);
-		String jsCarState = jsonOut.getString("CarState");
-        long jsTimeStamp = jsonOut.getLong("TimeStamp");
-		String jsAutoID = jsonOut.getString("AutoID");
-        String jsRouteIDSUMO = jsonOut.getString("RouteIDSUMO");
-        double jsSpeed = jsonOut.getDouble("Speed");
-        double jsDistance = jsonOut.getDouble("Distance");
-        double jsFuelConsumption = jsonOut.getDouble("FuelConsumption");
-        int jsFuelType = jsonOut.getInt("FuelType");
-        double jsCo2Emission = jsonOut.getDouble("Co2Emission");
-        long jsLongitude = jsonOut.getLong("Longitude");
-        long jsLatitude = jsonOut.getLong("Latitude");
+		JSONObject jsonIn = new JSONObject(_string);
+		String jsCarState = jsonIn.getString("CarState");
+        String jsDriverLogin = jsonIn.getString("DriverLogin");
+        long jsTimeStamp = jsonIn.getLong("TimeStamp");
+		String jsAutoID = jsonIn.getString("AutoID");
+        String jsRouteIDSUMO = jsonIn.getString("RouteIDSUMO");
+        double jsSpeed = jsonIn.getDouble("Speed");
+        double jsDistance = jsonIn.getDouble("Distance");
+        double jsFuelConsumption = jsonIn.getDouble("FuelConsumption");
+        int jsFuelType = jsonIn.getInt("FuelType");
+        double jsCo2Emission = jsonIn.getDouble("Co2Emission");
+        double jsLongitude = jsonIn.getDouble("Longitude");
+        double jsLatitude = jsonIn.getDouble("Latitude");
 
-        DrivingData carRepport = new DrivingData(jsCarState, jsTimeStamp, jsAutoID, jsRouteIDSUMO, jsSpeed, jsDistance, jsFuelConsumption,
+        DrivingData carRepport = new DrivingData(jsCarState, jsDriverLogin,jsTimeStamp, jsAutoID, jsRouteIDSUMO, jsSpeed, jsDistance, jsFuelConsumption,
         jsFuelType, jsCo2Emission,jsLongitude, jsLatitude);
 
 		return carRepport;
@@ -67,6 +68,7 @@ public class JSONConverter
 	{
         JSONObject jsonOut = new JSONObject();
         jsonOut.put("CarState",_carRepport.getCarState());
+        jsonOut.put("DriverLogin",_carRepport.getDriverLogin());
         jsonOut.put("TimeStamp",_carRepport.getTimeStamp());
         jsonOut.put("AutoID",_carRepport.getAutoID());
         jsonOut.put("RouteIDSUMO",_carRepport.getRouteIDSUMO());
@@ -80,4 +82,53 @@ public class JSONConverter
 
         return jsonOut.toString();
 	}
+
+    public static String getJSONservice(String _jsonString)
+    {
+        JSONObject jsonIn = new JSONObject(_jsonString);
+		return jsonIn.getString("Service");
+    }
+
+    public static String setJSONservice(String _service)
+    {
+        JSONObject jsonOut = new JSONObject();
+        jsonOut.put("Service",_service);
+
+		return jsonOut.toString();
+    }
+
+    public static String setJSONboolean(boolean _bool)
+    {
+        JSONObject jsonOut = new JSONObject();
+        jsonOut.put("Bool",_bool);
+
+		return jsonOut.toString();
+    }
+
+    public static boolean getJSONboolean(String _bool)
+    {
+        JSONObject jsonIn = new JSONObject(_bool);
+        return jsonIn.getBoolean("Bool");
+    }
+
+    public static Transaction stringToTransaction(String _transaction)
+    {
+        JSONObject jsonIn = new JSONObject(_transaction);
+		String jsSenha = jsonIn.getString("Senha");
+		String jsOrigem = jsonIn.getString("Origem");
+        String jsDestino = jsonIn.getString("Destino");
+        double jsValor = jsonIn.getDouble("Valor");
+		Transaction transaction = new Transaction(jsSenha, jsOrigem, jsDestino, jsValor);
+		return transaction;
+    }
+
+    public static String transactionToString(Transaction _transaction)
+    {
+        JSONObject jsonOut = new JSONObject();
+        jsonOut.put("Senha",_transaction.getSenha());
+        jsonOut.put("Origem",_transaction.getOrigem());
+        jsonOut.put("Destino",_transaction.getDestino());
+        jsonOut.put("Valor",_transaction.getValor());
+        return jsonOut.toString();
+    }
 }

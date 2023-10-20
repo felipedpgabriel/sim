@@ -4,21 +4,27 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import io.sim.EnvSimulator;
+
 public class CompanyChannelCreator extends Thread
 {
+    private String companyHost;
+	private int bankPort;
     private ServerSocket serverSocket;
-    private int numDrivers;
+    private Account account;
 
-    public CompanyChannelCreator(ServerSocket _serverSocket, int _numDrivers)
+    public CompanyChannelCreator(String _companyHost, int _bankPort,ServerSocket _serverSocket, Account _account)
     {
         this.serverSocket = _serverSocket;
-        this.numDrivers = _numDrivers;
+        this.companyHost = _companyHost;
+        this.bankPort = _bankPort;
+        this.account = _account;
     }
 
     @Override
     public void run()
     {
-        for(int i=0; i<numDrivers;i++)
+        for(int i=0; i<EnvSimulator.NUM_DRIVERS;i++)
         {
             try
             {
@@ -26,7 +32,7 @@ public class CompanyChannelCreator extends Thread
                 Socket socket = serverSocket.accept();
                 System.out.println("Car conectado");
 
-                CompanyChannel channel = new CompanyChannel(socket);
+                CompanyChannel channel = new CompanyChannel(this.companyHost, this.bankPort, socket, this.account);
                 channel.start();
             }
             catch(IOException e)

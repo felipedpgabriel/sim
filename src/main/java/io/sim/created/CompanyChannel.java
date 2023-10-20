@@ -6,14 +6,23 @@ import java.io.IOException;
 import java.net.Socket;
 
 import io.sim.DrivingData;
+import io.sim.EnvSimulator;
 
 public class CompanyChannel extends Thread
 {
-    // private static Object oWatch = new Object();
-    private Socket socket;
+    private Socket socketServ;
+    private String companyHost;
+	private int bankPort;
+
+    // atributos da classe
+    private Account account;
     
-    public CompanyChannel(Socket _socket) {
-        this.socket = _socket;
+    public CompanyChannel(String _companyHost, int _bankPort, Socket _socketServ, Account _account)
+    {
+        this.companyHost = _companyHost;
+        this.bankPort = _bankPort;
+        this.socketServ = _socketServ;
+        this.account = _account;
     }
 
     public void run()
@@ -22,16 +31,30 @@ public class CompanyChannel extends Thread
         {
             // variaveis de entrada e saida do servidor
             // System.out.println("CC - entrou no try.");
-            DataInputStream entrada = new DataInputStream(socket.getInputStream());
-            // System.out.println("CC - passou da entrada.");
-            DataOutputStream saida = new DataOutputStream(socket.getOutputStream());
-            // System.out.println("CC - passou da saida.");
-            // JSONObject jsonOut = new JSONObject();
+            DataInputStream entradaServ = new DataInputStream(socketServ.getInputStream());
+            // System.out.println("CC - passou da entradaServ.");
+            DataOutputStream saidaServ = new DataOutputStream(socketServ.getOutputStream());
+            // System.out.println("CC - passou da saidaServ.");
+
+            Socket socketCli = new Socket(this.companyHost, this.bankPort);
+			// System.out.println("CC - passou do socketCli.");
+            DataInputStream entradaCli = new DataInputStream(socketCli.getInputStream());
+			// System.out.println("CC - passou da entradaCli.");
+            DataOutputStream saidaCli = new DataOutputStream(socketCli.getOutputStream());
+            // System.out.println("CC - passou da saidaCli.");
 
             String mensagem = "";
+            double previusDistance = 0;
             while(!mensagem.equals("encerrado")) // loop do sistema
             {
-                DrivingData ddIn = (DrivingData) JSONConverter.stringToDrivingData(entrada.readUTF());
+                DrivingData ddIn = (DrivingData) JSONConverter.stringToDrivingData(entradaServ.readUTF());
+                if(payableDistanceReached(previusDistance, ddIn.getDistance()))
+                {
+                    previusDistance = ddIn.getDistance();
+                    BotPayment bot = new BotPayment(entradaCli,saidaCli, account.getLogin(), account.getSenha(), ddIn.getDriverLogin(),
+                    EnvSimulator.RUN_PRICE);
+                    bot.start();
+                }
                 // verifica distancia para pagamento
                 mensagem = ddIn.getCarState(); // lê solicitacao do cliente
                 // System.out.println("CC ouviu " + mensagem);
@@ -41,19 +64,13 @@ public class CompanyChannel extends Thread
                     {
                         System.out.println("CC - Sem mais rotas para liberar.");
                         RouteN route = new RouteN("-1", "00000");
-                        saida.writeUTF(JSONConverter.routeNtoString(route));
+                        saidaServ.writeUTF(JSONConverter.routeNtoString(route));
                         break;
                     }
                     if(MobilityCompany.areRoutesAvailable())
                     {
                         RouteN resposta = MobilityCompany.liberarRota();
-                        saida.writeUTF(JSONConverter.routeNtoString(resposta));
-
-                        // synchronized (oWatch)
-                        // {
-                        //     RouteN resposta = MobilityCompany.liberarRota();
-                        //     saida.writeUTF(JSONConverter.routeNtoString(resposta));
-                        // }
+                        saidaServ.writeUTF(JSONConverter.routeNtoString(resposta));
                     }
                 }
                 else if(mensagem.equals("finalizado"))
@@ -73,17 +90,28 @@ public class CompanyChannel extends Thread
                 {
                     break;
                 }
+                // System.out.println(ddIn.); // TODO comentar se der certo
             }
 
-            System.out.println("Encerrando canal.");
-            entrada.close();
-            saida.close();
-            socket.close();
+            System.out.println("Encerrando canal CC.");
+            saidaCli.writeUTF(JSONConverter.setJSONservice("Encerrar"));
+            entradaServ.close();
+            saidaServ.close();
+            socketServ.close();
+            entradaCli.close();
+            saidaCli.close();
+            socketCli.close();
             // serverSocket.close();
         }
         catch (IOException e)
         {
             e.printStackTrace();
         }
+    }
+
+    private boolean payableDistanceReached(double _previusDistance, double _currentDistance)
+    {
+        System.out.println("Distancia: " + _currentDistance); // TODO comentar caso der certo
+        return (_currentDistance >= (_previusDistance + EnvSimulator.PAYABLE_DISTANCE));
     }
 }

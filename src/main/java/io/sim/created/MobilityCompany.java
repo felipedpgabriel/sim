@@ -10,35 +10,32 @@ import it.polito.appeal.traci.SumoTraciConnection;
 
 public class MobilityCompany extends Thread
 {
-    // Atributos de servidor
-    private ServerSocket serverSocket;
     // Atributos de cliente
-    private String companyHost;
-	private int bankPort;
+    private static String companyHost;
+	private static int bankPort;
+    // Atributos de servidor
+    private static ServerSocket serverSocket;
     // private Socket socket;
-    // private static Account account;
+    private static Account account;
     // Atributos de sincronizacao
     private static Thread oWatch;
     // Atributos da classe
     private static ArrayList<RouteN> routesToExe;
     private static ArrayList<RouteN> routesInExe;
     private static ArrayList<RouteN> routesExecuted;
-    // private static final double RUN_PRICE = 3.25;
-    private static int numDrivers;
     private static boolean routesAvailable = true;
     private long acquisitionRate; 
 
-    public MobilityCompany(String _companyHost, int _bankPort, ServerSocket _serverSocket, ArrayList<RouteN> _routes, int _numDrivers, SumoTraciConnection _sumo, long _acquisitionRate)
+    public MobilityCompany(String _companyHost, int _bankPort, ServerSocket _serverSocket, ArrayList<RouteN> _routes, SumoTraciConnection _sumo, long _acquisitionRate)
     {
         oWatch = new Thread();
         routesToExe = new ArrayList<RouteN>();
         routesInExe = new ArrayList<RouteN>();
         routesExecuted = new ArrayList<RouteN>();
-        // BotPayment payment = new BotPayment(RUN_PRICE);
-        this.companyHost = _companyHost;
-        this.bankPort = _bankPort;
-        this.serverSocket = _serverSocket;
-        numDrivers = _numDrivers;
+        account = new Account(10000.0, "MobilityCompany", "mc123");
+        companyHost = _companyHost;
+        bankPort = _bankPort;
+        serverSocket = _serverSocket;
         routesToExe = _routes;
         this.acquisitionRate = _acquisitionRate;
     }
@@ -49,11 +46,13 @@ public class MobilityCompany extends Thread
         try
         {
             System.out.println("MobilityCompany iniciada...");
+            
+            AlphaBank.setConectionsInit(true);
 
-            CompanyChannelCreator ccc = new CompanyChannelCreator(serverSocket, numDrivers);
+            CompanyChannelCreator ccc = new CompanyChannelCreator(companyHost, bankPort, serverSocket, account);
             ccc.start();
 
-            while (routesAvailable) // || !routesInExe.isEmpty() IMP trocar para pagamentos
+            while (routesAvailable || !routesInExe.isEmpty()) // || !routesInExe.isEmpty() IMP trocar para pagamentos
             {
                 sleep(this.acquisitionRate);
                 if(routesToExe.isEmpty()) // && routesInExe.isEmpty()
@@ -69,6 +68,7 @@ public class MobilityCompany extends Thread
         }
 
         System.out.println("MobilityCompany encerrada...");
+        AlphaBank.encerrarConta(account.getLogin());
     }
     
     /**Libera uma rota para o cliente que a solicitou. Para isso, remove de routesToExe e adiciona em routesInExe
@@ -117,10 +117,9 @@ public class MobilityCompany extends Thread
         synchronized(oWatch){
             try {
                 SumoStringList lista;
-                lista = (SumoStringList) _sumo.do_job_get(Vehicle.getIDList()); // IMP# IllegalStateException
+                lista = (SumoStringList) _sumo.do_job_get(Vehicle.getIDList()); // TODO IllegalStateException
                 return lista.contains(_idCar);
             } catch (Exception e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
                 return false;
             }

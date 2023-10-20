@@ -15,7 +15,7 @@ public class Driver extends Thread
 	private int servPort;
     // atributos da classe
     private String driverID;
-    // private Account account;
+    private Account account;
     private Auto car; // private Car car;
     // private static final double FUEL_PRICE = 5.87;
     private long acquisitionRate;
@@ -24,7 +24,9 @@ public class Driver extends Thread
     private ArrayList<RouteN> routesInExe = new ArrayList<RouteN>();
     private boolean initRoute = false;
 
-    public Driver(String driverHost, int servPort, String driverID, Auto car, long acquisitionRate) {
+    public Driver(String driverHost, int servPort, String driverID, Auto car, long acquisitionRate)
+    {
+        account = new Account(0, driverID, (driverID + 123));
         this.driverHost = driverHost;
         this.servPort = servPort;
         this.driverID = driverID;
@@ -36,11 +38,11 @@ public class Driver extends Thread
     public void run()
     {
         try {
-            // System.out.println(this.idAuto + " no try.");
+            // System.out.println(this.idDriver + " no try.");
             Socket socket = new Socket(this.driverHost, this.servPort);
-			// System.out.println(this.idAuto + " passou do socket.");
+			// System.out.println(this.idDriver + " passou do socket.");
             DataInputStream entrada = new DataInputStream(socket.getInputStream());
-			// System.out.println(this.idAuto + " passou da entrada.");
+			// System.out.println(this.idDriver + " passou da entrada.");
             DataOutputStream saida = new DataOutputStream(socket.getOutputStream());
             
             System.out.println("Iniciando " + this.driverID);

@@ -66,6 +66,7 @@ public class CompanyChannel extends Thread
                 // System.out.println("CC ouviu " + mensagem);
                 if (mensagem.equals("aguardando"))
                 {
+                    previusDistance = 0;
                     if(!MobilityCompany.areRoutesAvailable()) // routesToExe.isEmpty()
                     {
                         saidaCli.writeUTF(JSONConverter.setJSONservice("Encerrar"));

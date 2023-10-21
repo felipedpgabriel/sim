@@ -38,7 +38,7 @@ public class Auto extends Thread // TODO Car extends Vehicle implements Runnable
 	private DrivingData carRepport;
 	private TransportService ts;
 	private RouteN route;
-	private double distance;
+	private double distanceCovered;
 
 	private double speed;
 	private boolean finished;
@@ -102,8 +102,9 @@ public class Auto extends Thread // TODO Car extends Vehicle implements Runnable
 				// atualiza informacoes iniciais
 				String edgeAtual = (String) this.sumo.do_job_get(Vehicle.getRoadID(this.idAuto));
 				double[] coordGeo = this.convertGeo();
-				double initialLat = coordGeo[0];
-				double initialLon = coordGeo[1];
+				double previousLat = coordGeo[0];
+				double previousLon = coordGeo[1];
+				this.distanceCovered = 0;
 
 				while (this.carOn) // && MobilityCompany.estaNoSUMO(this.idAuto, sumo)
 				{
@@ -119,7 +120,11 @@ public class Auto extends Thread // TODO Car extends Vehicle implements Runnable
 					if(!isRouteFineshed(edgeAtual, edgeFinal))
 					{
 						// System.out.println(this.idAuto + " -> edge atual: " + edgeAtual);
-						this.carRepport = this.atualizaSensores(initialLat, initialLon); // TODO tentar trocar para TransportService
+						this.carRepport = this.atualizaSensores(previousLat, previousLon); // TODO tentar trocar para TransportService
+						previousLat = carRepport.getLatitude();
+						previousLon = carRepport.getLongitude();
+						// System.out.println("Distancia percorrida: " + this.distanceCovered + "\n Distancia repport: "
+						// + this.carRepport.getDistance());
 						saida.writeUTF(JSONConverter.drivingDataToString(this.carRepport));
 						if(this.carRepport.getCarState().equals("finalizado"))
 						{
@@ -164,12 +169,12 @@ public class Auto extends Thread // TODO Car extends Vehicle implements Runnable
 				double[] coordGeo = this.convertGeo();
 				double currentLat = coordGeo[0];
 				double currentLon = coordGeo[1];
-				this.updateDistance(currentLat,currentLon,_initiLat, _initLon);
 				
 				// Criacao dos dados de conducao do veiculo
 				repport = updateDrivingData("rodando", this.driverLogin, System.nanoTime(), this.idAuto,
 				(String) this.sumo.do_job_get(Vehicle.getRouteID(this.idAuto)), (double) this.sumo.do_job_get(Vehicle.getSpeed(this.idAuto)),
-				this.distance, (double) this.sumo.do_job_get(Vehicle.getFuelConsumption(this.idAuto)), this.fuelType,
+				this.updateDistance(currentLat,currentLon,_initiLat, _initLon),
+				(double) this.sumo.do_job_get(Vehicle.getFuelConsumption(this.idAuto)), this.fuelType,
 				(double) this.sumo.do_job_get(Vehicle.getCO2Emission(this.idAuto)), currentLon, currentLat);
 						
 				// Vehicle's fuel consumption in ml/s during this time step,
@@ -218,7 +223,7 @@ public class Auto extends Thread // TODO Car extends Vehicle implements Runnable
 		return coordGeo;
 	}
 
-	private double calcDistance(double lat1, double lon1, double lat2, double lon2) {
+	private double calcDesloc(double lat1, double lon1, double lat2, double lon2) {
 		double raioTerra = 6371000;
 	
 		// Diferenças das latitudes e longitudes
@@ -234,14 +239,16 @@ public class Auto extends Thread // TODO Car extends Vehicle implements Runnable
 		return distancia;
 	}
 
-	private void updateDistance(double _initiLat, double _initLon,double _currentLat, double _currentLon) throws Exception {
+	private double updateDistance(double _previousLat, double _previousLon,double _currentLat, double _currentLon) throws Exception {
 
-		double distanceCovered = calcDistance(_initiLat, _initLon, _currentLat, _currentLon);
+		double deslocamento = calcDesloc(_previousLat, _previousLon, _currentLat, _currentLon);
+		this.distanceCovered += deslocamento;
 
-		if (distanceCovered > (this.distance + EnvSimulator.PAYABLE_DISTANCE)) {
-			this.distance += (EnvSimulator.PAYABLE_DISTANCE);
+		if (this.distanceCovered > (this.carRepport.getDistance() + EnvSimulator.PAYABLE_DISTANCE)) {
+			return this.carRepport.getDistance() + (EnvSimulator.PAYABLE_DISTANCE);
 		}
-	}
+		return this.carRepport.getDistance();
+	} // TODO retornar double e fazer this.distance ser a distancia acumulada
 
 	private DrivingData updateDrivingData(String _carState, String _driverLogin,long _timeStamp, String _autoID, String _routeIDSUMO,
 	double _speed, double _distance, double _fuelConsumption, int _fuelType, double _co2Emission, double _longitude, double _latitude)
@@ -268,8 +275,8 @@ public class Auto extends Thread // TODO Car extends Vehicle implements Runnable
 		return driverLogin;
 	}
 
-	public double getDistance() {
-		return distance;
+	public double getDistanceCovered() {
+		return distanceCovered;
 	}
 
 	public RouteN getRoute() {

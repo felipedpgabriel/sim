@@ -27,7 +27,7 @@ public class Driver extends Thread
 
     public Driver(String driverHost, int servPort, String driverID, Auto car, long acquisitionRate)
     {
-        account = new Account(0, driverID, (driverID + 123));
+        account = new Account(0, driverID, (driverID + "123"));
         this.driverHost = driverHost;
         this.servPort = servPort;
         this.driverID = driverID;
@@ -66,11 +66,13 @@ public class Driver extends Thread
                     initRoute = true; 
                 }
             }
-            saida.writeUTF(JSONConverter.setJSONservice("Encerrar"));
+            BankService bs = BankService.createService("Encerrar");
+            saida.writeUTF(JSONConverter.bankServiceToString(bs));
             System.out.println("Encerrando " + this.driverID);
             entrada.close();
 			saida.close();
 			socket.close();
+            System.out.println("Saldo "+ this.driverID+": "+this.account.getSaldo());
             AlphaBank.encerrarConta(this.account.getLogin());
         } catch (InterruptedException | IOException e) {
             // TODO Auto-generated catch block

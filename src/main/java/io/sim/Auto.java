@@ -253,22 +253,22 @@ public class Auto extends Thread // TODO Car extends Vehicle implements Runnable
 	private DrivingData updateDrivingData(String _carState, String _driverLogin,long _timeStamp, String _autoID, String _routeIDSUMO,
 	double _speed, double _distance, double _fuelConsumption, int _fuelType, double _co2Emission, double _longitude, double _latitude)
 	{
-		DrivingData _repport = new DrivingData(_carState, _driverLogin, _timeStamp, _autoID, _routeIDSUMO, _speed, _distance, _fuelConsumption,
+		DrivingData repport = new DrivingData(_carState, _driverLogin, _timeStamp, _autoID, _routeIDSUMO, _speed, _distance, _fuelConsumption,
 		_fuelType, _co2Emission,_longitude, _latitude);
-		return _repport;
+		return repport;
 	}
 
 	private DrivingData updateDrivingData(String _carState, String _routeIDSUMO)
 	{
-		DrivingData _repport = updateDrivingData(_carState, this.driverLogin, 0 , this.idAuto, _routeIDSUMO, 0, 0,
+		DrivingData repport = updateDrivingData(_carState, this.driverLogin, 0 , this.idAuto, _routeIDSUMO, 0, 0,
 		0, this.fuelType, 0,0,0);
-		return _repport;	
+		return repport;	
 	}
 
 	private DrivingData updateDrivingData(String _carState)
 	{
-		DrivingData _repport = updateDrivingData(_carState, this.route.getRouteID());
-		return _repport;	
+		DrivingData repport = updateDrivingData(_carState, this.route.getRouteID());
+		return repport;	
 	}
 
 	public String getDriverLogin() {

@@ -3,24 +3,25 @@ package io.sim.created;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.Socket;
+
+import io.sim.EnvSimulator;
 
 public class BotPayment extends Thread // TODO problema de Socket
 {
-    DataOutputStream saida;
-    DataInputStream entrada;
+    Socket socket;
     String loginOrigem;
     String senhaOrigem;
-    String loginDeestino;
+    String loginDestino;
     double valor;
 
-    public BotPayment(DataInputStream _entrada, DataOutputStream saida, String loginOrigem, String senhaOrigem, String loginDeestino,
+    public BotPayment(Socket _socket, String loginOrigem, String senhaOrigem, String loginDestino,
     double valor)
     {
-        this.saida = saida;
-        this.entrada = _entrada;
+        this.socket = _socket;
         this.loginOrigem = loginOrigem;
         this.senhaOrigem = senhaOrigem;
-        this.loginDeestino = loginDeestino;
+        this.loginDestino = loginDestino;
         this.valor = valor;
     }
 
@@ -28,24 +29,22 @@ public class BotPayment extends Thread // TODO problema de Socket
     public void run() // TODO B.O. simplificar logica
     {
         try {
+            DataInputStream entrada = new DataInputStream(socket.getInputStream());
+			// System.out.println("CC - passou da entradaCli.");
+            DataOutputStream saida = new DataOutputStream(socket.getOutputStream());
 
-            System.out.println("Criando BotPayment para " + loginDeestino);
-            saida.writeUTF(JSONConverter.setJSONservice("Pagamento"));
-            System.out.println("Aguardando confirmacao para " + loginDeestino);
-            boolean liberado = JSONConverter.getJSONboolean(entrada.readUTF());
-            if(liberado) // sinalizacao de pedido recebido
+            System.out.println("Criando BotPayment para " + loginDestino);
+            BankService transaction = new BankService("Pagamento",senhaOrigem, loginOrigem, valor, loginDestino);
+            do
             {
-                System.out.println("Liberado para " + loginDeestino);
-                Transaction transaction = new Transaction(senhaOrigem, loginOrigem, loginDeestino, valor);
-                saida.writeUTF(JSONConverter.transactionToString(transaction));
-                // boolean transacaoEfetuada = JSONConverter.getJSONboolean(entrada.readUTF());
-                // if(transacaoEfetuada)
-                // {
-                //     System.out.println("");
-                // }
-            }
+                saida.writeUTF(JSONConverter.bankServiceToString(transaction));
+                sleep(EnvSimulator.ACQUISITION_RATE);
+            }while(!JSONConverter.getJSONboolean(entrada.readUTF()));
             System.out.println("Encerrando BotPayment");
         } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }

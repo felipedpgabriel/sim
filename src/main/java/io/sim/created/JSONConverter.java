@@ -83,19 +83,19 @@ public class JSONConverter
         return jsonOut.toString();
 	}
 
-    public static String getJSONservice(String _jsonString)
-    {
-        JSONObject jsonIn = new JSONObject(_jsonString);
-		return jsonIn.getString("Service");
-    }
+    // public static String getJSONservice(String _jsonString)
+    // {
+    //     JSONObject jsonIn = new JSONObject(_jsonString);
+	// 	return jsonIn.getString("Service");
+    // }
 
-    public static String setJSONservice(String _service)
-    {
-        JSONObject jsonOut = new JSONObject();
-        jsonOut.put("Service",_service);
+    // public static String setJSONservice(String _service)
+    // {
+    //     JSONObject jsonOut = new JSONObject();
+    //     jsonOut.put("Service",_service);
 
-		return jsonOut.toString();
-    }
+	// 	return jsonOut.toString();
+    // }
 
     public static String setJSONboolean(boolean _bool)
     {
@@ -111,24 +111,26 @@ public class JSONConverter
         return jsonIn.getBoolean("Bool");
     }
 
-    public static Transaction stringToTransaction(String _transaction)
+    public static BankService stringToBankService(String _transaction)
     {
         JSONObject jsonIn = new JSONObject(_transaction);
+        String jsService = jsonIn.getString("Service");
 		String jsSenha = jsonIn.getString("Senha");
 		String jsOrigem = jsonIn.getString("Origem");
-        String jsDestino = jsonIn.getString("Destino");
         double jsValor = jsonIn.getDouble("Valor");
-		Transaction transaction = new Transaction(jsSenha, jsOrigem, jsDestino, jsValor);
+        String jsDestino = jsonIn.getString("Destino");
+		BankService transaction = new BankService(jsService, jsSenha, jsOrigem, jsValor, jsDestino);
 		return transaction;
     }
 
-    public static String transactionToString(Transaction _transaction)
+    public static String bankServiceToString(BankService _transaction)
     {
         JSONObject jsonOut = new JSONObject();
+        jsonOut.put("Service",_transaction.getService());
         jsonOut.put("Senha",_transaction.getSenha());
         jsonOut.put("Origem",_transaction.getOrigem());
-        jsonOut.put("Destino",_transaction.getDestino());
         jsonOut.put("Valor",_transaction.getValor());
+        jsonOut.put("Destino",_transaction.getDestino());
         return jsonOut.toString();
     }
 }

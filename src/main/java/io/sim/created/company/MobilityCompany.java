@@ -74,6 +74,7 @@ public class MobilityCompany extends Thread
         }
 
         System.out.println("MobilityCompany encerrada...");
+        System.out.println("Saldo Company: " + account.getSaldo());
         AlphaBank.encerrarConta(account.getLogin());
     }
     
@@ -120,7 +121,8 @@ public class MobilityCompany extends Thread
 
     public static boolean estaNoSUMO(String _idCar, SumoTraciConnection _sumo)
 	{
-        synchronized(oWatch){
+        synchronized(oWatch)
+        {
             try {
                 SumoStringList lista;
                 lista = (SumoStringList) _sumo.do_job_get(Vehicle.getIDList()); // TODO IllegalStateException
@@ -146,5 +148,4 @@ public class MobilityCompany extends Thread
     {
         return routesExecuted.size();
     }
-
 }

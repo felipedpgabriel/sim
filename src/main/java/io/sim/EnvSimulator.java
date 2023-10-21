@@ -25,7 +25,7 @@ public class EnvSimulator extends Thread
 	private static final int PORT_BANK = 22222;
 	// Quantidades 
 	private static final String ROTAS_XML = "data/dados4.xml"; // "data/dados.xml"
-	public static final int NUM_DRIVERS = 1; // ideal 100
+	public static final int NUM_DRIVERS = 5; // ideal 100
 	// Atributos padrao - Carros
 	private static final int FUEL_TYPE = 2;
 	private static final int FUEL_PREFERENTIAL = 2;
@@ -58,7 +58,7 @@ public class EnvSimulator extends Thread
 			TimeStep tStep = new TimeStep(this.sumo);
 			tStep.start();
 
-			String lHost = "localhost";
+			String lHost = "127.0.0.1";
 			ArrayList<RouteN> routes = RouteN.extractRoutes(ROTAS_XML);
 			System.out.println("ES - " + routes.size() + " rotas disponiveis.");
 

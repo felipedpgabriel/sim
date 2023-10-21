@@ -6,7 +6,8 @@ import java.io.IOException;
 import java.net.Socket;
 
 import io.sim.created.JSONConverter;
-import io.sim.created.Transaction;
+import io.sim.EnvSimulator;
+import io.sim.created.BankService;
 
 public class BankChannel extends Thread
 {
@@ -30,9 +31,9 @@ public class BankChannel extends Thread
             String service = "";
             while(!service.equals("Encerrar"))
             {
-                System.out.println("BC - Aguardando mensagem.");
-                service = (String) JSONConverter.getJSONservice(entrada.readUTF());
-                System.out.println("BC ouviu - " + service);
+                BankService bankService = (BankService) JSONConverter.stringToBankService(entrada.readUTF());
+                service = bankService.getService();
+                System.out.println("BC recebeu - " + service);
                 if(service.equals("Encerrar"))
                 {
                     System.out.println("BC - Pedido de encerramento.");
@@ -41,13 +42,13 @@ public class BankChannel extends Thread
                 else if(service.equals("Pagamento"))
                 {
                     saida.writeUTF(JSONConverter.setJSONboolean(true));
-                    System.out.println("BC - Iniciando pagamento.");
-                    Transaction transaction = (Transaction) JSONConverter.stringToTransaction(entrada.readUTF());
-                    System.out.println("BC - Dados recebidos.");
-                    AlphaBank.transfer(transaction);
-                    System.out.println("BC - Transacao realizada");
-                    transaction.setTimeStamp(System.nanoTime());
-                    AlphaBank.addTransaction(transaction);
+                    // saida.writeUTF(JSONConverter.setJSONboolean(true));
+                    System.out.println("BC - Realizando pagamento.");
+                    // BankService bankService = (BankService) JSONConverter.stringToBankService(entrada.readUTF());
+                    // System.out.println("BC - Dados recebidos.");
+                    AlphaBank.transfer(bankService);
+                    // System.out.println("BC - Transacao realizada");
+                    AlphaBank.addBankService(bankService);
                 }
             }
 

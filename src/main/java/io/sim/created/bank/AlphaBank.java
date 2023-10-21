@@ -1,10 +1,13 @@
 package io.sim.created.bank;
 
 import java.net.ServerSocket;
+import java.net.Socket;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 
 import io.sim.EnvSimulator;
-import io.sim.created.Transaction;
+import io.sim.created.BankService;
+import io.sim.created.BotPayment;
 import io.sim.created.Account;
 
 public class AlphaBank extends Thread
@@ -16,7 +19,7 @@ public class AlphaBank extends Thread
     private static Thread oWatch;
     // Atributos da conta
     private static ArrayList<Account> accounts;
-    private static ArrayList<Transaction> transactions;
+    private static ArrayList<BankService> bankServices;
     private static boolean conectionsInit;
 
     public AlphaBank(ServerSocket serverSocket, int numAccounts)
@@ -25,7 +28,7 @@ public class AlphaBank extends Thread
         this.numAccounts = numAccounts;
         oWatch = new Thread();
         accounts = new ArrayList<Account>();
-        transactions = new ArrayList<Transaction>();
+        bankServices = new ArrayList<BankService>();
         conectionsInit = false;
     }
 
@@ -36,8 +39,8 @@ public class AlphaBank extends Thread
         {
             System.out.println("AlphaBank iniciado...");
 
-            BankChannelCreator bc = new BankChannelCreator(serverSocket, numAccounts);
-            bc.start();
+            BankChannelCreator bcc = new BankChannelCreator(serverSocket, numAccounts);
+            bcc.start();
 
             while(!accounts.isEmpty() || !conectionsInit)
             {
@@ -63,40 +66,47 @@ public class AlphaBank extends Thread
 
     private static Account searchAccount(String _login)
     {
-        for(int i=0;i<accounts.size();i++)
+        synchronized(oWatch)
         {
-            Account account = accounts.get(i);
-            if(account.getLogin().equals(_login))
+            for(int i=0;i<accounts.size();i++)
             {
-                return account;
+                Account account = accounts.get(i);
+                if(account.getLogin().equals(_login))
+                {
+                    return account;
+                }
             }
         }
         return null;
     }
 
-    public static void addTransaction(Transaction _transaction)
+    public static void addBankService(BankService _bankService)
     {
         synchronized(oWatch)
         {
-            transactions.add(_transaction);
+            bankServices.add(_bankService);
         }
     }
 
-    public static void transfer(Transaction _transaction)
+    public static void transfer(BankService _bankService)
     {
-        Account origem = searchAccount(_transaction.getOrigem());
-        if(origem.getSenha().equals(_transaction.getSenha()))
+        synchronized (oWatch)
         {
-            Account destino = searchAccount(_transaction.getDestino());
-            origem.pay(_transaction.getValor());
-            destino.recieve(_transaction.getValor());
-            _transaction.setTimeStamp(System.nanoTime());
-            System.out.println("R$ " + _transaction.getValor() + " de " + origem.getLogin() + " para " + destino.getLogin());
-            System.out.println(origem.getLogin() + ": R$" + origem.getSaldo() + "\n" + destino.getLogin() + ": R$" + destino.getSaldo());
-        }
-        else
-        {
-            System.out.println("Senha de acesso incorreta!");
+            Account origem = searchAccount(_bankService.getOrigem());
+            if(origem.getSenha().equals(_bankService.getSenha()))
+            {
+                Account destino = searchAccount(_bankService.getDestino());
+                origem.pay(_bankService.getValor());
+                destino.recieve(_bankService.getValor());
+                Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+                _bankService.setTimeStamp(timestamp);
+                System.out.println("R$ " + _bankService.getValor() + " de " + origem.getLogin() + " para " + destino.getLogin());
+                System.out.println(origem.getLogin() + ": R$" + origem.getSaldo() + "\n" + destino.getLogin() + ": R$" + destino.getSaldo());
+            }
+            else
+            {
+                System.out.println("Senha de acesso incorreta!");
+            }
         }
     }
 
@@ -112,23 +122,36 @@ public class AlphaBank extends Thread
 
     public static double consultarSaldo(String _login, String _senha)
     {
-        Account account = searchAccount(_login);
-        if(account.getSenha().equals(_senha))
+        synchronized(oWatch)
         {
-            double saldo = account.getSaldo();
-            System.out.println("Saldo de " + _login + ": R$" + saldo);
-            return saldo;
-        }
-        else
-        {
-            System.out.println("Senha de acesso incorreta!");
-            return 0.0;
+            Account account = searchAccount(_login);
+            if(account.getSenha().equals(_senha))
+            {
+                double saldo = account.getSaldo();
+                System.out.println("Saldo de " + _login + ": R$" + saldo);
+                return saldo;
+            }
+            else
+            {
+                System.out.println("Senha de acesso incorreta!");
+                return 0.0;
+            }
         }
     }
 
     public static void setConectionsInit(boolean _conectionsInit)
     {
         AlphaBank.conectionsInit = _conectionsInit;
+    }
+
+    public static void payment(Socket socket, String _loginOrigem, String _senhaOrigem, String _loginDestino,
+    double _valor)
+    {
+        synchronized(oWatch)
+        {
+            BotPayment bot = new BotPayment(socket, _loginOrigem, _senhaOrigem, _loginDestino, _valor);
+            bot.start();
+        }
     }
 
 }

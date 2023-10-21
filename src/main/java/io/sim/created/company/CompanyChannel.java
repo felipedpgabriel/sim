@@ -8,9 +8,11 @@ import java.net.Socket;
 import io.sim.DrivingData;
 import io.sim.EnvSimulator;
 import io.sim.created.Account;
+import io.sim.created.BankService;
 import io.sim.created.BotPayment;
 import io.sim.created.JSONConverter;
 import io.sim.created.RouteN;
+import io.sim.created.bank.AlphaBank;
 
 public class CompanyChannel extends Thread
 {
@@ -58,9 +60,8 @@ public class CompanyChannel extends Thread
                     // TODO problema de Socket no BotPayment
                     System.out.println("Chamando bot para " + ddIn.getAutoID());
                     previusDistance = ddIn.getDistance();
-                    BotPayment bot = new BotPayment(entradaCli,saidaCli, account.getLogin(), account.getSenha(), ddIn.getDriverLogin(),
+                    AlphaBank.payment(socketCli, account.getLogin(), account.getSenha(), ddIn.getDriverLogin(),
                     EnvSimulator.RUN_PRICE);
-                    bot.start();
                 }
                 mensagem = ddIn.getCarState(); // lê solicitacao do cliente
                 // System.out.println("CC ouviu " + mensagem);
@@ -69,7 +70,8 @@ public class CompanyChannel extends Thread
                     previusDistance = 0;
                     if(!MobilityCompany.areRoutesAvailable()) // routesToExe.isEmpty()
                     {
-                        saidaCli.writeUTF(JSONConverter.setJSONservice("Encerrar"));
+                        BankService bs = BankService.createService("Encerrar");
+                        saidaCli.writeUTF(JSONConverter.bankServiceToString(bs));
                         System.out.println("CC - Sem mais rotas para liberar.");
                         RouteN route = new RouteN("-1", "00000");
                         saidaServ.writeUTF(JSONConverter.routeNtoString(route));

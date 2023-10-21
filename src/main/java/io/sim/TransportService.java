@@ -31,9 +31,9 @@ public class TransportService extends Thread {
 	{
 		System.out.println("Iniciando TransportService - " + this.car.getIdAuto());
 		this.initializeRoutes();
-		System.out.println(this.car.getIdAuto() + " - TS - Rota: " + edge + " adcionada!");
-		String edgeFinal = edge.get(edge.size()-1);
-		System.out.println(this.car.getIdAuto() + " - TS - Edge final: "+edgeFinal);
+		// System.out.println(this.car.getIdAuto() + " - TS - Rota: " + edge + " adcionada!");
+		// String edgeFinal = edge.get(edge.size()-1);
+		// System.out.println(this.car.getIdAuto() + " - TS - Edge final: "+edgeFinal);
 		System.out.println(this.car.getIdAuto() + " - TS - on");
 		try {
 			sleep(this.car.getAcquisitionRate());

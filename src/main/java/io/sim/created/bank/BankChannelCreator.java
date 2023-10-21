@@ -9,10 +9,10 @@ public class BankChannelCreator extends Thread
     private ServerSocket serverSocket;
     private int numAccounts;
 
-    public BankChannelCreator(ServerSocket serverSocket, int numAccounts)
+    public BankChannelCreator(ServerSocket _serverSocket, int _numAccounts)
     {
-        this.serverSocket = serverSocket;
-        this.numAccounts = numAccounts;
+        this.serverSocket = _serverSocket;
+        this.numAccounts = _numAccounts;
     }
 
     @Override
@@ -22,7 +22,7 @@ public class BankChannelCreator extends Thread
         {
             try
             {
-                System.out.println("BC - Aguardando conexao" + (i+1));
+                System.out.println("BC - Aguardando conexao " + (i+1));
                 Socket socket = serverSocket.accept();
                 System.out.println("Account conectada");
 

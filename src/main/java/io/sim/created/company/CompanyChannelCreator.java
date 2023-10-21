@@ -29,7 +29,7 @@ public class CompanyChannelCreator extends Thread
         {
             try
             {
-                System.out.println("CC - Aguardando conexao" + (i+1));
+                System.out.println("CC - Aguardando conexao " + (i+1));
                 Socket socket = serverSocket.accept();
                 System.out.println("Car conectado");
 

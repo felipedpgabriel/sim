@@ -9,7 +9,6 @@ import io.sim.DrivingData;
 import io.sim.EnvSimulator;
 import io.sim.created.Account;
 import io.sim.created.BankService;
-import io.sim.created.BotPayment;
 import io.sim.created.JSONConverter;
 import io.sim.created.RouteN;
 import io.sim.created.bank.AlphaBank;
@@ -35,13 +34,8 @@ public class CompanyChannel extends Thread
     {
         try
         {
-            // variaveis de entrada e saida do servidor
-            // System.out.println("CC - entrou no try.");
             DataInputStream entradaServ = new DataInputStream(socketServ.getInputStream());
-            // System.out.println("CC - passou da entradaServ.");
             DataOutputStream saidaServ = new DataOutputStream(socketServ.getOutputStream());
-            // System.out.println("CC - passou da saidaServ.");
-
             Socket socketCli = new Socket(this.companyHost, this.bankPort);
 			// System.out.println("CC - passou do socketCli.");
             DataInputStream entradaCli = new DataInputStream(socketCli.getInputStream());

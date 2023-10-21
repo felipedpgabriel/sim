@@ -10,3 +10,4 @@ Usa como base o repositório [21lab-technology/sim](https://github.com/21lab-tec
 * Buscar sugestões de mudança com TODO
 * Arrumado, falta testar com mais carros. (lembrar de retirar alguns sysout)
 * Arrumar TimeStamp (usar objeto).
+* Parei na lógica da Company

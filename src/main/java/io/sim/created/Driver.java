@@ -73,7 +73,7 @@ public class Driver extends Thread
 			saida.close();
 			socket.close();
             System.out.println("Saldo "+ this.driverID+": "+this.account.getSaldo());
-            AlphaBank.encerrarConta(this.account.getLogin());
+            // AlphaBank.encerrarConta(this.account.getLogin());
         } catch (InterruptedException | IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -82,5 +82,9 @@ public class Driver extends Thread
 
     public String getDriverID() {
         return driverID;
+    }
+
+    public Account getAccount() {
+        return account;
     }
 }

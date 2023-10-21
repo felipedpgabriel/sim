@@ -19,7 +19,7 @@ public class MobilityCompany extends Thread
     // Atributos de servidor
     private static ServerSocket serverSocket;
     // private Socket socket;
-    private static Account account;
+    private Account account;
     // Atributos de sincronizacao
     private static Thread oWatch;
     // Atributos da classe
@@ -50,7 +50,7 @@ public class MobilityCompany extends Thread
         {
             System.out.println("MobilityCompany iniciada...");
             
-            AlphaBank.setConectionsInit(true);
+            // AlphaBank.setConectionsInit(true);
 
             CompanyChannelCreator ccc = new CompanyChannelCreator(companyHost, bankPort, serverSocket, account);
             ccc.start();
@@ -75,7 +75,7 @@ public class MobilityCompany extends Thread
 
         System.out.println("MobilityCompany encerrada...");
         System.out.println("Saldo Company: " + account.getSaldo());
-        AlphaBank.encerrarConta(account.getLogin());
+        // AlphaBank.encerrarConta(account.getLogin());
     }
     
     /**Libera uma rota para o cliente que a solicitou. Para isso, remove de routesToExe e adiciona em routesInExe
@@ -148,4 +148,9 @@ public class MobilityCompany extends Thread
     {
         return routesExecuted.size();
     }
+
+    public Account getAccount() {
+        return this.account;
+    }
+
 }

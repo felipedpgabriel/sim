@@ -17,7 +17,8 @@ import it.polito.appeal.traci.SumoTraciConnection;
  */
 public class EnvSimulator extends Thread
 {
-    private SumoTraciConnection sumo; // TODO fazer sumo ser static
+    private SumoTraciConnection sumo; 
+	private AlphaBank bank;
 	public static final int ACQUISITION_RATE = 500;
 	// Servidores
 	private static final int PORT_SUMO = 12345;
@@ -53,23 +54,24 @@ public class EnvSimulator extends Thread
 		{
 			// Abrindo SUMO
 			sumo.runServer(PORT_SUMO);
+			Thread.sleep(5000);
 			System.out.println("SUMO conectado.");
-			Thread.sleep(4000);
-			TimeStep tStep = new TimeStep(this.sumo);
-			tStep.start();
 
-			String lHost = "127.0.0.1";
 			ArrayList<RouteN> routes = RouteN.extractRoutes(ROTAS_XML);
 			System.out.println("ES - " + routes.size() + " rotas disponiveis.");
+			String lHost = "127.0.0.1";
 
-			// Iniciando Servidores
-			ServerSocket bankServer = new ServerSocket(PORT_BANK);
-			AlphaBank bank = new AlphaBank(bankServer, NUM_DRIVERS + 1); // TODO + 2 quando fizer a FuelStation
+			bank = new AlphaBank(PORT_BANK, NUM_DRIVERS + 1); // TODO + 2 quando fizer a FuelStation
 			bank.start();
 
 			ServerSocket companyServer = new ServerSocket(PORT_COMPANY);
 			MobilityCompany company = new MobilityCompany(lHost, PORT_BANK,companyServer, routes, sumo, ACQUISITION_RATE);
 			company.start();
+
+			TimeStep tStep = new TimeStep(this.sumo);
+			tStep.start();
+
+			this.bank.addAccount(company.getAccount());
 
 			ArrayList<Driver> drivers = new ArrayList<Driver>();
 			for(int i=0;i<NUM_DRIVERS;i++)
@@ -81,13 +83,13 @@ public class EnvSimulator extends Thread
 				PERSON_CAPACITY, PERSON_NUMBER);
 				Driver driver = new Driver(lHost, PORT_BANK, driverID, car, ACQUISITION_RATE);
 				drivers.add(driver);
+				this.bank.addAccount(driver.getAccount());
 			}
 			iniciaDrivers(drivers);
 			aguardaDrivers(drivers);
 			company.join();
 			bank.join();
 			companyServer.close();
-			bankServer.close();
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		} catch (InterruptedException e) {

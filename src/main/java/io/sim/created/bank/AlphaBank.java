@@ -1,9 +1,11 @@
-package io.sim.created;
+package io.sim.created.bank;
 
 import java.net.ServerSocket;
 import java.util.ArrayList;
 
 import io.sim.EnvSimulator;
+import io.sim.created.Transaction;
+import io.sim.created.Account;
 
 public class AlphaBank extends Thread
 {

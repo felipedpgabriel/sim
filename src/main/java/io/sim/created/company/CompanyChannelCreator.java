@@ -1,10 +1,11 @@
-package io.sim.created;
+package io.sim.created.company;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 import io.sim.EnvSimulator;
+import io.sim.created.Account;
 
 public class CompanyChannelCreator extends Thread
 {

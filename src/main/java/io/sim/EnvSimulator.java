@@ -5,11 +5,11 @@ import java.net.ServerSocket;
 import java.util.ArrayList;
 
 import de.tudresden.sumo.objects.SumoColor;
-import io.sim.created.AlphaBank;
+import io.sim.created.bank.AlphaBank;
 import io.sim.created.Driver;
-import io.sim.created.MobilityCompany;
 import io.sim.created.RouteN;
 import io.sim.created.TimeStep;
+import io.sim.created.company.MobilityCompany;
 import it.polito.appeal.traci.SumoTraciConnection;
 
 /**Classe que faz a conexao com o SUMO e cria os objetos da simulacao. 
@@ -25,7 +25,7 @@ public class EnvSimulator extends Thread
 	private static final int PORT_BANK = 22222;
 	// Quantidades 
 	private static final String ROTAS_XML = "data/dados4.xml"; // "data/dados.xml"
-	public static final int NUM_DRIVERS = 1; // ideal 100
+	public static final int NUM_DRIVERS = 5; // ideal 100
 	// Atributos padrao - Carros
 	private static final int FUEL_TYPE = 2;
 	private static final int FUEL_PREFERENTIAL = 2;
@@ -34,7 +34,7 @@ public class EnvSimulator extends Thread
 	// Atributos de pagamento
 	public static final double RUN_PRICE = 3.25;
 	private static final double FUEL_PRICE = 5.87;
-	public static final double PAYABLE_DISTANCE = 50; // ideal 1000
+	public static final double PAYABLE_DISTANCE = 100; // ideal 1000
 
     public EnvSimulator(){}
 

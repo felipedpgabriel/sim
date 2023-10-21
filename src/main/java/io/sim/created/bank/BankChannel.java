@@ -1,9 +1,12 @@
-package io.sim.created;
+package io.sim.created.bank;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+
+import io.sim.created.JSONConverter;
+import io.sim.created.Transaction;
 
 public class BankChannel extends Thread
 {
@@ -27,17 +30,22 @@ public class BankChannel extends Thread
             String service = "";
             while(!service.equals("Encerrar"))
             {
+                System.out.println("BC - Aguardando mensagem.");
                 service = (String) JSONConverter.getJSONservice(entrada.readUTF());
+                System.out.println("BC ouviu - " + service);
                 if(service.equals("Encerrar"))
                 {
-                    System.out.println("Pedido de encerramento.");
+                    System.out.println("BC - Pedido de encerramento.");
                     break;
                 }
                 else if(service.equals("Pagamento"))
                 {
                     saida.writeUTF(JSONConverter.setJSONboolean(true));
+                    System.out.println("BC - Iniciando pagamento.");
                     Transaction transaction = (Transaction) JSONConverter.stringToTransaction(entrada.readUTF());
+                    System.out.println("BC - Dados recebidos.");
                     AlphaBank.transfer(transaction);
+                    System.out.println("BC - Transacao realizada");
                     transaction.setTimeStamp(System.nanoTime());
                     AlphaBank.addTransaction(transaction);
                 }

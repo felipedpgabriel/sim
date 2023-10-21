@@ -1,4 +1,4 @@
-package io.sim.created;
+package io.sim.created.company;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -7,6 +7,10 @@ import java.net.Socket;
 
 import io.sim.DrivingData;
 import io.sim.EnvSimulator;
+import io.sim.created.Account;
+import io.sim.created.BotPayment;
+import io.sim.created.JSONConverter;
+import io.sim.created.RouteN;
 
 public class CompanyChannel extends Thread
 {
@@ -51,6 +55,8 @@ public class CompanyChannel extends Thread
                 // verifica distancia para pagamento
                 if(payableDistanceReached(previusDistance, ddIn.getDistance()))
                 {
+                    // TODO problema de Socket no BotPayment
+                    System.out.println("Chamando bot para " + ddIn.getAutoID());
                     previusDistance = ddIn.getDistance();
                     BotPayment bot = new BotPayment(entradaCli,saidaCli, account.getLogin(), account.getSenha(), ddIn.getDriverLogin(),
                     EnvSimulator.RUN_PRICE);
@@ -109,7 +115,7 @@ public class CompanyChannel extends Thread
 
     private boolean payableDistanceReached(double _previusDistance, double _currentDistance)
     {
-        System.out.println("Distancia: " + _currentDistance); // TODO comentar caso der certo
+        // System.out.println(_idAuto + " distancia: " + _currentDistance);
         return (_currentDistance >= (_previusDistance + EnvSimulator.PAYABLE_DISTANCE));
     }
 }

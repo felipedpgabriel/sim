@@ -11,8 +11,8 @@ import de.tudresden.sumo.objects.SumoColor;
 import de.tudresden.sumo.objects.SumoPosition2D;
 import de.tudresden.sumo.objects.SumoStringList;
 import io.sim.created.JSONConverter;
-import io.sim.created.MobilityCompany;
 import io.sim.created.RouteN;
+import io.sim.created.company.MobilityCompany;
 
 /**Define os atributos que coracterizam um Carro.
  * Por meio de metodos get da classe Vehicle, 
@@ -238,7 +238,6 @@ public class Auto extends Thread // TODO Car extends Vehicle implements Runnable
 
 		double distanceCovered = calcDistance(_initiLat, _initLon, _currentLat, _currentLon);
 
-		System.out.println(idAuto + " percorreu " + distanceCovered + " metros");
 		if (distanceCovered > (this.distance + EnvSimulator.PAYABLE_DISTANCE)) {
 			this.distance += (EnvSimulator.PAYABLE_DISTANCE);
 		}

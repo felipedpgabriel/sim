@@ -1,4 +1,4 @@
-package io.sim.created;
+package io.sim.created.company;
 
 import java.net.ServerSocket;
 // import java.net.Socket;
@@ -6,6 +6,9 @@ import java.util.ArrayList;
 
 import de.tudresden.sumo.cmd.Vehicle;
 import de.tudresden.sumo.objects.SumoStringList;
+import io.sim.created.Account;
+import io.sim.created.RouteN;
+import io.sim.created.bank.AlphaBank;
 import it.polito.appeal.traci.SumoTraciConnection;
 
 public class MobilityCompany extends Thread

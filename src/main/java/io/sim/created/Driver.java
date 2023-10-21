@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 import io.sim.Auto;
+import io.sim.created.bank.AlphaBank;
 
 public class Driver extends Thread
 {

@@ -18,16 +18,22 @@ public class BankChannel extends Thread
         try
         {
             // variaveis de entrada e saida do servidor
-            System.out.println("BC - entrou no try.");
+            // System.out.println("BC - entrou no try.");
             DataInputStream entrada = new DataInputStream(socket.getInputStream());
-            System.out.println("BC - passou da entrada.");
+            // System.out.println("BC - passou da entrada.");
             DataOutputStream saida = new DataOutputStream(socket.getOutputStream());
-            System.out.println("BC - passou da saida.");
+            // System.out.println("BC - passou da saida.");
 
             String service = "";
             while(!service.equals("Encerrar"))
             {
-                if(service.equals("Pagamento"))
+                service = (String) JSONConverter.getJSONservice(entrada.readUTF());
+                if(service.equals("Encerrar"))
+                {
+                    System.out.println("Pedido de encerramento.");
+                    break;
+                }
+                else if(service.equals("Pagamento"))
                 {
                     saida.writeUTF(JSONConverter.setJSONboolean(true));
                     Transaction transaction = (Transaction) JSONConverter.stringToTransaction(entrada.readUTF());
@@ -35,11 +41,6 @@ public class BankChannel extends Thread
                     transaction.setTimeStamp(System.nanoTime());
                     AlphaBank.addTransaction(transaction);
                 }
-                else if(service.equals("Encerrar"))
-                {
-                    break;
-                }
-                service = (String) JSONConverter.getJSONservice(entrada.readUTF());
             }
 
             System.out.println("Encerrando canal BC.");

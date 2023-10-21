@@ -48,6 +48,7 @@ public class CompanyChannel extends Thread
             while(!mensagem.equals("encerrado")) // loop do sistema
             {
                 DrivingData ddIn = (DrivingData) JSONConverter.stringToDrivingData(entradaServ.readUTF());
+                // verifica distancia para pagamento
                 if(payableDistanceReached(previusDistance, ddIn.getDistance()))
                 {
                     previusDistance = ddIn.getDistance();
@@ -55,13 +56,13 @@ public class CompanyChannel extends Thread
                     EnvSimulator.RUN_PRICE);
                     bot.start();
                 }
-                // verifica distancia para pagamento
                 mensagem = ddIn.getCarState(); // lê solicitacao do cliente
                 // System.out.println("CC ouviu " + mensagem);
                 if (mensagem.equals("aguardando"))
                 {
                     if(!MobilityCompany.areRoutesAvailable()) // routesToExe.isEmpty()
                     {
+                        saidaCli.writeUTF(JSONConverter.setJSONservice("Encerrar"));
                         System.out.println("CC - Sem mais rotas para liberar.");
                         RouteN route = new RouteN("-1", "00000");
                         saidaServ.writeUTF(JSONConverter.routeNtoString(route));
@@ -84,24 +85,21 @@ public class CompanyChannel extends Thread
                 }
                 else if(mensagem.equals("rodando"))
                 {
-                    // adicionar rotas em uma lista para o relatorio
+                    // TODO adicionar rotas em uma lista para o relatorio
                 }
                 else if (mensagem.equals("encerrado"))
                 {
                     break;
                 }
-                // System.out.println(ddIn.); // TODO comentar se der certo
             }
 
             System.out.println("Encerrando canal CC.");
-            saidaCli.writeUTF(JSONConverter.setJSONservice("Encerrar"));
-            entradaServ.close();
-            saidaServ.close();
-            socketServ.close();
             entradaCli.close();
             saidaCli.close();
             socketCli.close();
-            // serverSocket.close();
+            entradaServ.close();
+            saidaServ.close();
+            socketServ.close();
         }
         catch (IOException e)
         {

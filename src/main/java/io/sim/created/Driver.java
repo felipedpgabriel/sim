@@ -52,7 +52,7 @@ public class Driver extends Thread
             {
                 Thread.sleep(acquisitionRate);
                 String carState = this.car.getCarRepport().getCarState();
-                if(carState.equals("finalizado"))
+                if(carState.equals("finalizado")) // estaAcontecendo muito rapido
                 {
                     System.out.println(this.driverID + " rota "+ this.routesInExe.get(0).getRouteID() +" finalizada");
                     this.routesExecuted.add((this.routesInExe.remove(0)));
@@ -65,10 +65,12 @@ public class Driver extends Thread
                     initRoute = true; 
                 }
             }
+            saida.writeUTF(JSONConverter.setJSONservice("Encerrar"));
             System.out.println("Encerrando " + this.driverID);
             entrada.close();
 			saida.close();
 			socket.close();
+            AlphaBank.encerrarConta(this.account.getLogin());
         } catch (InterruptedException | IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

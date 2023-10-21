@@ -52,13 +52,16 @@ public class MobilityCompany extends Thread
             CompanyChannelCreator ccc = new CompanyChannelCreator(companyHost, bankPort, serverSocket, account);
             ccc.start();
 
+            boolean fimRotasNotificado = false; // evita que a mensagem "Rotas terminadas" seja enviado continuamente
+
             while (routesAvailable || !routesInExe.isEmpty()) // || !routesInExe.isEmpty() IMP trocar para pagamentos
             {
                 sleep(this.acquisitionRate);
-                if(routesToExe.isEmpty()) // && routesInExe.isEmpty()
+                if(routesToExe.isEmpty() && !fimRotasNotificado) // && routesInExe.isEmpty()
                 {
                     System.out.println("Rotas terminadas");
                     routesAvailable = false;
+                    fimRotasNotificado = true;
                 }
             }
         }

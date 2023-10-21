@@ -48,7 +48,7 @@ public class AlphaBank extends Thread
                 e.printStackTrace();
         }
 
-        System.out.println("MobilityCompany encerrada...");
+        System.out.println("AlphaBank encerrado...");
     }
 
     public static void addAccount(Account _account)
@@ -98,12 +98,13 @@ public class AlphaBank extends Thread
         }
     }
 
-    public static void encerrarConta(String login)
+    public static void encerrarConta(String _login)
     {
         synchronized(oWatch)
         {
-            Account account = searchAccount(login);
+            Account account = searchAccount(_login);
             accounts.remove(account);
+            System.out.println("Encerrando conta de " + _login);
         }
     }
 

@@ -34,7 +34,7 @@ public class EnvSimulator extends Thread
 	// Atributos de pagamento
 	public static final double RUN_PRICE = 3.25;
 	private static final double FUEL_PRICE = 5.87;
-	public static final double PAYABLE_DISTANCE = 150; // ideal 1000
+	public static final double PAYABLE_DISTANCE = 50; // ideal 1000
 
     public EnvSimulator(){}
 

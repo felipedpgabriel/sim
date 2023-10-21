@@ -49,7 +49,6 @@ public class AlphaBank extends Thread
             System.out.println("Contas encerradas");
         }
         catch (InterruptedException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
         }
 
@@ -100,8 +99,8 @@ public class AlphaBank extends Thread
                 destino.recieve(_bankService.getValor());
                 Timestamp timestamp = new Timestamp(System.currentTimeMillis());
                 _bankService.setTimeStamp(timestamp);
-                System.out.println("R$ " + _bankService.getValor() + " de " + origem.getLogin() + " para " + destino.getLogin());
-                System.out.println(origem.getLogin() + ": R$" + origem.getSaldo() + "\n" + destino.getLogin() + ": R$" + destino.getSaldo());
+                // System.out.println("R$ " + _bankService.getValor() + " de " + origem.getLogin() + " para " + destino.getLogin());
+                System.out.println(origem.getLogin() + ": R$" + origem.getSaldo() + " | " + destino.getLogin() + ": R$" + destino.getSaldo());
             }
             else
             {

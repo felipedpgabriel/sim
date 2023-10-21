@@ -26,7 +26,7 @@ public class BankChannelCreator extends Thread
                 Socket socket = serverSocket.accept();
                 System.out.println("Account conectada");
 
-                BankChannel channel = new BankChannel(socket);
+                BankChannel channel = new BankChannel("BC" + (i+1),socket);
                 channel.start();
             }
             catch(IOException e)

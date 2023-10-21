@@ -1,13 +1,11 @@
 package io.sim.created;
 
-import java.io.DataInputStream;
+// import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-import io.sim.EnvSimulator;
-
-public class BotPayment extends Thread // TODO problema de Socket
+public class BotPayment extends Thread
 {
     Socket socket;
     String loginOrigem;
@@ -26,26 +24,17 @@ public class BotPayment extends Thread // TODO problema de Socket
     }
 
     @Override
-    public void run() // TODO B.O. simplificar logica
+    public void run()
     {
         try {
-            DataInputStream entrada = new DataInputStream(socket.getInputStream());
-			// System.out.println("CC - passou da entradaCli.");
+            // DataInputStream entrada = new DataInputStream(socket.getInputStream());
             DataOutputStream saida = new DataOutputStream(socket.getOutputStream());
 
-            System.out.println("Criando BotPayment para " + loginDestino);
+            // System.out.println("Criando BotPayment para " + loginDestino);
             BankService transaction = new BankService("Pagamento",senhaOrigem, loginOrigem, valor, loginDestino);
-            do
-            {
-                saida.writeUTF(JSONConverter.bankServiceToString(transaction));
-                sleep(EnvSimulator.ACQUISITION_RATE);
-            }while(!JSONConverter.getJSONboolean(entrada.readUTF()));
-            System.out.println("Encerrando BotPayment");
+            saida.writeUTF(JSONConverter.bankServiceToString(transaction));
+            // System.out.println("Encerrando BotPayment");
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }

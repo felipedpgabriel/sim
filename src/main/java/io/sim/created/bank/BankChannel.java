@@ -6,14 +6,15 @@ import java.io.IOException;
 import java.net.Socket;
 
 import io.sim.created.JSONConverter;
-import io.sim.EnvSimulator;
+// import io.sim.EnvSimulator;
 import io.sim.created.BankService;
 
 public class BankChannel extends Thread
 {
     private Socket socket;
     
-    public BankChannel(Socket _socket) {
+    public BankChannel(String nome,Socket _socket) {
+        super(nome);
         this.socket = _socket;
     }
 
@@ -33,17 +34,17 @@ public class BankChannel extends Thread
             {
                 BankService bankService = (BankService) JSONConverter.stringToBankService(entrada.readUTF());
                 service = bankService.getService();
-                System.out.println("BC recebeu - " + service);
+                // System.out.println("BC recebeu - " + service);
                 if(service.equals("Encerrar"))
                 {
-                    System.out.println("BC - Pedido de encerramento.");
+                    System.out.println("Encerrando canal BC.");
                     break;
                 }
                 else if(service.equals("Pagamento"))
                 {
                     saida.writeUTF(JSONConverter.setJSONboolean(true));
                     // saida.writeUTF(JSONConverter.setJSONboolean(true));
-                    System.out.println("BC - Realizando pagamento.");
+                    // System.out.println("BC - Realizando pagamento.");
                     // BankService bankService = (BankService) JSONConverter.stringToBankService(entrada.readUTF());
                     // System.out.println("BC - Dados recebidos.");
                     AlphaBank.transfer(bankService);
@@ -52,7 +53,7 @@ public class BankChannel extends Thread
                 }
             }
 
-            System.out.println("Encerrando canal BC.");
+            // System.out.println("Encerrando canal BC.");
             entrada.close();
             saida.close();
             socket.close();
@@ -60,6 +61,7 @@ public class BankChannel extends Thread
         }
         catch (IOException e)
         {
+            System.out.println("Erro em: " + this.getName());
             e.printStackTrace();
         }
     }

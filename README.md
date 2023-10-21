@@ -8,5 +8,4 @@ Este projeto simula o funcionamento de uma companhia de mobilidade, segundo o di
 Usa como base o repositório [21lab-technology/sim](https://github.com/21lab-technology/sim).
 * Drivers não observam corretamente os estados do carro. Ideias: fazer sistema de cliente e servidor com Drivers e Auto (IMP para o caso do abastecimento), ou ignorar as listas e fazer com flags.
 * Buscar sugestões de mudança com TODO
-* Arrumado, falta testar com mais carros. (lembrar de retirar alguns sysout)
-* Arrumar TimeStamp (usar objeto).
+* Problema: com colisões, pagamentos estão sequenciais. 

@@ -9,16 +9,14 @@ import io.sim.created.Account;
 
 public class CompanyChannelCreator extends Thread
 {
-    private String companyHost;
-	private int bankPort;
+    private Socket socketCli;
     private ServerSocket serverSocket;
     private Account account;
 
-    public CompanyChannelCreator(String _companyHost, int _bankPort,ServerSocket _serverSocket, Account _account)
+    public CompanyChannelCreator(Socket _socketCli,ServerSocket _serverSocket, Account _account)
     {
         this.serverSocket = _serverSocket;
-        this.companyHost = _companyHost;
-        this.bankPort = _bankPort;
+        this.socketCli = _socketCli;
         this.account = _account;
     }
 
@@ -33,7 +31,7 @@ public class CompanyChannelCreator extends Thread
                 Socket socket = serverSocket.accept();
                 System.out.println("Car conectado");
 
-                CompanyChannel channel = new CompanyChannel(this.companyHost, this.bankPort, socket, this.account);
+                CompanyChannel channel = new CompanyChannel(this.socketCli, socket, this.account);
                 channel.start();
             }
             catch(IOException e)

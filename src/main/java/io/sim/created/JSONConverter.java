@@ -5,7 +5,7 @@ import org.json.JSONObject;
 import io.sim.DrivingData;
 
 /**Classe para tratar as comunicacoes de Cl
- * TODO Falta acrescentar metodos para converter transacoes financeiras
+ * 
  */
 public class JSONConverter
 {

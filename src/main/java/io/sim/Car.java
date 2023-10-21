@@ -17,7 +17,7 @@ import io.sim.created.company.MobilityCompany;
 /**Define os atributos que coracterizam um Carro.
  * Por meio de metodos get da classe Vehicle, 
  */
-public class Auto extends Thread // TODO Car extends Vehicle implements Runnable
+public class Car extends Vehicle implements Runnable
 {
 	// atributos de cliente
 	private String carHost;
@@ -43,7 +43,7 @@ public class Auto extends Thread // TODO Car extends Vehicle implements Runnable
 	private double speed;
 	private boolean finished;
 
-	public Auto(boolean _carOn, String _carHost,int _servPort, String _idAuto, String _driverLogin,SumoColor _colorAuto, String _driverID, 
+	public Car(boolean _carOn, String _carHost,int _servPort, String _idAuto, String _driverLogin,SumoColor _colorAuto, String _driverID, 
 	SumoTraciConnection _sumo, long _acquisitionRate, int _fuelType, int _fuelPreferential, double _fuelPrice, int _personCapacity,
 	int _personNumber) throws Exception
 	{
@@ -72,11 +72,8 @@ public class Auto extends Thread // TODO Car extends Vehicle implements Runnable
 		try
 		{
 			// Conexoes cliente
-			// System.out.println(this.idAuto + " no try.");
             Socket socket = new Socket(this.carHost, this.servPort);
-			// System.out.println(this.idAuto + " passou do socket.");
             DataInputStream entrada = new DataInputStream(socket.getInputStream());
-			// System.out.println(this.idAuto + " passou da entrada.");
             DataOutputStream saida = new DataOutputStream(socket.getOutputStream());
 
 			while(!finished)
@@ -89,7 +86,7 @@ public class Auto extends Thread // TODO Car extends Vehicle implements Runnable
 					System.out.println(this.idAuto +" - Sem rotas a receber.");
 					finished = true;
 					break;
-				} // TODO avaliar necessidade de um else
+				}
 				System.out.println(this.idAuto + " iniciando rota " + route.getRouteID());
 				ts = new TransportService(this.idAuto, route,this, this.sumo);
 				ts.start();
@@ -97,7 +94,7 @@ public class Auto extends Thread // TODO Car extends Vehicle implements Runnable
 				this.carOn = true;
 				while(!MobilityCompany.estaNoSUMO(this.idAuto, this.sumo)) //esperar estar no SUMO
 				{
-					sleep(this.acquisitionRate);
+					Thread.sleep(this.acquisitionRate);
 				}
 				// atualiza informacoes iniciais
 				String edgeAtual = (String) this.sumo.do_job_get(Vehicle.getRoadID(this.idAuto));
@@ -116,10 +113,9 @@ public class Auto extends Thread // TODO Car extends Vehicle implements Runnable
 						this.carOn = false;
 						break;
 					}
-					sleep(this.acquisitionRate);
+					Thread.sleep(this.acquisitionRate);
 					if(!isRouteFineshed(edgeAtual, edgeFinal))
 					{
-						// System.out.println(this.idAuto + " -> edge atual: " + edgeAtual);
 						this.carRepport = this.atualizaSensores(previousLat, previousLon); // TODO tentar trocar para TransportService
 						previousLat = carRepport.getLatitude();
 						previousLon = carRepport.getLongitude();
@@ -137,7 +133,7 @@ public class Auto extends Thread // TODO Car extends Vehicle implements Runnable
 						}
 					}
 				}
-				System.out.println(this.idAuto + " off.");
+				// System.out.println(this.idAuto + " off.");
 
 				if(!finished)
 				{
@@ -155,7 +151,6 @@ public class Auto extends Thread // TODO Car extends Vehicle implements Runnable
         }
 		catch (Exception e)
 		{
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
@@ -187,7 +182,7 @@ public class Auto extends Thread // TODO Car extends Vehicle implements Runnable
 				
 				// 1/*averageFuelConsumption (calcular)*/,
 
-				this.sumo.do_job_set(Vehicle.setSpeedMode(this.idAuto, 0));
+				this.sumo.do_job_set(Vehicle.setSpeedMode(this.idAuto, 2)); // 0 padrao
 				this.setSpeed(speed);
 
 			} else {

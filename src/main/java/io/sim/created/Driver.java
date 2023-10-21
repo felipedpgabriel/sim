@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import io.sim.Auto;
+import io.sim.Car;
 import io.sim.created.bank.AlphaBank;
 
 public class Driver extends Thread
@@ -17,7 +17,7 @@ public class Driver extends Thread
     // atributos da classe
     private String driverID;
     private Account account;
-    private Auto car; // private Car car;
+    private Car car; // private Car car;
     // private static final double FUEL_PRICE = 5.87;
     private long acquisitionRate;
     // private ArrayList<RouteN> routeToExe = new ArrayList<RouteN>();
@@ -25,7 +25,7 @@ public class Driver extends Thread
     private ArrayList<RouteN> routesInExe = new ArrayList<RouteN>();
     private boolean initRoute = false;
 
-    public Driver(String driverHost, int servPort, String driverID, Auto car, long acquisitionRate)
+    public Driver(String driverHost, int servPort, String driverID, Car car, long acquisitionRate)
     {
         account = new Account(0, driverID, (driverID + "123"));
         this.driverHost = driverHost;
@@ -39,16 +39,14 @@ public class Driver extends Thread
     public void run()
     {
         try {
-            // System.out.println(this.idDriver + " no try.");
             Socket socket = new Socket(this.driverHost, this.servPort);
-			// System.out.println(this.idDriver + " passou do socket.");
             DataInputStream entrada = new DataInputStream(socket.getInputStream());
-			// System.out.println(this.idDriver + " passou da entrada.");
             DataOutputStream saida = new DataOutputStream(socket.getOutputStream());
             
             System.out.println("Iniciando " + this.driverID);
-            this.car.start();
-            while(this.car.isAlive())
+            Thread c = new Thread(car);
+            c.start();
+            while(c.isAlive())
             // while(MobilityCompany.areRoutesAvailable() || !this.routesInExe.isEmpty()) // this.car.getCarRepport().getCarState().equals("rodando")
             {
                 Thread.sleep(acquisitionRate);
@@ -69,13 +67,14 @@ public class Driver extends Thread
             BankService bs = BankService.createService("Encerrar");
             saida.writeUTF(JSONConverter.bankServiceToString(bs));
             System.out.println("Encerrando " + this.driverID);
-            entrada.close();
+            entrada.close(); 
 			saida.close();
 			socket.close();
             System.out.println("Saldo "+ this.driverID+": "+this.account.getSaldo());
             AlphaBank.encerrarConta(this.account.getLogin());
-        } catch (InterruptedException | IOException e) {
-            // TODO Auto-generated catch block
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

@@ -21,7 +21,6 @@ public class TimeStep extends Thread
                 this.sumo.do_timestep();
                 sleep(EnvSimulator.ACQUISITION_RATE);
             } catch (Exception e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
                 break;
             }

@@ -2,7 +2,7 @@ package io.sim;
 
 import java.io.Serializable;
 
-/**Armazena dados do veiculo TODO arrumar os dados necessarios para o relatorio
+/**Armazena dados do veiculo
  * Funcao organizacional, para ser usada no relatorio via Excel.
  */
 public class DrivingData implements Serializable{
@@ -11,7 +11,7 @@ public class DrivingData implements Serializable{
 
 	private String carState;
 	private String driverLogin;
-	private long timeStamp; 			// System.currentTimeMillis() TODO precisa ser em nanosegundos
+	private long timestamp; 			// System.currentTimeMillis() // TODO mudar para Timestamp
 	private String autoID;
 	private String routeIDSUMO; 		// this.sumo.do_job_get(Vehicle.getRouteID(this.idAuto))
 	private double speed; 				// in m/s for the last time step
@@ -22,19 +22,19 @@ public class DrivingData implements Serializable{
 	private double longitude;
 	private double latitude;
 
-	public DrivingData(String carState, String _driverLogin, long timeStamp, String autoID, String routeIDSUMO, double speed, double distance,
-	double fuelConsumption, int fuelType, double co2Emission, double _longitude, double _latitude)
+	public DrivingData(String _carState, String _driverLogin, long _timestamp, String _autoID, String _routeIDSUMO, double _speed,
+	double _distance, double _fuelConsumption, int _fuelType, double _co2Emission, double _longitude, double _latitude)
 	{
-		this.carState = carState;
+		this.carState = _carState;
 		this.driverLogin = _driverLogin;
-		this.timeStamp = timeStamp;
-		this.autoID = autoID;
-		this.routeIDSUMO = routeIDSUMO;
-		this.speed = speed;
-		this.distance = distance;
-		this.fuelConsumption = fuelConsumption;
-		this.fuelType = fuelType;
-		this.co2Emission = co2Emission;
+		this.timestamp = _timestamp;
+		this.autoID = _autoID;
+		this.routeIDSUMO = _routeIDSUMO;
+		this.speed = _speed;
+		this.distance = _distance;
+		this.fuelConsumption = _fuelConsumption;
+		this.fuelType = _fuelType;
+		this.co2Emission = _co2Emission;
 		this.longitude = _longitude;
 		this.latitude = _latitude;
 	}
@@ -52,7 +52,7 @@ public class DrivingData implements Serializable{
 	}
 
 	public long getTimeStamp() {
-		return timeStamp;
+		return timestamp;
 	}
 
 	public String getAutoID() {

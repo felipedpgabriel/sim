@@ -1,12 +1,16 @@
 package io.sim.created.company;
 
+import java.io.DataOutputStream;
 import java.net.ServerSocket;
+import java.net.Socket;
 // import java.net.Socket;
 import java.util.ArrayList;
 
 import de.tudresden.sumo.cmd.Vehicle;
 import de.tudresden.sumo.objects.SumoStringList;
 import io.sim.created.Account;
+import io.sim.created.BankService;
+import io.sim.created.JSONConverter;
 import io.sim.created.RouteN;
 import io.sim.created.bank.AlphaBank;
 import it.polito.appeal.traci.SumoTraciConnection;
@@ -14,8 +18,8 @@ import it.polito.appeal.traci.SumoTraciConnection;
 public class MobilityCompany extends Thread
 {
     // Atributos de cliente
-    private static String companyHost;
-	private static int bankPort;
+    private String companyHost;
+	private int bankPort;
     // Atributos de servidor
     private static ServerSocket serverSocket;
     // private Socket socket;
@@ -51,8 +55,10 @@ public class MobilityCompany extends Thread
             System.out.println("MobilityCompany iniciada...");
             
             AlphaBank.setConectionsInit(true);
+            Socket socketCli = new Socket(this.companyHost, this.bankPort);
+            DataOutputStream saidaCli = new DataOutputStream(socketCli.getOutputStream());
 
-            CompanyChannelCreator ccc = new CompanyChannelCreator(companyHost, bankPort, serverSocket, account);
+            CompanyChannelCreator ccc = new CompanyChannelCreator(socketCli, serverSocket, account);
             ccc.start();
 
             boolean fimRotasNotificado = false; // evita que a mensagem "Rotas terminadas" seja enviado continuamente
@@ -67,15 +73,17 @@ public class MobilityCompany extends Thread
                     fimRotasNotificado = true;
                 }
             }
-        }
+            BankService bs = BankService.createService("Encerrar");
+            saidaCli.writeUTF(JSONConverter.bankServiceToString(bs));
+            socketCli.close();
+            System.out.println("MobilityCompany encerrada...");
+            System.out.println("Saldo Company: " + account.getSaldo());
+            AlphaBank.encerrarConta(account.getLogin());
+            }
         catch (Exception e)
         {
             e.printStackTrace();
         }
-
-        System.out.println("MobilityCompany encerrada...");
-        System.out.println("Saldo Company: " + account.getSaldo());
-        AlphaBank.encerrarConta(account.getLogin());
     }
     
     /**Libera uma rota para o cliente que a solicitou. Para isso, remove de routesToExe e adiciona em routesInExe

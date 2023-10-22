@@ -8,13 +8,16 @@ import java.net.Socket;
 import io.sim.DrivingData;
 import io.sim.EnvSimulator;
 import io.sim.created.Account;
-import io.sim.created.JSONConverter;
 import io.sim.created.RouteN;
 import io.sim.created.bank.AlphaBank;
+import io.sim.created.messages.Cryptography;
+import io.sim.created.messages.JSONConverter;
 
 public class CompanyChannel extends Thread
 {
     private Socket socketServ;
+    private DataInputStream entradaServ;
+    private DataOutputStream saidaServ;
     private Socket socketCli;
 
     // atributos da classe
@@ -31,8 +34,8 @@ public class CompanyChannel extends Thread
     {
         try
         {
-            DataInputStream entradaServ = new DataInputStream(socketServ.getInputStream());
-            DataOutputStream saidaServ = new DataOutputStream(socketServ.getOutputStream());
+            entradaServ = new DataInputStream(socketServ.getInputStream());
+            saidaServ = new DataOutputStream(socketServ.getOutputStream());
             // DataInputStream entradaCli = new DataInputStream(socketCli.getInputStream());
             // DataOutputStream saidaCli = new DataOutputStream(socketCli.getOutputStream());
 
@@ -40,7 +43,7 @@ public class CompanyChannel extends Thread
             double previusDistance = 0;
             while(!mensagem.equals("encerrado")) // loop do sistema
             {
-                DrivingData ddIn = (DrivingData) JSONConverter.stringToDrivingData(entradaServ.readUTF());
+                DrivingData ddIn = (DrivingData) read();
                 // verifica distancia para pagamento
                 if(payableDistanceReached(previusDistance, ddIn.getDistance()))
                 {
@@ -58,13 +61,13 @@ public class CompanyChannel extends Thread
                     {
                         System.out.println("CC - Sem mais rotas para liberar.");
                         RouteN route = new RouteN("-1", "00000");
-                        saidaServ.writeUTF(JSONConverter.routeNtoString(route));
+                        write(route);
                         break;
                     }
                     if(MobilityCompany.areRoutesAvailable())
                     {
                         RouteN resposta = MobilityCompany.liberarRota();
-                        saidaServ.writeUTF(JSONConverter.routeNtoString(resposta));
+                        write(resposta);
                     }
                 }
                 else if(mensagem.equals("finalizado"))
@@ -96,6 +99,9 @@ public class CompanyChannel extends Thread
         catch (IOException e)
         {
             e.printStackTrace();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
     }
 
@@ -104,4 +110,20 @@ public class CompanyChannel extends Thread
         // System.out.println(_idAuto + " distancia: " + _currentDistance);
         return (_currentDistance >= (_previusDistance + EnvSimulator.PAYABLE_DISTANCE));
     }
+
+    private void write(RouteN _route) throws Exception
+	{
+		String jsMsg = JSONConverter.routeNtoString(_route);
+		byte[] msgEncrypt = Cryptography.encrypt(jsMsg);
+		saidaServ.writeInt(msgEncrypt.length);
+		saidaServ.write(msgEncrypt);
+	}
+
+	private DrivingData read() throws Exception
+	{
+		int numBytes = entradaServ.readInt();
+		byte[] msgEncrypt = entradaServ.readNBytes(numBytes);
+		String msgDecrypt = Cryptography.decrypt(msgEncrypt);
+		return JSONConverter.stringToDrivingData(msgDecrypt);
+	}
 }

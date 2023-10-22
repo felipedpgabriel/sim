@@ -9,12 +9,15 @@ import java.util.ArrayList;
 import io.sim.Car;
 import io.sim.EnvSimulator;
 import io.sim.created.bank.AlphaBank;
+import io.sim.created.messages.Cryptography;
+import io.sim.created.messages.JSONConverter;
 
 public class Driver extends Thread
 {
 	// atributos de cliente
 	private String driverHost;
 	private int servPort;
+    private DataOutputStream saida;
     // atributos da classe
     private String driverID;
     private Account account;
@@ -45,7 +48,7 @@ public class Driver extends Thread
         try {
             Socket socket = new Socket(this.driverHost, this.servPort);
             DataInputStream entrada = new DataInputStream(socket.getInputStream());
-            DataOutputStream saida = new DataOutputStream(socket.getOutputStream());
+            saida = new DataOutputStream(socket.getOutputStream());
             
             System.out.println("Iniciando " + this.driverID);
             Thread c = new Thread(car);
@@ -86,7 +89,7 @@ public class Driver extends Thread
                 }
             }
             BankService bs = BankService.createService("Encerrar");
-            saida.writeUTF(JSONConverter.bankServiceToString(bs));
+            write(bs);
             System.out.println("Encerrando " + this.driverID);
             entrada.close(); 
 			saida.close();
@@ -96,6 +99,9 @@ public class Driver extends Thread
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
@@ -117,4 +123,12 @@ public class Driver extends Thread
             return maxFuel;
         }
     }
+
+    private void write(BankService _bankService) throws Exception
+	{
+		String jsMsg = JSONConverter.bankServiceToString(_bankService);
+		byte[] msgEncrypt = Cryptography.encrypt(jsMsg);
+		saida.writeInt(msgEncrypt.length);
+		saida.write(msgEncrypt);
+	}
 }

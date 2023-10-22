@@ -6,6 +6,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.http.annotation.Obsolete;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -15,6 +16,7 @@ import org.xml.sax.SAXException;
 /**Representa um Itinerario de rota. PODE VIRAR A CLASSE ROUTE
  *Contem um ID e as edges para seguir
  */
+@Obsolete
 public class Itinerary {
 
 	private boolean on; // indica se a classe esta ativa

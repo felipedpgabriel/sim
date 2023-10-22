@@ -1,8 +1,10 @@
-package io.sim.created;
+package io.sim.created.messages;
 
 import org.json.JSONObject;
 
 import io.sim.DrivingData;
+import io.sim.created.BankService;
+import io.sim.created.RouteN;
 
 /**Classe para tratar as comunicacoes de Cl
  * 
@@ -82,20 +84,6 @@ public class JSONConverter
 
         return jsonOut.toString();
 	}
-
-    // public static String getJSONservice(String _jsonString)
-    // {
-    //     JSONObject jsonIn = new JSONObject(_jsonString);
-	// 	return jsonIn.getString("Service");
-    // }
-
-    // public static String setJSONservice(String _service)
-    // {
-    //     JSONObject jsonOut = new JSONObject();
-    //     jsonOut.put("Service",_service);
-
-	// 	return jsonOut.toString();
-    // }
 
     public static String setJSONboolean(boolean _bool)
     {

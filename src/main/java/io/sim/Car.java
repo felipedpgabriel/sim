@@ -11,9 +11,10 @@ import de.tudresden.sumo.objects.SumoColor;
 import de.tudresden.sumo.objects.SumoPosition2D;
 import de.tudresden.sumo.objects.SumoStringList;
 import io.sim.created.CarFuelManager;
-import io.sim.created.JSONConverter;
 import io.sim.created.RouteN;
 import io.sim.created.company.MobilityCompany;
+import io.sim.created.messages.Cryptography;
+import io.sim.created.messages.JSONConverter;
 
 /**Define os atributos que coracterizam um Carro.
  * Por meio de metodos get da classe Vehicle, 
@@ -23,6 +24,8 @@ public class Car extends Vehicle implements Runnable
 	// atributos de cliente
 	private String carHost;
 	private int servPort;
+	private DataInputStream entrada;
+	private DataOutputStream saida;
 	// atributos da classe
 	private String carSate;
 	private boolean carOn;
@@ -79,17 +82,17 @@ public class Car extends Vehicle implements Runnable
 		{
 			// Conexoes cliente
             Socket socket = new Socket(this.carHost, this.servPort);
-            DataInputStream entrada = new DataInputStream(socket.getInputStream());
-            DataOutputStream saida = new DataOutputStream(socket.getOutputStream());
+            entrada = new DataInputStream(socket.getInputStream());
+            saida = new DataOutputStream(socket.getOutputStream());
 
 			CarFuelManager cfm = new CarFuelManager(this); 
 			cfm.start();
 
 			while(!finished)
 			{
-				saida.writeUTF(JSONConverter.drivingDataToString(this.carRepport));
+				write(this.carRepport);
 				System.out.println(this.idAuto + " aguardando rota.");
-				route = (RouteN) JSONConverter.stringToRouteN(entrada.readUTF());
+				route = (RouteN) read();
 				if(route.getRouteID().equals("-1"))
 				{
 					System.out.println(this.idAuto +" - Sem rotas a receber.");
@@ -119,7 +122,7 @@ public class Car extends Vehicle implements Runnable
 						System.out.println(this.idAuto + " acabou a rota " + this.route.getRouteID());
 						this.carSate = "finalizado";
 						this.carRepport = this.updateDrivingData(this.carSate);
-						saida.writeUTF(JSONConverter.drivingDataToString(this.carRepport));
+						write(this.carRepport);
 						this.carOn = false;
 						break;
 					}
@@ -133,7 +136,7 @@ public class Car extends Vehicle implements Runnable
 						// + this.carRepport.getDistance());
 						if(this.carRepport.getCarState().equals("finalizado"))
 						{
-							saida.writeUTF(JSONConverter.drivingDataToString(this.carRepport));
+							write(this.carRepport);
 							this.carOn = false;
 							break;
 						}
@@ -141,7 +144,7 @@ public class Car extends Vehicle implements Runnable
 						{
 							previousLat = carRepport.getLatitude();
 							previousLon = carRepport.getLongitude();
-							saida.writeUTF(JSONConverter.drivingDataToString(this.carRepport));
+							write(this.carRepport);
 							edgeAtual = (String) this.sumo.do_job_get(Vehicle.getRoadID(this.idAuto));
 						}
 					}
@@ -411,6 +414,22 @@ public class Car extends Vehicle implements Runnable
 
 	public synchronized void setFuelTank(double _fuelTank) {
 		this.fuelTank = _fuelTank;
+	}
+
+	private void write(DrivingData _carRepport) throws Exception
+	{
+		String jsMsg = JSONConverter.drivingDataToString(_carRepport);
+		byte[] msgEncrypt = Cryptography.encrypt(jsMsg);
+		saida.writeInt(msgEncrypt.length);
+		saida.write(msgEncrypt);
+	}
+
+	private RouteN read() throws Exception
+	{
+		int numBytes = entrada.readInt();
+		byte[] msgEncrypt = entrada.readNBytes(numBytes);
+		String msgDecrypt = Cryptography.decrypt(msgEncrypt);
+		return JSONConverter.stringToRouteN(msgDecrypt);
 	}
 
 	private boolean isRouteFineshed(String _edgeAtual, String _edgeFinal)

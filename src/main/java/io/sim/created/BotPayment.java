@@ -5,13 +5,17 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
+import io.sim.created.messages.Cryptography;
+import io.sim.created.messages.JSONConverter;
+
 public class BotPayment extends Thread
 {
-    Socket socket;
-    String loginOrigem;
-    String senhaOrigem;
-    String loginDestino;
-    double valor;
+    private Socket socket;
+    private DataOutputStream saida;
+    private String loginOrigem;
+    private String senhaOrigem;
+    private String loginDestino;
+    private double valor;
 
     public BotPayment(Socket _socket, String loginOrigem, String senhaOrigem, String loginDestino,
     double valor)
@@ -28,15 +32,25 @@ public class BotPayment extends Thread
     {
         try {
             // DataInputStream entrada = new DataInputStream(socket.getInputStream());
-            DataOutputStream saida = new DataOutputStream(socket.getOutputStream());
+            saida = new DataOutputStream(socket.getOutputStream());
 
             // System.out.println("Criando BotPayment para " + loginDestino);
-            BankService transaction = new BankService("Pagamento",senhaOrigem, loginOrigem, valor, loginDestino);
-            saida.writeUTF(JSONConverter.bankServiceToString(transaction));
+            BankService bankService = new BankService("Pagamento",senhaOrigem, loginOrigem, valor, loginDestino);
+            write(bankService);
             // System.out.println("Encerrando BotPayment");
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
 
+    private void write(BankService _bankService) throws Exception
+	{
+		String jsMsg = JSONConverter.bankServiceToString(_bankService);
+		byte[] msgEncrypt = Cryptography.encrypt(jsMsg);
+		saida.writeInt(msgEncrypt.length);
+		saida.write(msgEncrypt);
+	}
 }

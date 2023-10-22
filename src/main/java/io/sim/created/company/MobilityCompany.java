@@ -11,9 +11,10 @@ import de.tudresden.sumo.objects.SumoStringList;
 import io.sim.EnvSimulator;
 import io.sim.created.Account;
 import io.sim.created.BankService;
-import io.sim.created.JSONConverter;
 import io.sim.created.RouteN;
 import io.sim.created.bank.AlphaBank;
+import io.sim.created.messages.Cryptography;
+import io.sim.created.messages.JSONConverter;
 import it.polito.appeal.traci.SumoTraciConnection;
 
 public class MobilityCompany extends Thread
@@ -21,6 +22,7 @@ public class MobilityCompany extends Thread
     // Atributos de cliente
     private String companyHost;
 	private int bankPort;
+    private DataOutputStream saidaCli;
     // Atributos de servidor
     private static ServerSocket serverSocket;
     private static Account account;
@@ -54,7 +56,7 @@ public class MobilityCompany extends Thread
             
             AlphaBank.setConectionsInit(true);
             Socket socketCli = new Socket(this.companyHost, this.bankPort);
-            DataOutputStream saidaCli = new DataOutputStream(socketCli.getOutputStream());
+            saidaCli = new DataOutputStream(socketCli.getOutputStream());
 
             CompanyChannelCreator ccc = new CompanyChannelCreator(socketCli, serverSocket, account);
             ccc.start();
@@ -72,7 +74,7 @@ public class MobilityCompany extends Thread
                 }
             }
             BankService bs = BankService.createService("Encerrar");
-            saidaCli.writeUTF(JSONConverter.bankServiceToString(bs));
+            write(bs);
             socketCli.close();
             System.out.println("MobilityCompany encerrada...");
             System.out.println("Saldo Company: " + account.getSaldo());
@@ -154,4 +156,12 @@ public class MobilityCompany extends Thread
     {
         return routesExecuted.size();
     }
+
+    private void write(BankService _bankService) throws Exception
+	{
+		String jsMsg = JSONConverter.bankServiceToString(_bankService);
+		byte[] msgEncrypt = Cryptography.encrypt(jsMsg);
+		saidaCli.writeInt(msgEncrypt.length);
+		saidaCli.write(msgEncrypt);
+	}
 }

@@ -1,12 +1,14 @@
 package io.sim.created;
 
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.util.concurrent.Semaphore;
 
 import io.sim.Car;
 import io.sim.EnvSimulator;
 import io.sim.created.bank.AlphaBank;
+import io.sim.created.messages.Cryptography;
+import io.sim.created.messages.JSONConverter;
+
 import java.net.Socket;
 
 public class FuelStation extends Thread
@@ -14,6 +16,7 @@ public class FuelStation extends Thread
     // Atributos de cliente
     private String stationHost;
 	private int bankPort;
+    private DataOutputStream saida;
     // Atributos da classe
     private Account account;
     private int numBombas;
@@ -40,18 +43,18 @@ public class FuelStation extends Thread
         {
             System.out.println("Iniciando FuelStation");
             Socket socket = new Socket(stationHost, bankPort);
-            DataOutputStream saida = new DataOutputStream(socket.getOutputStream());
+            saida = new DataOutputStream(socket.getOutputStream());
             while(stationOn)
             {
                 sleep(EnvSimulator.ACQUISITION_RATE);
             }
             BankService bs = BankService.createService("Encerrar");
-            saida.writeUTF(JSONConverter.bankServiceToString(bs));
+            write(bs);
             socket.close();
             System.out.println("FuelStation encerrada...");
             System.out.println("Saldo Station: " + account.getSaldo());
             AlphaBank.encerrarConta(account.getLogin());
-        } catch (IOException | InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -71,4 +74,12 @@ public class FuelStation extends Thread
     {
         this.stationOn = _on;
     }
+
+    private void write(BankService _bankService) throws Exception
+	{
+		String jsMsg = JSONConverter.bankServiceToString(_bankService);
+		byte[] msgEncrypt = Cryptography.encrypt(jsMsg);
+		saida.writeInt(msgEncrypt.length);
+		saida.write(msgEncrypt);
+	}
 }

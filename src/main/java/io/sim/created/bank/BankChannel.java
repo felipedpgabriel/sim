@@ -2,16 +2,16 @@ package io.sim.created.bank;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.net.Socket;
 
-import io.sim.created.JSONConverter;
-// import io.sim.EnvSimulator;
 import io.sim.created.BankService;
+import io.sim.created.messages.Cryptography;
+import io.sim.created.messages.JSONConverter;
 
 public class BankChannel extends Thread
 {
     private Socket socket;
+    private DataInputStream entrada;
     
     public BankChannel(String nome,Socket _socket) {
         super(nome);
@@ -24,7 +24,7 @@ public class BankChannel extends Thread
         {
             // variaveis de entrada e saida do servidor
             // System.out.println("BC - entrou no try.");
-            DataInputStream entrada = new DataInputStream(socket.getInputStream());
+            entrada = new DataInputStream(socket.getInputStream());
             // System.out.println("BC - passou da entrada.");
             DataOutputStream saida = new DataOutputStream(socket.getOutputStream());
             // System.out.println("BC - passou da saida.");
@@ -32,7 +32,7 @@ public class BankChannel extends Thread
             String service = "";
             while(!service.equals("Encerrar"))
             {
-                BankService bankService = (BankService) JSONConverter.stringToBankService(entrada.readUTF());
+                BankService bankService = (BankService) read();
                 service = bankService.getService();
                 // System.out.println("BC recebeu - " + service);
                 if(service.equals("Encerrar"))
@@ -53,10 +53,18 @@ public class BankChannel extends Thread
             socket.close();
             // serverSocket.close();
         }
-        catch (IOException e)
+        catch (Exception e)
         {
             System.out.println("Erro em: " + this.getName());
             e.printStackTrace();
         }
     }
+
+	private BankService read() throws Exception
+	{
+		int numBytes = entrada.readInt();
+		byte[] msgEncrypt = entrada.readNBytes(numBytes);
+		String msgDecrypt = Cryptography.decrypt(msgEncrypt);
+		return JSONConverter.stringToBankService(msgDecrypt);
+	}
 }

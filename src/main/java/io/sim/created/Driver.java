@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 import io.sim.Car;
+import io.sim.EnvSimulator;
 import io.sim.created.bank.AlphaBank;
 
 public class Driver extends Thread
@@ -21,9 +22,9 @@ public class Driver extends Thread
     // private static final double FUEL_PRICE = 5.87;
     private long acquisitionRate;
     // private ArrayList<RouteN> routeToExe = new ArrayList<RouteN>();
-    private ArrayList<RouteN> routesExecuted = new ArrayList<RouteN>();
-    private ArrayList<RouteN> routesInExe = new ArrayList<RouteN>();
-    private boolean initRoute = false;
+    private ArrayList<RouteN> routesExecuted;
+    private ArrayList<RouteN> routesInExe;
+    private boolean initRoute;
 
     public Driver(String driverHost, int servPort, String driverID, Car car, long acquisitionRate)
     {
@@ -33,6 +34,9 @@ public class Driver extends Thread
         this.driverID = driverID;
         this.car = car;
         this.acquisitionRate = acquisitionRate;
+        routesExecuted = new ArrayList<RouteN>();
+        routesInExe = new ArrayList<RouteN>();
+        initRoute = false;
     }
 
     @Override
@@ -47,11 +51,10 @@ public class Driver extends Thread
             Thread c = new Thread(car);
             c.start();
             while(c.isAlive())
-            // while(MobilityCompany.areRoutesAvailable() || !this.routesInExe.isEmpty()) // this.car.getCarRepport().getCarState().equals("rodando")
             {
                 Thread.sleep(acquisitionRate);
                 String carState = this.car.getCarRepport().getCarState();
-                if(carState.equals("finalizado")) // estaAcontecendo muito rapido
+                if(carState.equals("finalizado") || (carState.equals("aguardando") && initRoute)) // esta acontecendo muito rapido
                 {
                     System.out.println(this.driverID + " rota "+ this.routesInExe.get(0).getRouteID() +" finalizada");
                     this.routesExecuted.add((this.routesInExe.remove(0)));
@@ -62,6 +65,19 @@ public class Driver extends Thread
                     System.out.println(this.driverID + " rota "+ this.car.getRoute().getRouteID() +" iniciada");
                     this.routesInExe.add(this.car.getRoute());
                     initRoute = true; 
+                }
+                else if(carState.equals("abastecendo"))
+                {
+                    System.out.println(this.driverID + " parou para abastecer.");
+                    double fuelQtd = calcFuelQtd();
+                    FuelStation.fuel(this.car, fuelQtd);
+                    BotPayment bot = new BotPayment(socket, this.account.getLogin(), this.account.getSenha(), "FuelStation",
+                    fuelQtd * EnvSimulator.FUEL_PRICE);
+                    bot.start();
+                }
+                else if(carState.equals("encerrado"))
+                {
+                    break;
                 }
             }
             BankService bs = BankService.createService("Encerrar");
@@ -81,5 +97,18 @@ public class Driver extends Thread
 
     public String getDriverID() {
         return driverID;
+    }
+
+    private double calcFuelQtd()
+    {
+        double maxFuel = this.account.getSaldo()/EnvSimulator.FUEL_PRICE;
+        if(maxFuel + this.car.getFuelTank() > EnvSimulator.MAX_FUEL_TANK*1000)
+        {
+            return ((EnvSimulator.MAX_FUEL_TANK*1000) - this.car.getFuelTank());
+        }
+        else
+        {
+            return maxFuel;
+        }
     }
 }

@@ -76,7 +76,7 @@ public class CompanyChannel extends Thread
                     + MobilityCompany.getRoutesInExeSize() + "\nRotas executadas: "+ MobilityCompany.getRoutesExecutedSize());
                     System.out.println("Aguardando mensagem...");
                 }
-                else if(mensagem.equals("rodando"))
+                else if(mensagem.equals("rodando") || mensagem.equals("abastecendo"))
                 {
                     // TODO adicionar rotas em uma lista para o relatorio
                 }

@@ -23,6 +23,7 @@ public class Car extends Vehicle implements Runnable
 	private String carHost;
 	private int servPort;
 	// atributos da classe
+	private String carSate;
 	private boolean carOn;
 	private String idAuto; // id do carro
 	private String driverLogin;
@@ -39,14 +40,16 @@ public class Car extends Vehicle implements Runnable
 	private TransportService ts;
 	private RouteN route;
 	private double distanceCovered;
-
+	private double fuelTank;
 	private double speed;
 	private boolean finished;
+	private boolean abastecendo;
 
 	public Car(boolean _carOn, String _carHost,int _servPort, String _idAuto, String _driverLogin,SumoColor _colorAuto, String _driverID, 
 	SumoTraciConnection _sumo, long _acquisitionRate, int _fuelType, int _fuelPreferential, double _fuelPrice, int _personCapacity,
 	int _personNumber) throws Exception
 	{
+		this.carSate = "aguardando";
 		this.carHost = _carHost;
 		this.servPort = _servPort;
 		this.carOn = _carOn;
@@ -60,9 +63,11 @@ public class Car extends Vehicle implements Runnable
 		this.fuelPrice = _fuelPrice;
 		this.personCapacity = _personCapacity;
 		this.personNumber = _personNumber;
+		this.fuelTank = EnvSimulator.MAX_FUEL_TANK * 1000; // passar para ml
 		this.speed = 40;
 		this.finished = false;
-		this.carRepport = this.updateDrivingData("aguardando", "");
+		this.abastecendo = false;
+		this.carRepport = this.updateDrivingData(this.carSate, "");
 	}
 
 	@Override
@@ -102,13 +107,16 @@ public class Car extends Vehicle implements Runnable
 				double previousLat = coordGeo[0];
 				double previousLon = coordGeo[1];
 				this.distanceCovered = 0;
+				// TODO Criar gastaTanque
+				// TODO adicionar um atualizaSensores aqui
 
 				while (this.carOn) // && MobilityCompany.estaNoSUMO(this.idAuto, sumo)
 				{
 					if(isRouteFineshed(edgeAtual, edgeFinal)) // TODO IllegalStateException
-					{
+					{ // TODO desativar gasto de combustivel
 						System.out.println(this.idAuto + " acabou a rota " + this.route.getRouteID());
-						this.carRepport = this.updateDrivingData("finalizado");
+						this.carSate = "finalizado";
+						this.carRepport = this.updateDrivingData(this.carSate);
 						saida.writeUTF(JSONConverter.drivingDataToString(this.carRepport));
 						this.carOn = false;
 						break;
@@ -121,6 +129,7 @@ public class Car extends Vehicle implements Runnable
 						// + this.carRepport.getDistance());
 						if(this.carRepport.getCarState().equals("finalizado"))
 						{
+							saida.writeUTF(JSONConverter.drivingDataToString(this.carRepport));
 							this.carOn = false;
 							break;
 						}
@@ -164,9 +173,18 @@ public class Car extends Vehicle implements Runnable
 				double[] coordGeo = this.convertGeo();
 				double currentLat = coordGeo[0];
 				double currentLon = coordGeo[1];
+
+				if(this.abastecendo)
+				{
+					this.carSate = "abastecendo";
+				}
+				else
+				{
+					this.carSate = "rodando";
+				}
 				
 				// Criacao dos dados de conducao do veiculo
-				repport = updateDrivingData("rodando", this.driverLogin, System.nanoTime(), this.idAuto,
+				repport = updateDrivingData(this.carSate, this.driverLogin, System.nanoTime(), this.idAuto,
 				(String) this.sumo.do_job_get(Vehicle.getRouteID(this.idAuto)), (double) this.sumo.do_job_get(Vehicle.getSpeed(this.idAuto)),
 				this.updateDistance(currentLat,currentLon,_initiLat, _initLon),
 				(double) this.sumo.do_job_get(Vehicle.getFuelConsumption(this.idAuto)), this.fuelType,
@@ -182,12 +200,13 @@ public class Car extends Vehicle implements Runnable
 				
 				// 1/*averageFuelConsumption (calcular)*/,
 
-				this.sumo.do_job_set(Vehicle.setSpeedMode(this.idAuto, 2)); // 0 padrao
-				this.setSpeed(speed);
+				this.sumo.do_job_set(Vehicle.setSpeedMode(this.idAuto, 31)); // 0 padrao
+				this.setSpeed(this.speed);
 
 			} else {
 				this.carOn = false;
-				this.carRepport = this.updateDrivingData("finalizado");
+				this.carSate = "finalizado";
+				this.carRepport = this.updateDrivingData(this.carSate);
 				System.out.println("SUMO is closed...");
 			}
 		} catch (Exception e) {
@@ -267,6 +286,14 @@ public class Car extends Vehicle implements Runnable
 		return repport;	
 	}
 
+	public boolean isAbastecendo() {
+		return abastecendo;
+	}
+
+	public void setAbastecendo(boolean abastecendo) {
+		this.abastecendo = abastecendo;
+	}
+
 	public String getDriverLogin() {
 		return driverLogin;
 	}
@@ -285,6 +312,10 @@ public class Car extends Vehicle implements Runnable
 
 	public void setcarOn(boolean _carOn) {
 		this.carOn = _carOn;
+	}
+
+	public boolean isFinished() {
+		return finished;
 	}
 
 	public void setfinished(boolean finished) {
@@ -351,13 +382,21 @@ public class Car extends Vehicle implements Runnable
 		return this.personNumber;
 	}
 
-	public void setSpeed(double speed) throws Exception
+	public void setSpeed(double _speed) throws Exception
 	{
-		this.sumo.do_job_set(Vehicle.setSpeed(this.idAuto, speed));
+		this.sumo.do_job_set(Vehicle.setSpeed(this.idAuto, _speed));
 	}
 
 	public DrivingData getCarRepport() {
 		return carRepport;
+	}
+
+	public double getFuelTank() {
+		return fuelTank;
+	}
+
+	public void setFuelTank(double fuelTank) {
+		this.fuelTank = fuelTank;
 	}
 
 	private boolean isRouteFineshed(String _edgeAtual, String _edgeFinal)

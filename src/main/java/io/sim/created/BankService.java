@@ -1,8 +1,9 @@
 package io.sim.created;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 
-public class BankService
+public class BankService implements Serializable
 {
     private String service;
     private String senha;

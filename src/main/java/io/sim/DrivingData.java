@@ -5,7 +5,8 @@ import java.io.Serializable;
 /**Armazena dados do veiculo
  * Funcao organizacional, para ser usada no relatorio via Excel.
  */
-public class DrivingData implements Serializable{
+public class DrivingData implements Serializable
+{
 
 	/* SUMO's data */
 
@@ -45,6 +46,10 @@ public class DrivingData implements Serializable{
 
 	public String getCarState() {
 		return carState;
+	}
+
+	public void setCarState(String _carState) {
+		this.carState = _carState;
 	}
 
 	public String getDriverLogin() {

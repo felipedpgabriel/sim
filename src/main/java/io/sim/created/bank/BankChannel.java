@@ -42,13 +42,7 @@ public class BankChannel extends Thread
                 }
                 else if(service.equals("Pagamento"))
                 {
-                    saida.writeUTF(JSONConverter.setJSONboolean(true));
-                    // saida.writeUTF(JSONConverter.setJSONboolean(true));
-                    // System.out.println("BC - Realizando pagamento.");
-                    // BankService bankService = (BankService) JSONConverter.stringToBankService(entrada.readUTF());
-                    // System.out.println("BC - Dados recebidos.");
                     AlphaBank.transfer(bankService);
-                    // System.out.println("BC - Transacao realizada");
                     AlphaBank.addBankService(bankService);
                 }
             }

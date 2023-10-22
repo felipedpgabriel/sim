@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import de.tudresden.sumo.cmd.Vehicle;
 import de.tudresden.sumo.objects.SumoStringList;
+import io.sim.EnvSimulator;
 import io.sim.created.Account;
 import io.sim.created.BankService;
 import io.sim.created.JSONConverter;
@@ -22,7 +23,6 @@ public class MobilityCompany extends Thread
 	private int bankPort;
     // Atributos de servidor
     private static ServerSocket serverSocket;
-    // private Socket socket;
     private static Account account;
     // Atributos de sincronizacao
     private static Thread oWatch;
@@ -31,20 +31,18 @@ public class MobilityCompany extends Thread
     private static ArrayList<RouteN> routesInExe;
     private static ArrayList<RouteN> routesExecuted;
     private static boolean routesAvailable = true;
-    private long acquisitionRate; 
 
-    public MobilityCompany(String _companyHost, int _bankPort, ServerSocket _serverSocket, ArrayList<RouteN> _routes, SumoTraciConnection _sumo, long _acquisitionRate)
+    public MobilityCompany(String _companyHost, int _bankPort, ServerSocket _serverSocket, ArrayList<RouteN> _routes, SumoTraciConnection _sumo)
     {
         oWatch = new Thread();
         routesToExe = new ArrayList<RouteN>();
         routesInExe = new ArrayList<RouteN>();
         routesExecuted = new ArrayList<RouteN>();
-        account = new Account(10000.0, "MobilityCompany", "mc123");
+        account = new Account(100000.0, "MobilityCompany", "mc123");
         companyHost = _companyHost;
         bankPort = _bankPort;
         serverSocket = _serverSocket;
         routesToExe = _routes;
-        this.acquisitionRate = _acquisitionRate;
     }
 
     @Override
@@ -65,7 +63,7 @@ public class MobilityCompany extends Thread
 
             while (routesAvailable || !routesInExe.isEmpty()) // || !routesInExe.isEmpty() IMP trocar para pagamentos
             {
-                sleep(this.acquisitionRate);
+                sleep(EnvSimulator.ACQUISITION_RATE);
                 if(routesToExe.isEmpty() && !fimRotasNotificado) // && routesInExe.isEmpty()
                 {
                     System.out.println("Rotas terminadas");

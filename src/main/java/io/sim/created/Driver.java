@@ -28,7 +28,7 @@ public class Driver extends Thread
 
     public Driver(String driverHost, int servPort, String driverID, Car car, long acquisitionRate)
     {
-        account = new Account(1000, driverID, (driverID + "123")); // 0
+        account = new Account(0, driverID, (driverID + "123")); // 0
         this.driverHost = driverHost;
         this.servPort = servPort;
         this.driverID = driverID;

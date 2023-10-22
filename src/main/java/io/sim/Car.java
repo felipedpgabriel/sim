@@ -10,6 +10,7 @@ import it.polito.appeal.traci.SumoTraciConnection;
 import de.tudresden.sumo.objects.SumoColor;
 import de.tudresden.sumo.objects.SumoPosition2D;
 import de.tudresden.sumo.objects.SumoStringList;
+import io.sim.created.CarFuelManager;
 import io.sim.created.JSONConverter;
 import io.sim.created.RouteN;
 import io.sim.created.company.MobilityCompany;
@@ -41,7 +42,7 @@ public class Car extends Vehicle implements Runnable
 	private RouteN route;
 	private double distanceCovered;
 	private double fuelTank;
-	private double speed;
+	private double speedDefault;
 	private boolean finished;
 	private boolean abastecendo;
 
@@ -64,7 +65,7 @@ public class Car extends Vehicle implements Runnable
 		this.personCapacity = _personCapacity;
 		this.personNumber = _personNumber;
 		this.fuelTank = EnvSimulator.MAX_FUEL_TANK * 1000; // passar para ml
-		this.speed = 40;
+		this.speedDefault = EnvSimulator.SPEED_DEFAULT/3.6; // ideal 80/3.6
 		this.finished = false;
 		this.abastecendo = false;
 		this.carRepport = this.updateDrivingData(this.carSate, "");
@@ -80,6 +81,9 @@ public class Car extends Vehicle implements Runnable
             Socket socket = new Socket(this.carHost, this.servPort);
             DataInputStream entrada = new DataInputStream(socket.getInputStream());
             DataOutputStream saida = new DataOutputStream(socket.getOutputStream());
+
+			CarFuelManager cfm = new CarFuelManager(this, sumo); 
+			cfm.start();
 
 			while(!finished)
 			{
@@ -125,6 +129,8 @@ public class Car extends Vehicle implements Runnable
 					if(!isRouteFineshed(edgeAtual, edgeFinal))
 					{
 						this.carRepport = this.atualizaSensores(previousLat, previousLon); // TODO tentar trocar para TransportService
+						// cfm.setFuelConsumption(this.carRepport.getFuelConsumption());
+						// System.out.println("Consumo: " + cfm.getFuelConsumption());
 						// System.out.println("Distancia percorrida: " + this.distanceCovered + "\n Distancia repport: "
 						// + this.carRepport.getDistance());
 						if(this.carRepport.getCarState().equals("finalizado"))
@@ -173,14 +179,17 @@ public class Car extends Vehicle implements Runnable
 				double[] coordGeo = this.convertGeo();
 				double currentLat = coordGeo[0];
 				double currentLon = coordGeo[1];
+				double carSpeed;
 
 				if(this.abastecendo)
 				{
 					this.carSate = "abastecendo";
+					carSpeed = 0;
 				}
 				else
 				{
 					this.carSate = "rodando";
+					carSpeed = this.speedDefault;
 				}
 				
 				// Criacao dos dados de conducao do veiculo
@@ -199,9 +208,8 @@ public class Car extends Vehicle implements Runnable
 				// -2^30
 				
 				// 1/*averageFuelConsumption (calcular)*/,
-
-				this.sumo.do_job_set(Vehicle.setSpeedMode(this.idAuto, 31)); // 0 padrao
-				this.setSpeed(this.speed);
+				this.sumo.do_job_set(Vehicle.setSpeedMode(this.idAuto, 31));
+				this.setSpeed(carSpeed);
 
 			} else {
 				this.carOn = false;
@@ -284,6 +292,14 @@ public class Car extends Vehicle implements Runnable
 	{
 		DrivingData repport = updateDrivingData(_carState, this.route.getRouteID());
 		return repport;	
+	}
+
+	public double getSpeedDefault() {
+		return speedDefault;
+	}
+
+	public void setCarSate(String carSate) {
+		this.carSate = carSate;
 	}
 
 	public boolean isAbastecendo() {
@@ -391,12 +407,12 @@ public class Car extends Vehicle implements Runnable
 		return carRepport;
 	}
 
-	public double getFuelTank() {
+	public synchronized double getFuelTank() {
 		return fuelTank;
 	}
 
-	public void setFuelTank(double fuelTank) {
-		this.fuelTank = fuelTank;
+	public synchronized void setFuelTank(double _fuelTank) {
+		this.fuelTank = _fuelTank;
 	}
 
 	private boolean isRouteFineshed(String _edgeAtual, String _edgeFinal)

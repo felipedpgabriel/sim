@@ -28,7 +28,7 @@ public class Driver extends Thread
 
     public Driver(String driverHost, int servPort, String driverID, Car car, long acquisitionRate)
     {
-        account = new Account(0, driverID, (driverID + "123"));
+        account = new Account(1000, driverID, (driverID + "123")); // 0
         this.driverHost = driverHost;
         this.servPort = servPort;
         this.driverID = driverID;
@@ -70,9 +70,14 @@ public class Driver extends Thread
                 {
                     System.out.println(this.driverID + " parou para abastecer.");
                     double fuelQtd = calcFuelQtd();
-                    FuelStation.fuel(this.car, fuelQtd);
+                    boolean terminouDeAbastecer = FuelStation.fuel(this.car, fuelQtd);
+                    if(terminouDeAbastecer)
+                    {
+                        this.car.setAbastecendo(false);
+                        this.car.setCarSate("rodando");
+                    }
                     BotPayment bot = new BotPayment(socket, this.account.getLogin(), this.account.getSenha(), "FuelStation",
-                    fuelQtd * EnvSimulator.FUEL_PRICE);
+                    fuelQtd * EnvSimulator.FUEL_PRICE/1000);
                     bot.start();
                 }
                 else if(carState.equals("encerrado"))
@@ -101,7 +106,8 @@ public class Driver extends Thread
 
     private double calcFuelQtd()
     {
-        double maxFuel = this.account.getSaldo()/EnvSimulator.FUEL_PRICE;
+        double maxFuel = (this.account.getSaldo()/EnvSimulator.FUEL_PRICE) * 1000;
+        System.out.println("Qtd max: " + maxFuel);
         if(maxFuel + this.car.getFuelTank() > EnvSimulator.MAX_FUEL_TANK*1000)
         {
             return ((EnvSimulator.MAX_FUEL_TANK*1000) - this.car.getFuelTank());

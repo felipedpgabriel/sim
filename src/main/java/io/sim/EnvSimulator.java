@@ -24,7 +24,7 @@ public class EnvSimulator extends Thread
 	private static final int PORT_COMPANY = 11111;
 	private static final int PORT_BANK = 22222;
 	// Quantidades 
-	private static final String ROTAS_XML = "data/dados.xml"; // "data/dados.xml"
+	private static final String ROTAS_XML = "data/dados4.xml"; // "data/dados.xml"
 	public static final int NUM_DRIVERS = 100; // ideal 100
 	private static final int NUM_BOMBAS = 2;
 	// Atributos Carros
@@ -32,8 +32,10 @@ public class EnvSimulator extends Thread
 	private static final int FUEL_PREFERENTIAL = 2;
 	private static final int PERSON_CAPACITY = 1;
 	private static final int PERSON_NUMBER = 1;
-	public static final double MAX_FUEL_TANK = 10; // litros
-	public static final double MIN_FUEL_TANK = 3; // litros
+	public static final double MAX_FUEL_TANK = 10; // 10 litros
+	public static final double MIN_FUEL_TANK = 3; // 3 litros
+	public static final double SPEED_DEFAULT = 80; // Km/h
+	public static final double FUEL_CONSUMPTION = 3; // ml/s
 	// Atributos de pagamento
 	public static final double RUN_PRICE = 3.25;
 	public static final double FUEL_PRICE = 5.87;

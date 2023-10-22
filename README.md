@@ -9,4 +9,4 @@ Usa como base o repositório [21lab-technology/sim](https://github.com/21lab-tec
 * Drivers não observam corretamente os estados do carro. Ideias: fazer sistema de cliente e servidor com Drivers e Auto (IMP para o caso do abastecimento), ou ignorar as listas e fazer com flags.
 * Buscar sugestões de mudança com TODO
 * Problema: com colisões, pagamentos estão sequenciais. (mudança de speedMode para 31 não testado)
-* Terminar TankUpdate() -> novas funcionalidades não testadas 
+* Falta Criptografia e Excel

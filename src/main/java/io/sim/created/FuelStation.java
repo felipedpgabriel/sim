@@ -38,6 +38,7 @@ public class FuelStation extends Thread
     {
         try
         {
+            System.out.println("Iniciando FuelStation");
             Socket socket = new Socket(stationHost, bankPort);
             DataOutputStream saida = new DataOutputStream(socket.getOutputStream());
             while(stationOn)
@@ -56,14 +57,15 @@ public class FuelStation extends Thread
         }
     }
 
-    public static void fuel(Car _car, double _fuelQtd) throws InterruptedException
+    public static boolean fuel(Car _car, double _fuelQtd) throws InterruptedException
     {
         semaphore.acquire();
         System.out.println(_car.getIdAuto() + " abastecendo.");
         sleep(fuelTime * 1000);
-        _car.setFuelTank(_fuelQtd);
-        System.out.println(_car.getIdAuto() + " abastecido.");
+        _car.setFuelTank( _car.getFuelTank() + _fuelQtd);
+        System.out.println(_car.getIdAuto() + " abastecido: " + _car.getFuelTank());
         semaphore.release();
+        return true;
     }
 
     public void setStationOn(boolean _on)

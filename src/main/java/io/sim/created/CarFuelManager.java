@@ -1,19 +1,15 @@
 package io.sim.created;
 
-// import de.tudresden.sumo.cmd.Vehicle;
 import io.sim.Car;
 import io.sim.EnvSimulator;
-import it.polito.appeal.traci.SumoTraciConnection;
 
 public class CarFuelManager extends Thread
 {
     private Car car;
-    private SumoTraciConnection sumo;
     private double fuelConsumption; // ml/s
 
-    public CarFuelManager(Car car, SumoTraciConnection sumo) {
+    public CarFuelManager(Car car) {
         this.car = car;
-        this.sumo = sumo;
         this.fuelConsumption = EnvSimulator.FUEL_CONSUMPTION; // ml/s
     }
 
@@ -28,12 +24,6 @@ public class CarFuelManager extends Thread
                 sleep(EnvSimulator.ACQUISITION_RATE);
                 while(this.car.iscarOn())
                 {
-                    if(!this.car.isAbastecendo())
-                    {
-                        System.out.println("Voltou a consumir.");
-                        // this.sumo.do_job_set(Vehicle.setSpeedMode(this.car.getIdAuto(), 31));
-                        // this.car.setSpeed(0);
-                    }
                     while(this.car.iscarOn() && !this.car.isAbastecendo())
                     {
                         // this.sumo.do_job_set(Vehicle.setSpeedMode(this.car.getIdAuto(), 31));

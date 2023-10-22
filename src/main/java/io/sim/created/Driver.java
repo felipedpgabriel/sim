@@ -69,7 +69,7 @@ public class Driver extends Thread
                 else if(carState.equals("abastecendo"))
                 {
                     System.out.println(this.driverID + " parou para abastecer.");
-                    double fuelQtd = calcFuelQtd();
+                    double fuelQtd = calcFuelQtd(); // TODO adicionar condicional para caso saldo seja 0, encerrar 
                     boolean terminouDeAbastecer = FuelStation.fuel(this.car, fuelQtd);
                     if(terminouDeAbastecer)
                     {

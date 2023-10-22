@@ -44,7 +44,7 @@ public class CompanyChannel extends Thread
                 // verifica distancia para pagamento
                 if(payableDistanceReached(previusDistance, ddIn.getDistance()))
                 {
-                    // System.out.println("Chamando bot para " + ddIn.getAutoID());
+                    // TODO verificar se o carro existe antes de prosseguir, senão fechar
                     previusDistance = ddIn.getDistance();
                     AlphaBank.payment(socketCli, account.getLogin(), account.getSenha(), ddIn.getDriverLogin(),
                     EnvSimulator.RUN_PRICE);
@@ -70,11 +70,10 @@ public class CompanyChannel extends Thread
                 else if(mensagem.equals("finalizado"))
                 {
                     String routeID = ddIn.getRouteIDSUMO();
-                    // System.out.println("CC - Rota " + routeID + " finalizada.");
                     MobilityCompany.arquivarRota(routeID);
                     System.out.println("Rotas para executar: " + MobilityCompany.getRoutesToExeSize() +"\nRotas em execucao: " 
                     + MobilityCompany.getRoutesInExeSize() + "\nRotas executadas: "+ MobilityCompany.getRoutesExecutedSize());
-                    System.out.println("Aguardando mensagem...");
+                    // System.out.println("Aguardando mensagem...");
                 }
                 else if(mensagem.equals("rodando") || mensagem.equals("abastecendo"))
                 {

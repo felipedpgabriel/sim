@@ -52,7 +52,6 @@ public class FuelStation extends Thread
             System.out.println("Saldo Station: " + account.getSaldo());
             AlphaBank.encerrarConta(account.getLogin());
         } catch (IOException | InterruptedException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }

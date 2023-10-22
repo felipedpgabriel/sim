@@ -82,7 +82,7 @@ public class Car extends Vehicle implements Runnable
             DataInputStream entrada = new DataInputStream(socket.getInputStream());
             DataOutputStream saida = new DataOutputStream(socket.getOutputStream());
 
-			CarFuelManager cfm = new CarFuelManager(this, sumo); 
+			CarFuelManager cfm = new CarFuelManager(this); 
 			cfm.start();
 
 			while(!finished)
@@ -111,13 +111,11 @@ public class Car extends Vehicle implements Runnable
 				double previousLat = coordGeo[0];
 				double previousLon = coordGeo[1];
 				this.distanceCovered = 0;
-				// TODO Criar gastaTanque
-				// TODO adicionar um atualizaSensores aqui
 
 				while (this.carOn) // && MobilityCompany.estaNoSUMO(this.idAuto, sumo)
 				{
 					if(isRouteFineshed(edgeAtual, edgeFinal)) // TODO IllegalStateException
-					{ // TODO desativar gasto de combustivel
+					{
 						System.out.println(this.idAuto + " acabou a rota " + this.route.getRouteID());
 						this.carSate = "finalizado";
 						this.carRepport = this.updateDrivingData(this.carSate);

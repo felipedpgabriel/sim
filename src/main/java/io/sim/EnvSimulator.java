@@ -89,7 +89,6 @@ public class EnvSimulator extends Thread
 			{
 				SumoColor cor = new SumoColor(0, 255, 0, 126);// TODO funcao para cria cor
 				String driverID = "D" + (i+1);
-				// TODO host unico para cada e outros para drivers;
 				Car car = new Car(true,lHost,PORT_COMPANY, ("CAR" + (i+1)), driverID, cor, driverID, sumo, ACQUISITION_RATE, FUEL_TYPE, FUEL_PREFERENTIAL, FUEL_PRICE,
 				PERSON_CAPACITY, PERSON_NUMBER);
 				Driver driver = new Driver(lHost, PORT_BANK, driverID, car, ACQUISITION_RATE);

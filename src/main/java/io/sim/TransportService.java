@@ -40,7 +40,7 @@ public class TransportService extends Thread {
 		// System.out.println("Encerrando TransportService " + this.car.getIdAuto());
 	}
 
-	private void initializeRoutes() { // TODO investigar se existe um retorno para saber se foi bem suscedido
+	private void initializeRoutes() { // TODO investigar se existe um retorno para saber se foi bem suscedido (ou se a rota eh valida)
 
 		// Adiciona todas as edges em uma lista de Strings
 		edge = new SumoStringList();

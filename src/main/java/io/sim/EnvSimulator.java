@@ -1,15 +1,14 @@
 package io.sim;
 
-import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 
 import de.tudresden.sumo.objects.SumoColor;
-import io.sim.created.bank.AlphaBank;
 import io.sim.created.Driver;
 import io.sim.created.FuelStation;
 import io.sim.created.RouteN;
 import io.sim.created.TimeStep;
+import io.sim.created.bank.AlphaBank;
 import io.sim.created.company.MobilityCompany;
 import it.polito.appeal.traci.SumoTraciConnection;
 
@@ -25,26 +24,29 @@ public class EnvSimulator extends Thread
 	private static final int PORT_BANK = 22222;
 	// Quantidades 
 	private static final String ROTAS_XML = "data/dados.xml"; // "data/dados.xml"
-	public static final int NUM_DRIVERS = 100; // ideal 100
 	private static final int NUM_BOMBAS = 2;
+	public static final int NUM_DRIVERS = 100; // ideal 100
 	// Atributos Carros
 	private static final int FUEL_TYPE = 2;
 	private static final int FUEL_PREFERENTIAL = 2;
 	private static final int PERSON_CAPACITY = 1;
 	private static final int PERSON_NUMBER = 1;
-	public static final double MAX_FUEL_TANK = 10; // 10 litros
-	public static final double MIN_FUEL_TANK = 3; // 3 litros
-	public static final double SPEED_DEFAULT = 80; // 80 Km/h (em car passa para m/s)
-	public static final double FUEL_CONSUMPTION = 3; // 3 ml/s
+	public static final double MAX_FUEL_TANK = 10; // 10 [L]
+	public static final double MIN_FUEL_TANK = 3; // 3 [L]
+	public static final double SPEED_DEFAULT = 80; // 80 Km/h (em Car passa para [m/s])
+	public static final double FUEL_CONSUMPTION = 3; // 3 [mL/s]
 	// Atributos de pagamento
-	public static final double RUN_PRICE = 3.25;
-	public static final double FUEL_PRICE = 5.87;
-	public static final double PAYABLE_DISTANCE = 1000; // ideal 1000
+	public static final double RUN_PRICE = 3.25; // [R$]
+	public static final double FUEL_PRICE = 5.87; // [R$]
+	public static final double PAYABLE_DISTANCE = 1000; // ideal 1000 [m]
 	// Tempos
-	public static final int ACQUISITION_RATE = 300;
-	private static final long FUEL_TIME = 120; // em segundos, ideal 120
+	private static final long FUEL_TIME = 120; // ideal 120 [s]
+	public static final int ACQUISITION_RATE = 300; // Tempo padrao de sleeps [ms]
 
-    public EnvSimulator(){}
+    /**Construtor vazio
+	 * 
+	 */
+	public EnvSimulator(){}
 
     public void run()
 	{
@@ -63,10 +65,12 @@ public class EnvSimulator extends Thread
 			sumo.runServer(PORT_SUMO);
 			System.out.println("SUMO conectado.");
 			Thread.sleep(5000);
+			// Tempo da simulacao
 			TimeStep tStep = new TimeStep(this.sumo);
 			tStep.start();
 
-			String lHost = "127.0.0.1";
+			String lHost = "127.0.0.1"; // Host padrao para todos os clientes
+			
 			// Extraindo rotas
 			ArrayList<RouteN> routes = RouteN.extractRoutes(ROTAS_XML);
 			System.out.println("ES - " + routes.size() + " rotas disponiveis.");
@@ -84,8 +88,9 @@ public class EnvSimulator extends Thread
 			FuelStation fuelStation = new FuelStation(lHost, PORT_BANK, NUM_BOMBAS, FUEL_TIME);
 			fuelStation.start();
 
-			ArrayList<Driver> drivers = new ArrayList<Driver>();
-			for(int i=0;i<NUM_DRIVERS;i++)
+			ArrayList<Driver> drivers = new ArrayList<Driver>(); // Lista de Drivers para join e start
+
+			for(int i=0;i<NUM_DRIVERS;i++) // Cria Cars e Drivers
 			{
 				SumoColor cor = new SumoColor(0, 255, 0, 126);// TODO funcao para cria cor
 				String driverID = "D" + (i+1);
@@ -101,10 +106,6 @@ public class EnvSimulator extends Thread
 			bank.join();
 			companyServer.close();
 			bankServer.close();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -112,9 +113,9 @@ public class EnvSimulator extends Thread
 		System.out.println("Encerrando EnvSimulator");
     }
 
-	/**Roda o metodo join em todos os Drivers.
-     * @param lista
-     * @throws InterruptedException
+	/**Roda o metodo join() em todos os Driver's.
+     * @param lista ArrayList<Driver> - Lista de Driver's
+     * @throws InterruptedException 
      */
     private static void aguardaDrivers(ArrayList<Driver> _lista) throws InterruptedException
     {
@@ -125,6 +126,10 @@ public class EnvSimulator extends Thread
         }
     }
 
+	/**Roda o metodo start() em todos os Driver's.
+	 * @param _lista ArrayList<Driver> - Lista de Driver's
+	 * @throws InterruptedException
+	 */
 	private static void iniciaDrivers(ArrayList<Driver> _lista) throws InterruptedException
     {
         for(int i=0;i<_lista.size();i++)
@@ -132,7 +137,7 @@ public class EnvSimulator extends Thread
 			Driver d =_lista.get(i);
 			System.out.println("aguardar " + d.getDriverID());
             d.start();
-			sleep(5/3*ACQUISITION_RATE);
+			sleep(5/3*ACQUISITION_RATE); // intervalo de 0.5 [s] entre cricao de Driver's
         }
     }
 

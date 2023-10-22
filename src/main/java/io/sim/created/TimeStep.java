@@ -3,6 +3,9 @@ package io.sim.created;
 import io.sim.EnvSimulator;
 import it.polito.appeal.traci.SumoTraciConnection;
 
+/**Classe que faz o timestep do SUMO.
+ *Feito separadamente em uma Thread para evitar multiplos timesteps e melhorar o desempenho. 
+ */
 public class TimeStep extends Thread
 {
     private SumoTraciConnection sumo;
@@ -17,10 +20,13 @@ public class TimeStep extends Thread
     {
         while(true)
         {
-            try {
+            try
+            {
                 this.sumo.do_timestep();
-                sleep(EnvSimulator.ACQUISITION_RATE);
-            } catch (Exception e) {
+                sleep(EnvSimulator.ACQUISITION_RATE); // Step da simulacao
+            }
+            catch (Exception e)
+            {
                 e.printStackTrace();
                 break;
             }

@@ -14,20 +14,32 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-/**Classe de rotas
- * Tem edges e routeID.
+/**Classe de rotas (substitui Itinerary).
+ *O nome RouteN eh devido a ja existencia de uma classe Route.
  */
 public class RouteN implements Serializable
 {
     private String edges;
     private String routeID;
 
+    /**Contrutor da classe RouteN.
+     * 
+     * @param routeID String - ID da rota.
+     * @param edges String - Edges que configuram o trajeto.
+     */
     public RouteN(String routeID, String edges)
     {
         this.edges = edges;
         this.routeID = routeID;
     }
 
+    /**Extrai as rotas no formato XML para RouteN e adiciona em uma lista.
+     * @param arqXML Strinf - Path do arquivo XML com as rotas
+     * @return ArrayList<RouteN> - Lista de rotas.
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
     public static ArrayList<RouteN> extractRoutes(String arqXML) throws ParserConfigurationException, SAXException, IOException
     {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -44,7 +56,7 @@ public class RouteN implements Serializable
                 Element elem = (Element) nNode; // pausa 
                 String idRouteAux = elem.getAttribute("id"); 
                 Node node = elem.getElementsByTagName("route").item(0);
-                Element edges = (Element) node; // extrai as edges -> FALTA ver se eh o primeiro ponto ou a edge toda
+                Element edges = (Element) node; // extrai as edges 
                 RouteN route = new RouteN(idRouteAux, edges.getAttribute("edges"));
                 routes.add(route);
             }

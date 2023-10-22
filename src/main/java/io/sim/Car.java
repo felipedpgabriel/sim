@@ -117,11 +117,8 @@ public class Car extends Vehicle implements Runnable
 					if(!isRouteFineshed(edgeAtual, edgeFinal))
 					{
 						this.carRepport = this.atualizaSensores(previousLat, previousLon); // TODO tentar trocar para TransportService
-						previousLat = carRepport.getLatitude();
-						previousLon = carRepport.getLongitude();
 						// System.out.println("Distancia percorrida: " + this.distanceCovered + "\n Distancia repport: "
 						// + this.carRepport.getDistance());
-						saida.writeUTF(JSONConverter.drivingDataToString(this.carRepport));
 						if(this.carRepport.getCarState().equals("finalizado"))
 						{
 							this.carOn = false;
@@ -129,6 +126,9 @@ public class Car extends Vehicle implements Runnable
 						}
 						else
 						{
+							previousLat = carRepport.getLatitude();
+							previousLon = carRepport.getLongitude();
+							saida.writeUTF(JSONConverter.drivingDataToString(this.carRepport));
 							edgeAtual = (String) this.sumo.do_job_get(Vehicle.getRoadID(this.idAuto));
 						}
 					}
@@ -187,6 +187,7 @@ public class Car extends Vehicle implements Runnable
 
 			} else {
 				this.carOn = false;
+				this.carRepport = this.updateDrivingData("finalizado");
 				System.out.println("SUMO is closed...");
 			}
 		} catch (Exception e) {
@@ -243,7 +244,7 @@ public class Car extends Vehicle implements Runnable
 			return this.carRepport.getDistance() + (EnvSimulator.PAYABLE_DISTANCE);
 		}
 		return this.carRepport.getDistance();
-	} // TODO retornar double e fazer this.distance ser a distancia acumulada
+	} 
 
 	private DrivingData updateDrivingData(String _carState, String _driverLogin,long _timeStamp, String _autoID, String _routeIDSUMO,
 	double _speed, double _distance, double _fuelConsumption, int _fuelType, double _co2Emission, double _longitude, double _latitude)

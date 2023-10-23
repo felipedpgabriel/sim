@@ -29,7 +29,7 @@ public class Car extends Vehicle implements Runnable
 	// atributos da classe
 	private String carSate;
 	private boolean carOn;
-	private String idAuto; // id do carro
+	private String idAuto; // id do carro // TODO mudar para CarID
 	private String driverLogin;
 	private SumoColor colorAuto;
 	private SumoTraciConnection sumo;

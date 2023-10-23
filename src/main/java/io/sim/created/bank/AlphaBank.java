@@ -9,6 +9,7 @@ import io.sim.EnvSimulator;
 import io.sim.created.Account;
 import io.sim.created.BankService;
 import io.sim.created.BotPayment;
+import io.sim.created.repport.ExcelBank;
 
 /**Classe do Banco que contem as contas e gerencia as transacoes financeiras.
  * 
@@ -46,6 +47,9 @@ public class AlphaBank extends Thread
             // Cria os canais de comunicação Thread com cada cliente de AlphaBank
             BankChannelCreator bcc = new BankChannelCreator(serverSocket, numAccounts);
             bcc.start();
+            bcc.join();
+            ExcelBank eb = new ExcelBank(this);
+            eb.start();
 
             // Aguarda a desconexoes das contas
             while(!accounts.isEmpty() || !conectionsInit)
@@ -60,6 +64,14 @@ public class AlphaBank extends Thread
         }
 
         System.out.println("AlphaBank encerrado...");
+    }
+
+    public boolean isBankServicesEmpty() {
+        return bankServices.isEmpty();
+    }
+
+    public BankService removeServices() {
+        return bankServices.remove(0);
     }
 
     /**Adiciona as contas na lista.

@@ -13,7 +13,7 @@ public class DrivingData implements Serializable
 	private String carState;
 	private String driverLogin;
 	private long timestamp; 			// System.currentTimeMillis() // TODO mudar para Timestamp
-	private String autoID;
+	private String carID;
 	private String routeIDSUMO; 		// this.sumo.do_job_get(Vehicle.getRouteID(this.idAuto))
 	private double speed; 				// in m/s for the last time step
 	private double distance;
@@ -23,13 +23,13 @@ public class DrivingData implements Serializable
 	private double longitude;
 	private double latitude;
 
-	public DrivingData(String _carState, String _driverLogin, long _timestamp, String _autoID, String _routeIDSUMO, double _speed,
+	public DrivingData(String _carState, String _driverLogin, long _timestamp, String _carID, String _routeIDSUMO, double _speed,
 	double _distance, double _fuelConsumption, int _fuelType, double _co2Emission, double _longitude, double _latitude)
 	{
 		this.carState = _carState;
 		this.driverLogin = _driverLogin;
 		this.timestamp = _timestamp;
-		this.autoID = _autoID;
+		this.carID = _carID;
 		this.routeIDSUMO = _routeIDSUMO;
 		this.speed = _speed;
 		this.distance = _distance;
@@ -60,8 +60,8 @@ public class DrivingData implements Serializable
 		return timestamp;
 	}
 
-	public String getAutoID() {
-		return autoID;
+	public String getCarID() {
+		return carID;
 	}
 
 	public String getRouteIDSUMO() {

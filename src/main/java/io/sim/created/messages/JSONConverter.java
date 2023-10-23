@@ -72,7 +72,7 @@ public class JSONConverter
         jsonOut.put("CarState",_carRepport.getCarState());
         jsonOut.put("DriverLogin",_carRepport.getDriverLogin());
         jsonOut.put("TimeStamp",_carRepport.getTimeStamp());
-        jsonOut.put("AutoID",_carRepport.getAutoID());
+        jsonOut.put("AutoID",_carRepport.getCarID());
         jsonOut.put("RouteIDSUMO",_carRepport.getRouteIDSUMO());
         jsonOut.put("Speed",_carRepport.getSpeed());
 		jsonOut.put("Distance",_carRepport.getDistance());

@@ -10,6 +10,7 @@ import io.sim.created.RouteN;
 import io.sim.created.TimeStep;
 import io.sim.created.bank.AlphaBank;
 import io.sim.created.company.MobilityCompany;
+import io.sim.created.repport.ExcelRepport;
 import it.polito.appeal.traci.SumoTraciConnection;
 
 /**Classe que faz a conexao com o SUMO e cria os objetos da simulacao. 
@@ -23,9 +24,9 @@ public class EnvSimulator extends Thread
 	private static final int PORT_COMPANY = 11111;
 	private static final int PORT_BANK = 22222;
 	// Quantidades 
-	private static final String ROTAS_XML = "data/dados.xml"; // "data/dados.xml"
+	private static final String ROTAS_XML = "data/dados4.xml"; // "data/dados.xml"
 	private static final int NUM_BOMBAS = 2;
-	public static final int NUM_DRIVERS = 100; // ideal 100
+	public static final int NUM_DRIVERS = 2; // ideal 100
 	// Atributos Carros
 	private static final int FUEL_TYPE = 2;
 	private static final int FUEL_PREFERENTIAL = 2;
@@ -34,13 +35,13 @@ public class EnvSimulator extends Thread
 	public static final double MAX_FUEL_TANK = 10; // 10 [L]
 	public static final double MIN_FUEL_TANK = 3; // 3 [L]
 	public static final double SPEED_DEFAULT = 80; // 80 Km/h (em Car passa para [m/s])
-	public static final double FUEL_CONSUMPTION = 3; // 3 [mL/s]
+	public static final double FUEL_CONSUMPTION = 50; // 3 [mL/s]
 	// Atributos de pagamento
 	public static final double RUN_PRICE = 3.25; // [R$]
 	public static final double FUEL_PRICE = 5.87; // [R$]
-	public static final double PAYABLE_DISTANCE = 1000; // ideal 1000 [m]
+	public static final double PAYABLE_DISTANCE = 100; // ideal 1000 [m]
 	// Tempos
-	private static final long FUEL_TIME = 120; // ideal 120 [s]
+	private static final long FUEL_TIME = 12; // ideal 120 [s]
 	public static final int ACQUISITION_RATE = 300; // Tempo padrao de sleeps [ms]
 
     /**Construtor vazio
@@ -99,6 +100,11 @@ public class EnvSimulator extends Thread
 				Driver driver = new Driver(lHost, PORT_BANK, driverID, car, ACQUISITION_RATE);
 				drivers.add(driver);
 			}
+
+			// Cria as planilhas de Excel
+			ExcelRepport.ssDrivingDataCreator(drivers);
+			ExcelRepport.ssBankServiceCreator(company.getAccountLogin(), drivers, fuelStation.getAccountLogin());
+			
 			iniciaDrivers(drivers);
 			aguardaDrivers(drivers);
 			fuelStation.setStationOn(false);

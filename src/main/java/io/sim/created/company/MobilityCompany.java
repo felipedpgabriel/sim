@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import de.tudresden.sumo.cmd.Vehicle;
 import de.tudresden.sumo.objects.SumoStringList;
+import io.sim.DrivingData;
 import io.sim.EnvSimulator;
 import io.sim.created.Account;
 import io.sim.created.BankService;
@@ -15,6 +16,7 @@ import io.sim.created.RouteN;
 import io.sim.created.bank.AlphaBank;
 import io.sim.created.messages.Cryptography;
 import io.sim.created.messages.JSONConverter;
+import io.sim.created.repport.ExcelCompany;
 import it.polito.appeal.traci.SumoTraciConnection;
 
 public class MobilityCompany extends Thread
@@ -33,6 +35,7 @@ public class MobilityCompany extends Thread
     private static ArrayList<RouteN> routesInExe;
     private static ArrayList<RouteN> routesExecuted;
     private static boolean routesAvailable = true;
+    private static ArrayList<DrivingData> carsRepport;
 
     public MobilityCompany(String _companyHost, int _bankPort, ServerSocket _serverSocket, ArrayList<RouteN> _routes, SumoTraciConnection _sumo)
     {
@@ -40,6 +43,7 @@ public class MobilityCompany extends Thread
         routesToExe = new ArrayList<RouteN>();
         routesInExe = new ArrayList<RouteN>();
         routesExecuted = new ArrayList<RouteN>();
+        carsRepport = new ArrayList<DrivingData>();
         account = new Account(100000.0, "MobilityCompany", "mc123");
         companyHost = _companyHost;
         bankPort = _bankPort;
@@ -60,6 +64,9 @@ public class MobilityCompany extends Thread
 
             CompanyChannelCreator ccc = new CompanyChannelCreator(socketCli, serverSocket, account);
             ccc.start();
+            ccc.join();
+            ExcelCompany ec = new ExcelCompany(this);
+            ec.start();
 
             boolean fimRotasNotificado = false; // evita que a mensagem "Rotas terminadas" seja enviado continuamente
 
@@ -85,6 +92,24 @@ public class MobilityCompany extends Thread
             e.printStackTrace();
         }
     }
+
+    public String getAccountLogin() {
+        return account.getLogin();
+    }
+
+    public boolean isCarsRepportEmpty() {
+        return carsRepport.isEmpty();
+    }
+
+    public static synchronized void addRepport(DrivingData _repport)
+    {
+        carsRepport.add(_repport);
+    }
+
+    public DrivingData removeRepport() {
+        return carsRepport.remove(0);
+    }
+
     
     /**Libera uma rota para o cliente que a solicitou. Para isso, remove de routesToExe e adiciona em routesInExe
      * @return route RouteN - Rota do topo da ArrayList de rotas

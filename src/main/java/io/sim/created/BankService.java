@@ -43,6 +43,10 @@ public class BankService implements Serializable
         return destino;
     }
 
+    public Timestamp getTimestamp() {
+        return timestamp;
+    }
+
     public void setTimeStamp(Timestamp _timestamp)
     {
         this.timestamp = _timestamp;

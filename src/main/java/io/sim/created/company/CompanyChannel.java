@@ -80,7 +80,7 @@ public class CompanyChannel extends Thread
                 }
                 else if(mensagem.equals("rodando") || mensagem.equals("abastecendo"))
                 {
-                    // TODO adicionar rotas em uma lista para o relatorio
+                    MobilityCompany.addRepport(ddIn);
                 }
                 else if (mensagem.equals("encerrado"))
                 {

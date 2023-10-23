@@ -59,6 +59,10 @@ public class FuelStation extends Thread
         }
     }
 
+    public String getAccountLogin() {
+        return account.getLogin();
+    }
+
     public static boolean fuel(Car _car, double _fuelQtd) throws InterruptedException
     {
         semaphore.acquire();

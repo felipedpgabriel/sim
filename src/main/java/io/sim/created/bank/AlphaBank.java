@@ -23,6 +23,7 @@ public class AlphaBank extends Thread
     private static ArrayList<Account> accounts;
     private static ArrayList<BankService> bankServices;
     private static boolean conectionsInit;
+    private static boolean accountsEnded;
 
     /**Contrutor da classe AlphaBank.
      * @param serverSocket ServerSocket - Socket para conexao 
@@ -35,6 +36,7 @@ public class AlphaBank extends Thread
         accounts = new ArrayList<Account>();
         bankServices = new ArrayList<BankService>();
         conectionsInit = false;
+        accountsEnded = false;
     }
 
     @Override
@@ -55,8 +57,14 @@ public class AlphaBank extends Thread
             while(!accounts.isEmpty() || !conectionsInit)
             {
                 sleep(EnvSimulator.ACQUISITION_RATE);
+                if(accounts.isEmpty())
+                {
+                    System.out.println("Contas encerradas");
+                    accountsEnded = true;
+                }
             }
-            System.out.println("Contas encerradas");
+
+            eb.join();
         }
         catch (InterruptedException e)
         {
@@ -72,6 +80,10 @@ public class AlphaBank extends Thread
 
     public BankService removeServices() {
         return bankServices.remove(0);
+    }
+
+    public static boolean isAccountsEnded() {
+        return accountsEnded;
     }
 
     /**Adiciona as contas na lista.

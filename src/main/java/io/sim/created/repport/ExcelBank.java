@@ -21,13 +21,14 @@ public class ExcelBank extends Thread
     {
         try
         {
-            while(bank.isAlive())
+            long sleepTime = EnvSimulator.ACQUISITION_RATE/3;
+            while(!AlphaBank.isAccountsEnded() || !bank.isBankServicesEmpty()) // bank.isAlive()
             {
                 if(!bank.isBankServicesEmpty())
                 {
                     ExcelRepport.updateSSBankService(this.bank.removeServices());
                 }
-                sleep(EnvSimulator.ACQUISITION_RATE/3);
+                sleep(sleepTime);
             }
         }
         catch (EncryptedDocumentException | IOException | InterruptedException e)

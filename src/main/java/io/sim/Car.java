@@ -15,7 +15,7 @@ import io.sim.created.CarFuelManager;
 import io.sim.created.RouteN;
 import io.sim.created.company.MobilityCompany;
 import io.sim.created.messages.Cryptography;
-import io.sim.created.messages.JSONConverter;
+import io.sim.created.messages.JSONconverter;
 
 /**Define os atributos que coracterizam um Carro.
  * Por meio de metodos get da classe Vehicle, 
@@ -131,7 +131,7 @@ public class Car extends Vehicle implements Runnable
 					if(!isRouteFineshed(edgeAtual, edgeFinal))
 					{
 						this.carRepport = this.atualizaSensores(previousLat, previousLon); // TODO tentar trocar para TransportService
-						// cfm.setFuelConsumption(this.carRepport.getFuelConsumption());
+						cfm.setFuelConsumption(this.carRepport.getFuelConsumption()/950);
 						// System.out.println("Consumo: " + cfm.getFuelConsumption());
 						// System.out.println("Distancia percorrida: " + this.distanceCovered + "\n Distancia repport: "
 						// + this.carRepport.getDistance());
@@ -432,7 +432,7 @@ public class Car extends Vehicle implements Runnable
 
 	private void write(DrivingData _carRepport) throws Exception
 	{
-		String jsMsg = JSONConverter.drivingDataToString(_carRepport);
+		String jsMsg = JSONconverter.drivingDataToString(_carRepport);
 		byte[] msgEncrypt = Cryptography.encrypt(jsMsg);
 		saida.writeInt(msgEncrypt.length);
 		saida.write(msgEncrypt);
@@ -443,7 +443,7 @@ public class Car extends Vehicle implements Runnable
 		int numBytes = entrada.readInt();
 		byte[] msgEncrypt = entrada.readNBytes(numBytes);
 		String msgDecrypt = Cryptography.decrypt(msgEncrypt);
-		return JSONConverter.stringToRouteN(msgDecrypt);
+		return JSONconverter.stringToRouteN(msgDecrypt);
 	}
 
 	private boolean isRouteFineshed(String _edgeAtual, String _edgeFinal)

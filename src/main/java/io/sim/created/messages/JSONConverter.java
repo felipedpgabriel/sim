@@ -9,7 +9,7 @@ import io.sim.created.RouteN;
 /**Classe para tratar as comunicacoes de Cl
  * 
  */
-public class JSONConverter
+public class JSONconverter
 {
     /**Converte uma string no formato JSON para um objeto do tipo RouteN
      * @param _string String - no formato JSON

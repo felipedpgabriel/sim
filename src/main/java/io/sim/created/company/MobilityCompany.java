@@ -15,7 +15,7 @@ import io.sim.created.BankService;
 import io.sim.created.RouteN;
 import io.sim.created.bank.AlphaBank;
 import io.sim.created.messages.Cryptography;
-import io.sim.created.messages.JSONConverter;
+import io.sim.created.messages.JSONconverter;
 import io.sim.created.repport.ExcelCompany;
 import it.polito.appeal.traci.SumoTraciConnection;
 
@@ -75,7 +75,7 @@ public class MobilityCompany extends Thread
                 sleep(EnvSimulator.ACQUISITION_RATE);
                 if(routesToExe.isEmpty() && !fimRotasNotificado) // && routesInExe.isEmpty()
                 {
-                    System.out.println("Rotas terminadas");
+                    System.out.println("Distribuicao de rotas terminadas");
                     routesAvailable = false;
                     fimRotasNotificado = true;
                 }
@@ -83,9 +83,10 @@ public class MobilityCompany extends Thread
             BankService bs = BankService.createService("Encerrar");
             write(bs);
             socketCli.close();
-            System.out.println("MobilityCompany encerrada...");
             System.out.println("Saldo Company: " + account.getSaldo());
             AlphaBank.encerrarConta(account.getLogin());
+            ec.join();
+            System.out.println("MobilityCompany encerrada...");
             }
         catch (Exception e)
         {
@@ -108,6 +109,10 @@ public class MobilityCompany extends Thread
 
     public DrivingData removeRepport() {
         return carsRepport.remove(0);
+    }
+
+    public static boolean isRoutesInExeEmpty() {
+        return routesInExe.isEmpty();
     }
 
     
@@ -184,7 +189,7 @@ public class MobilityCompany extends Thread
 
     private void write(BankService _bankService) throws Exception
 	{
-		String jsMsg = JSONConverter.bankServiceToString(_bankService);
+		String jsMsg = JSONconverter.bankServiceToString(_bankService);
 		byte[] msgEncrypt = Cryptography.encrypt(jsMsg);
 		saidaCli.writeInt(msgEncrypt.length);
 		saidaCli.write(msgEncrypt);

@@ -11,7 +11,7 @@ import io.sim.created.Account;
 import io.sim.created.RouteN;
 import io.sim.created.bank.AlphaBank;
 import io.sim.created.messages.Cryptography;
-import io.sim.created.messages.JSONConverter;
+import io.sim.created.messages.JSONconverter;
 
 public class CompanyChannel extends Thread
 {
@@ -125,7 +125,7 @@ public class CompanyChannel extends Thread
 
     private void write(RouteN _route) throws Exception
 	{
-		String jsMsg = JSONConverter.routeNtoString(_route);
+		String jsMsg = JSONconverter.routeNtoString(_route);
 		byte[] msgEncrypt = Cryptography.encrypt(jsMsg);
 		saidaServ.writeInt(msgEncrypt.length);
 		saidaServ.write(msgEncrypt);
@@ -136,6 +136,6 @@ public class CompanyChannel extends Thread
 		int numBytes = entradaServ.readInt();
 		byte[] msgEncrypt = entradaServ.readNBytes(numBytes);
 		String msgDecrypt = Cryptography.decrypt(msgEncrypt);
-		return JSONConverter.stringToDrivingData(msgDecrypt);
+		return JSONconverter.stringToDrivingData(msgDecrypt);
 	}
 }

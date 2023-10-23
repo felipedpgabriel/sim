@@ -7,7 +7,7 @@ import io.sim.Car;
 import io.sim.EnvSimulator;
 import io.sim.created.bank.AlphaBank;
 import io.sim.created.messages.Cryptography;
-import io.sim.created.messages.JSONConverter;
+import io.sim.created.messages.JSONconverter;
 
 import java.net.Socket;
 
@@ -81,7 +81,7 @@ public class FuelStation extends Thread
 
     private void write(BankService _bankService) throws Exception
 	{
-		String jsMsg = JSONConverter.bankServiceToString(_bankService);
+		String jsMsg = JSONconverter.bankServiceToString(_bankService);
 		byte[] msgEncrypt = Cryptography.encrypt(jsMsg);
 		saida.writeInt(msgEncrypt.length);
 		saida.write(msgEncrypt);

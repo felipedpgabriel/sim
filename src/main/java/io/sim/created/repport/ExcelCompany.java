@@ -22,13 +22,14 @@ public class ExcelCompany extends Thread
     {
         try
         {
-            while(company.isAlive())
+            long sleepTime = EnvSimulator.ACQUISITION_RATE/EnvSimulator.NUM_DRIVERS;
+            while(!MobilityCompany.isRoutesInExeEmpty() || !company.isCarsRepportEmpty()) // company.isAlive()
             {
                 if(!company.isCarsRepportEmpty())
                 {
                     ExcelRepport.updateSSDrivingData(this.company.removeRepport());
                 }
-                sleep(EnvSimulator.ACQUISITION_RATE/3);
+                sleep(sleepTime);
             }
         }
         catch (EncryptedDocumentException | IOException | InterruptedException e)

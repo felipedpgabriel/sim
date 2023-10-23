@@ -10,7 +10,7 @@ public class CarFuelManager extends Thread
 
     public CarFuelManager(Car car) {
         this.car = car;
-        this.fuelConsumption = EnvSimulator.FUEL_CONSUMPTION; // ml/s
+        this.fuelConsumption = 0; // ml/s
     }
 
     @Override

@@ -6,7 +6,7 @@ import java.net.Socket;
 
 import io.sim.created.BankService;
 import io.sim.created.messages.Cryptography;
-import io.sim.created.messages.JSONConverter;
+import io.sim.created.messages.JSONconverter;
 
 public class BankChannel extends Thread
 {
@@ -65,6 +65,6 @@ public class BankChannel extends Thread
 		int numBytes = entrada.readInt();
 		byte[] msgEncrypt = entrada.readNBytes(numBytes);
 		String msgDecrypt = Cryptography.decrypt(msgEncrypt);
-		return JSONConverter.stringToBankService(msgDecrypt);
+		return JSONconverter.stringToBankService(msgDecrypt);
 	}
 }

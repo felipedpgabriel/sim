@@ -10,7 +10,7 @@ import io.sim.Car;
 import io.sim.EnvSimulator;
 import io.sim.created.bank.AlphaBank;
 import io.sim.created.messages.Cryptography;
-import io.sim.created.messages.JSONConverter;
+import io.sim.created.messages.JSONconverter;
 
 public class Driver extends Thread
 {
@@ -22,7 +22,6 @@ public class Driver extends Thread
     private String driverID;
     private Account account;
     private Car car; // private Car car;
-    // private static final double FUEL_PRICE = 5.87;
     private long acquisitionRate;
     // private ArrayList<RouteN> routeToExe = new ArrayList<RouteN>();
     private ArrayList<RouteN> routesExecuted;
@@ -31,7 +30,7 @@ public class Driver extends Thread
 
     public Driver(String driverHost, int servPort, String driverID, Car car, long acquisitionRate)
     {
-        account = new Account(41, driverID, (driverID + "123")); // 0
+        account = new Account(41.10/2, driverID, (driverID + "123"));
         this.driverHost = driverHost;
         this.servPort = servPort;
         this.driverID = driverID;
@@ -136,7 +135,7 @@ public class Driver extends Thread
 
     private void write(BankService _bankService) throws Exception
 	{
-		String jsMsg = JSONConverter.bankServiceToString(_bankService);
+		String jsMsg = JSONconverter.bankServiceToString(_bankService);
 		byte[] msgEncrypt = Cryptography.encrypt(jsMsg);
 		saida.writeInt(msgEncrypt.length);
 		saida.write(msgEncrypt);

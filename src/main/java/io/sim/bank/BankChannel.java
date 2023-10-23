@@ -1,0 +1,79 @@
+package io.sim.bank;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.net.Socket;
+
+import io.sim.messages.Cryptography;
+import io.sim.messages.JSONconverter;
+
+/**
+ * Classe que representa o canal de comunicacao com o banco (Thread especifica apra cada cliente).
+ */
+public class BankChannel extends Thread
+{
+    private Socket socket;
+    private DataInputStream entrada;
+    
+    /**
+     * Construtor da classe BankChannel.
+     * @param nome String - Nome do canal.
+     * @param _socket Socket - Socket para comunicacao.
+     */
+    public BankChannel(String nome, Socket _socket)
+    {
+        super(nome);
+        this.socket = _socket;
+    }
+
+    @Override
+    public void run()
+    {
+        try
+        {
+            // Variaveis de entrada e saida do servidor
+            entrada = new DataInputStream(socket.getInputStream());
+            DataOutputStream saida = new DataOutputStream(socket.getOutputStream());
+
+            String service = "";
+            while(!service.equals("Encerrar"))
+            {
+                BankService bankService = (BankService) read();
+                service = bankService.getService();
+
+                if(service.equals("Encerrar"))
+                {
+                    System.out.println("Encerrando canal BC.");
+                    break;
+                }
+                else if(service.equals("Pagamento"))
+                {
+                    AlphaBank.transfer(bankService);
+                    AlphaBank.addBankService(bankService);
+                }
+            }
+
+            entrada.close();
+            saida.close();
+            socket.close();
+        }
+        catch (Exception e)
+        {
+            System.out.println("Erro em: " + this.getName());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Le e descriptografa a mensagem recebida (tambem resolve JSON).
+     * @return BankService - Servico bancario recebido.
+     * @throws Exception - Excecao em caso de erro na leitura ou descriptografia.
+     */
+    private BankService read() throws Exception
+    {
+        int numBytes = entrada.readInt();
+        byte[] msgEncrypt = entrada.readNBytes(numBytes);
+        String msgDecrypt = Cryptography.decrypt(msgEncrypt);
+        return JSONconverter.stringToBankService(msgDecrypt);
+    }
+}

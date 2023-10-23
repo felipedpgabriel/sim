@@ -1,5 +1,7 @@
 package io.sim;
 
+import io.sim.simulation.EnvSimulator;
+
 /**
  * Classe Princiapl com o metodo main
  */

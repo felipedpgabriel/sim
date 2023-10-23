@@ -1,0 +1,451 @@
+package io.sim.driver;
+
+import de.tudresden.sumo.cmd.Vehicle;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.net.Socket;
+
+import it.polito.appeal.traci.SumoTraciConnection;
+import it.polito.appeal.traci.TraCIException;
+import de.tudresden.sumo.objects.SumoColor;
+import de.tudresden.sumo.objects.SumoPosition2D;
+import de.tudresden.sumo.objects.SumoStringList;
+import io.sim.simulation.EnvSimulator;
+import io.sim.company.MobilityCompany;
+import io.sim.company.RouteN;
+import io.sim.messages.Cryptography;
+import io.sim.messages.JSONconverter;
+
+/**Define os atributos que coracterizam um Carro.
+ *
+ */
+public class Car extends Vehicle implements Runnable
+{
+	// atributos de cliente
+	private String carHost;
+	private int servPort;
+	private DataInputStream entrada;
+	private DataOutputStream saida;
+	// atributos da classe
+	private String carState;
+	private boolean carOn;
+	private String carID;
+	private String driverLoginID;
+	private SumoColor carColor;
+	private SumoTraciConnection sumo;
+	private int fuelType; 			// 1-diesel, 2-gasoline, 3-ethanol, 4-hybrid
+	// private int fuelPreferential; 	// 1-diesel, 2-gasoline, 3-ethanol, 4-hybrid NAO USADO
+	// private double fuelPrice; 		// price in liters
+	private int personCapacity;		// the total number of persons that can ride in this vehicle
+	private int personNumber;		// the total number of persons which are riding in this vehicle
+
+	private DrivingData carRepport;
+	private TransportService ts;
+	private RouteN route;
+	private double distanceCovered;
+	private double fuelTank;
+	private double speedDefault;
+	private boolean finished;
+	private boolean abastecendo;
+
+	public Car(boolean _carOn, String _carHost,int _servPort, String _carID, String _driverLoginID,SumoColor _carColor, 
+	SumoTraciConnection _sumo, int _fuelType, int _personCapacity, int _personNumber) throws Exception
+	{
+		// NAO USADO int _fuelPreferential | double fuelPrice
+		this.carState = "aguardando";
+		this.carHost = _carHost;
+		this.servPort = _servPort;
+		this.carOn = _carOn;
+		this.carID = _carID;
+		this.driverLoginID = _driverLoginID;
+		this.carColor = _carColor;
+		this.sumo = _sumo;
+		this.setFuelType(_fuelType);
+		// this.setFuelPreferential(_fuelPreferential);
+		// this.fuelPrice = _fuelPrice; NAO USADO
+		this.personCapacity = _personCapacity;
+		this.personNumber = _personNumber;
+		this.fuelTank = EnvSimulator.MAX_FUEL_TANK * 1000; // passar para ml
+		this.speedDefault = EnvSimulator.SPEED_DEFAULT/3.6; // ideal 80/3.6
+		this.finished = false;
+		this.abastecendo = false;
+		this.carRepport = this.updateDrivingData(this.carState, "");
+	}
+
+	@Override
+	public void run()
+	{
+		System.out.println(this.carID + " iniciado.");
+		try
+		{
+			// Conexoes cliente
+            Socket socket = new Socket(this.carHost, this.servPort);
+            entrada = new DataInputStream(socket.getInputStream());
+            saida = new DataOutputStream(socket.getOutputStream());
+
+			CarFuelManager cfm = new CarFuelManager(this); 
+			cfm.start();
+
+			while(!finished)
+			{
+				write(this.carRepport);
+				System.out.println(this.carID + " aguardando rota.");
+				route = (RouteN) read();
+				if(route.getRouteID().equals("-1"))
+				{
+					System.out.println(this.carID +" - Sem rotas a receber.");
+					finished = true;
+					break;
+				}
+				System.out.println(this.carID + " iniciando rota " + route.getRouteID());
+				ts = new TransportService(this.carID, route,this, this.sumo);
+				ts.start();
+				String edgeFinal = this.getEdgeFinal(); 
+				this.carOn = true;
+				while(!MobilityCompany.estaNoSUMO(this.carID, this.sumo)) //esperar estar no SUMO
+				{
+					Thread.sleep(EnvSimulator.ACQUISITION_RATE);
+				}
+				// atualiza informacoes iniciais
+				String edgeAtual = (String) this.sumo.do_job_get(Vehicle.getRoadID(this.carID));
+				double[] coordGeo = this.convertGeo();
+				double previousLat = coordGeo[0];
+				double previousLon = coordGeo[1];
+				this.distanceCovered = 0;
+
+				while (this.carOn) // && MobilityCompany.estaNoSUMO(this.carID, sumo)
+				{
+					if(isRouteFineshed(edgeAtual, edgeFinal)) // TODO IllegalStateException
+					{
+						System.out.println(this.carID + " acabou a rota " + this.route.getRouteID());
+						this.carState = "finalizado";
+						this.carRepport = this.updateDrivingData(this.carState);
+						write(this.carRepport);
+						this.carOn = false;
+						break;
+					}
+					Thread.sleep(EnvSimulator.ACQUISITION_RATE);
+					if(!isRouteFineshed(edgeAtual, edgeFinal))
+					{
+						this.carRepport = this.atualizaSensores(previousLat, previousLon); // TODO tentar trocar para TransportService
+						cfm.setFuelConsumption(this.carRepport.getFuelConsumption()/950);
+						// System.out.println("Consumo: " + cfm.getFuelConsumption());
+						// System.out.println("Distancia percorrida: " + this.distanceCovered + "\n Distancia repport: "
+						// + this.carRepport.getDistance());
+						if(this.carRepport.getCarState().equals("finalizado"))
+						{
+							write(this.carRepport);
+							this.carOn = false;
+							break;
+						}
+						else
+						{
+							previousLat = carRepport.getLatitude();
+							previousLon = carRepport.getLongitude();
+							write(this.carRepport);
+							edgeAtual = (String) this.sumo.do_job_get(Vehicle.getRoadID(this.carID));
+						}
+					}
+				}
+				// System.out.println(this.carID + " off.");
+
+				if(!finished)
+				{
+					this.carRepport = this.updateDrivingData("aguardando");
+				}
+				if(finished)
+				{
+					this.carRepport = this.updateDrivingData("encerrado");
+				}
+			}
+			System.out.println("Encerrando: " + carID);
+			entrada.close();
+			saida.close();
+			socket.close();
+        }
+		catch (TraCIException e)
+		{
+			System.out.println(this.carID + " erro na rota: " + this.carRepport.getRouteIDSUMO());
+			this.carState = "encerrado";
+			this.carRepport = this.updateDrivingData(this.carState);
+			try {
+				write(this.carRepport);
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+            e.printStackTrace();
+        }
+		catch (Exception e)
+		{
+            e.printStackTrace();
+        }
+
+		System.out.println(this.carID + " encerrado.");
+	}
+
+	private DrivingData atualizaSensores(double _initiLat, double _initLon) {
+		DrivingData repport = updateDrivingData("aguardando", "");
+		try {
+			if (!this.sumo.isClosed()) {
+				double[] coordGeo = this.convertGeo();
+				double currentLat = coordGeo[0];
+				double currentLon = coordGeo[1];
+				double carSpeed;
+
+				if(this.abastecendo)
+				{
+					this.carState = "abastecendo";
+					carSpeed = 0;
+				}
+				else
+				{
+					this.carState = "rodando";
+					carSpeed = this.speedDefault;
+				}
+				
+				// Criacao dos dados de conducao do veiculo
+				repport = updateDrivingData(this.carState, this.driverLoginID, System.nanoTime(), this.carID,
+				(String) this.sumo.do_job_get(Vehicle.getRouteID(this.carID)), (double) this.sumo.do_job_get(Vehicle.getSpeed(this.carID)),
+				this.updateDistance(currentLat,currentLon,_initiLat, _initLon),
+				(double) this.sumo.do_job_get(Vehicle.getFuelConsumption(this.carID)), this.fuelType,
+				(double) this.sumo.do_job_get(Vehicle.getCO2Emission(this.carID)), currentLon, currentLat);
+						
+				// Vehicle's fuel consumption in ml/s during this time step,
+				// to get the value for one step multiply with the step length; error value:
+				// -2^30
+
+				// Vehicle's CO2 emissions in mg/s during this time step,
+				// to get the value for one step multiply with the step length; error value:
+				// -2^30
+				
+				// 1/*averageFuelConsumption (calcular)*/,
+				this.sumo.do_job_set(Vehicle.setSpeedMode(this.carID, 31));
+				this.setSpeed(carSpeed);
+
+			} else {
+				this.carOn = false;
+				this.carState = "finalizado";
+				this.carRepport = this.updateDrivingData(this.carState);
+				System.out.println("SUMO is closed...");
+			}
+		} catch (Exception e) {
+			// e.printStackTrace();
+			System.out.println(this.carID + " erro no sumo.");
+			return this.updateDrivingData("encerrado");			
+		}
+
+		return repport;
+	}
+
+	private double[] convertGeo() throws Exception {
+		SumoPosition2D sumoPosition2D = (SumoPosition2D) sumo.do_job_get(Vehicle.getPosition(this.carID));
+
+		double x = sumoPosition2D.x; // coordenada X em metros
+		double y = sumoPosition2D.y; // coordenada Y em metros
+
+		double raioTerra = 6371000; // raio medio da Terra em metros
+		
+		// retirados do sumo
+		double latRef = -22.986731;
+		double lonRef = -43.217054;
+
+		// Conversao de metros para graus
+		double lat = latRef + (y / raioTerra) * (180 / Math.PI);
+		double lon = lonRef + (x / raioTerra) * (180 / Math.PI) / Math.cos(latRef * Math.PI / 180);
+
+		double[] coordGeo = new double[] { lat, lon };
+		return coordGeo;
+	}
+
+	public double calcDesloc(double lat1, double lon1, double lat2, double lon2) {
+		double raioTerra = 6378100;
+	
+		// Diferenças das latitudes e longitudes
+		double latDiff = Math.toRadians(lat2 - lat1);
+		double lonDiff = Math.toRadians(lon2 - lon1);
+	
+		// Fórmula de Haversine
+		double a = Math.sin(latDiff / 2) * Math.sin(latDiff / 2) +
+		Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.sin(lonDiff / 2) * Math.sin(lonDiff / 2);
+		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+		double distancia = raioTerra * c;
+	
+		return distancia;
+	}
+
+	private double updateDistance(double _previousLat, double _previousLon,double _currentLat, double _currentLon) throws Exception {
+
+		double deslocamento = calcDesloc(_previousLat, _previousLon, _currentLat, _currentLon);
+		this.distanceCovered += deslocamento;
+
+		if (this.distanceCovered > (this.carRepport.getDistance() + EnvSimulator.PAYABLE_DISTANCE)) {
+			return this.carRepport.getDistance() + (EnvSimulator.PAYABLE_DISTANCE);
+		}
+		return this.carRepport.getDistance();
+	} 
+
+	private DrivingData updateDrivingData(String _carState, String _driverLoginID,long _timeStamp, String _autoID, String _routeIDSUMO,
+	double _speed, double _distance, double _fuelConsumption, int _fuelType, double _co2Emission, double _longitude, double _latitude)
+	{
+		DrivingData repport = new DrivingData(_carState, _driverLoginID, _timeStamp, _autoID, _routeIDSUMO, _speed, _distance, _fuelConsumption,
+		_fuelType, _co2Emission,_longitude, _latitude);
+		return repport;
+	}
+
+	private DrivingData updateDrivingData(String _carState, String _routeIDSUMO)
+	{
+		DrivingData repport = updateDrivingData(_carState, this.driverLoginID, 0 , this.carID, _routeIDSUMO, 0, 0,
+		0, this.fuelType, 0,0,0);
+		return repport;	
+	}
+
+	private DrivingData updateDrivingData(String _carState)
+	{
+		DrivingData repport = updateDrivingData(_carState, this.route.getRouteID());
+		return repport;	
+	}
+
+	public double getSpeedDefault() {
+		return speedDefault;
+	}
+
+	public void setcarState(String carState) {
+		this.carState = carState;
+	}
+
+	public boolean isAbastecendo() {
+		return abastecendo;
+	}
+
+	public void setAbastecendo(boolean abastecendo) {
+		this.abastecendo = abastecendo;
+	}
+
+	public double getDistanceCovered() {
+		return distanceCovered;
+	}
+
+	public RouteN getRoute() {
+		return route;
+	}
+
+	public boolean iscarOn() {
+		return this.carOn;
+	}
+
+	public void setcarOn(boolean _carOn) {
+		this.carOn = _carOn;
+	}
+
+	public boolean isFinished() {
+		return finished;
+	}
+
+	public void setfinished(boolean finished) {
+		this.finished = finished;
+	}
+
+	public String getCarID() {
+		return this.carID;
+	}
+
+	public void setFuelType(int _fuelType) {
+		if((_fuelType < 0) || (_fuelType > 4)) {
+			this.fuelType = 4;
+		} else {
+			this.fuelType = _fuelType;
+		}
+	}
+
+	// public double getFuelPrice() {
+	// 	return this.fuelPrice;
+	// }
+
+	// public void setFuelPrice(double _fuelPrice) {
+	// 	this.fuelPrice = _fuelPrice;
+	// }
+
+	public SumoColor getCarColor() {
+		return this.carColor;
+	}
+	// NAO USADO EM NENHUM LUGAR 
+	// public int getFuelPreferential() {
+	// 	return this.fuelPreferential;
+	// }
+
+	// public void setFuelPreferential(int _fuelPreferential) {
+	// 	if((_fuelPreferential < 0) || (_fuelPreferential > 4)) {
+	// 		this.fuelPreferential = 4;
+	// 	} else {
+	// 		this.fuelPreferential = _fuelPreferential;
+	// 	}
+	// }
+
+	public int getPersonCapacity() {
+		return this.personCapacity;
+	}
+
+	public int getPersonNumber() {
+		return this.personNumber;
+	}
+
+	public void setSpeed(double _speed) throws Exception
+	{
+		this.sumo.do_job_set(Vehicle.setSpeed(this.carID, _speed));
+	}
+
+	public DrivingData getCarRepport() {
+		return carRepport;
+	}
+
+	public synchronized double getFuelTank() {
+		return fuelTank;
+	}
+
+	public synchronized void setFuelTank(double _fuelTank) {
+		this.fuelTank = _fuelTank;
+	}
+
+	private void write(DrivingData _carRepport) throws Exception
+	{
+		String jsMsg = JSONconverter.drivingDataToString(_carRepport);
+		byte[] msgEncrypt = Cryptography.encrypt(jsMsg);
+		saida.writeInt(msgEncrypt.length);
+		saida.write(msgEncrypt);
+	}
+
+	private RouteN read() throws Exception
+	{
+		int numBytes = entrada.readInt();
+		byte[] msgEncrypt = entrada.readNBytes(numBytes);
+		String msgDecrypt = Cryptography.decrypt(msgEncrypt);
+		return JSONconverter.stringToRouteN(msgDecrypt);
+	}
+
+	private boolean isRouteFineshed(String _edgeAtual, String _edgeFinal)
+	{
+		boolean taNoSUMO = MobilityCompany.estaNoSUMO(this.carID, this.sumo); //TODO IllegalStateException
+		if(!taNoSUMO && (_edgeFinal.equals(_edgeAtual)))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	private String getEdgeFinal()
+	{
+		SumoStringList edge = new SumoStringList();
+		edge.clear();
+		String aux = this.route.getEdges();
+		for(String e : aux.split(" "))
+		{
+			edge.add(e);
+		}
+		return edge.get(edge.size()-1);
+	}
+}

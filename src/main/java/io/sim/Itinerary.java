@@ -13,8 +13,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-/**Representa um Itinerario de rota. PODE VIRAR A CLASSE ROUTE
- *Contem um ID e as edges para seguir
+/**classe nao mais usada e substituida por RouteN
+ *
  */
 @Obsolete
 public class Itinerary {

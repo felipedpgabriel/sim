@@ -19,6 +19,7 @@ public class CompanyChannel extends Thread
     private DataInputStream entradaServ;
     private DataOutputStream saidaServ;
     private Socket socketCli;
+    private boolean rotaFinalizada;
 
     // atributos da classe
     private Account account;
@@ -28,6 +29,7 @@ public class CompanyChannel extends Thread
         this.socketCli = _socketCli;
         this.socketServ = _socketServ;
         this.account = _account;
+        rotaFinalizada = false;
     }
 
     public void run()
@@ -68,6 +70,7 @@ public class CompanyChannel extends Thread
                     {
                         RouteN resposta = MobilityCompany.liberarRota();
                         write(resposta);
+                        rotaFinalizada = false;
                     }
                 }
                 else if(mensagem.equals("finalizado"))
@@ -77,6 +80,7 @@ public class CompanyChannel extends Thread
                     System.out.println("Rotas para executar: " + MobilityCompany.getRoutesToExeSize() +"\nRotas em execucao: " 
                     + MobilityCompany.getRoutesInExeSize() + "\nRotas executadas: "+ MobilityCompany.getRoutesExecutedSize());
                     // System.out.println("Aguardando mensagem...");
+                    rotaFinalizada = true;
                 }
                 else if(mensagem.equals("rodando") || mensagem.equals("abastecendo"))
                 {
@@ -84,6 +88,14 @@ public class CompanyChannel extends Thread
                 }
                 else if (mensagem.equals("encerrado"))
                 {
+                    if(!rotaFinalizada)
+                    {
+                        String routeID = ddIn.getRouteIDSUMO();
+                        MobilityCompany.arquivarRota(routeID);
+                        System.out.println("Rotas para executar: " + MobilityCompany.getRoutesToExeSize() +"\nRotas em execucao: " 
+                        + MobilityCompany.getRoutesInExeSize() + "\nRotas executadas: "+ MobilityCompany.getRoutesExecutedSize());
+                        rotaFinalizada = true;
+                    }
                     break;
                 }
             }

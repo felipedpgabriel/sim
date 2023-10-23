@@ -161,7 +161,7 @@ public class MobilityCompany extends Thread
                 lista = (SumoStringList) _sumo.do_job_get(Vehicle.getIDList()); // TODO IllegalStateException
                 return lista.contains(_idCar);
             } catch (Exception e) {
-                e.printStackTrace();
+                // e.printStackTrace();
                 return false;
             }
         }

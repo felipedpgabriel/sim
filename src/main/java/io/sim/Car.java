@@ -7,6 +7,7 @@ import java.io.DataOutputStream;
 import java.net.Socket;
 
 import it.polito.appeal.traci.SumoTraciConnection;
+import it.polito.appeal.traci.TraCIException;
 import de.tudresden.sumo.objects.SumoColor;
 import de.tudresden.sumo.objects.SumoPosition2D;
 import de.tudresden.sumo.objects.SumoStringList;
@@ -165,6 +166,19 @@ public class Car extends Vehicle implements Runnable
 			saida.close();
 			socket.close();
         }
+		catch (TraCIException e)
+		{
+			System.out.println(this.idAuto + " erro na rota: " + this.carRepport.getRouteIDSUMO());
+			this.carSate = "encerrado";
+			this.carRepport = this.updateDrivingData(this.carSate);
+			try {
+				write(this.carRepport);
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+            e.printStackTrace();
+        }
 		catch (Exception e)
 		{
             e.printStackTrace();
@@ -219,7 +233,7 @@ public class Car extends Vehicle implements Runnable
 				System.out.println("SUMO is closed...");
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			// e.printStackTrace();
 			System.out.println(this.idAuto + " erro no sumo.");
 			return this.updateDrivingData("encerrado");			
 		}

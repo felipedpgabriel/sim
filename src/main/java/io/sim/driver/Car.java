@@ -129,7 +129,7 @@ public class Car extends Vehicle implements Runnable
 					if(!isRouteFineshed(edgeAtual, edgeFinal))
 					{
 						this.carRepport = this.atualizaSensores(previousLat, previousLon); // TODO tentar trocar para TransportService
-						cfm.setFuelConsumption(this.carRepport.getFuelConsumption()/950);
+						cfm.setFuelConsumption(this.carRepport.getFuelConsumption()/800);
 						// System.out.println("Consumo: " + cfm.getFuelConsumption());
 						// System.out.println("Distancia percorrida: " + this.distanceCovered + "\n Distancia repport: "
 						// + this.carRepport.getDistance());
@@ -245,7 +245,7 @@ public class Car extends Vehicle implements Runnable
 		double x = sumoPosition2D.x; // coordenada X em metros
 		double y = sumoPosition2D.y; // coordenada Y em metros
 
-		double raioTerra = 6371000; // raio medio da Terra em metros
+		double raioTerra = 6378100; // raio medio da Terra em metros
 		
 		// retirados do sumo
 		double latRef = -22.986731;

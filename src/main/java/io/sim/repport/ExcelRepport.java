@@ -18,14 +18,11 @@ public class ExcelRepport
     private static final String FILE_NAME_DD = "DrivingDataRepport.xlsx";
     private static final String FILE_NAME_BS = "BankServiceRepport.xlsx";
     
-    public static void ssDrivingDataCreator(ArrayList<Driver> _drivers) throws IOException
+    public static void ssDrivingDataCreator() throws IOException
     {
         Workbook workbook = new XSSFWorkbook();
-        for(Driver driver : _drivers)
-        {
-            Sheet sheet = workbook.createSheet(driver.getCarID()); // nome da aba
-            headerCreatorDD(sheet);
-        }
+        Sheet sheet = workbook.createSheet("Drivers");
+        headerCreatorDD(sheet);
         FileOutputStream outputStream = new FileOutputStream(FILE_NAME_DD);
         workbook.write(outputStream);
 
@@ -54,7 +51,7 @@ public class ExcelRepport
         FileInputStream inputStream = new FileInputStream(FILE_NAME_DD);
         Workbook workbook = WorkbookFactory.create(inputStream);
         FileOutputStream outputStream = new FileOutputStream(FILE_NAME_DD);
-        Sheet sheet = workbook.getSheet(_carRepport.getCarID());
+        Sheet sheet = workbook.getSheetAt(0);
 
         int lastRowNum = sheet.getLastRowNum();
         Row ceil = sheet.createRow(lastRowNum + 1);

@@ -103,7 +103,7 @@ public class EnvSimulator extends Thread
 			}
 
 			// Cria as planilhas de Excel
-			ExcelRepport.ssDrivingDataCreator(drivers);
+			ExcelRepport.ssDrivingDataCreator();
 			ExcelRepport.ssBankServiceCreator(company.getAccountLogin(), drivers, fuelStation.getAccountLogin());
 			
 			iniciaDrivers(drivers);

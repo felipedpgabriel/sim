@@ -85,19 +85,19 @@ public class JSONconverter
         return jsonOut.toString();
 	}
 
-    public static String setJSONboolean(boolean _bool)
-    {
-        JSONObject jsonOut = new JSONObject();
-        jsonOut.put("Bool",_bool);
+    // public static String setJSONboolean(boolean _bool)
+    // {
+    //     JSONObject jsonOut = new JSONObject();
+    //     jsonOut.put("Bool",_bool);
 
-		return jsonOut.toString();
-    }
+	// 	return jsonOut.toString();
+    // }
 
-    public static boolean getJSONboolean(String _bool)
-    {
-        JSONObject jsonIn = new JSONObject(_bool);
-        return jsonIn.getBoolean("Bool");
-    }
+    // public static boolean getJSONboolean(String _bool)
+    // {
+    //     JSONObject jsonIn = new JSONObject(_bool);
+    //     return jsonIn.getBoolean("Bool");
+    // }
 
     public static BankService stringToBankService(String _transaction)
     {

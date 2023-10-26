@@ -24,7 +24,7 @@ public class AlphaBank extends Thread
 
     /**
      * Contrutor da classe AlphaBank.
-     * @param serverSocket ServerSocket - Socket para conexao.
+     * @param serverSocket ServerSocket - Socket para conexao do servidor.
      * @param numAccounts int - Numero de contas para criar.
      */
     public AlphaBank(ServerSocket serverSocket, int numAccounts)
@@ -94,7 +94,7 @@ public class AlphaBank extends Thread
     }
 
     /**
-     * Adiciona uma conta na lista.
+     * Adiciona uma conta na lista (synchronized).
      * @param _account Account - Conta para adicionar.
      */
     public static synchronized void addAccount(Account _account)
@@ -103,7 +103,7 @@ public class AlphaBank extends Thread
     }
 
     /**
-     * Busca uma conta na lista.
+     * Busca uma conta na lista (synchronized).
      * @param _login String - Login para fazer a busca.
      * @return Account - A conta buscada.
      */
@@ -121,7 +121,7 @@ public class AlphaBank extends Thread
     }
 
     /**
-     * Adiciona um BankService na lista (para relatorio).
+     * Adiciona um BankService na lista para relatorio (synchronized).
      * @param _bankService BankService - Servico com transacao a ser registrada.
      */
     public static synchronized void addBankService(BankService _bankService)
@@ -163,7 +163,7 @@ public class AlphaBank extends Thread
     }
 
     /**
-     * Cria um bot de pagamento para as Threads da MobilityCompany.
+     * Cria um bot de pagamento para as Threads da MobilityCompany (synchronized).
      * @param socket Socket - Canal de comunicacao de cliente.
      * @param _loginOrigem String - Login do pagador.
      * @param _senhaOrigem String - Senha da conta do pagador.

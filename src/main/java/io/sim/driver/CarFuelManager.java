@@ -2,14 +2,21 @@ package io.sim.driver;
 
 import io.sim.simulation.EnvSimulator;
 
+/**
+ * Classe que executa o gasto de combustivel da classe Car. 
+ */
 public class CarFuelManager extends Thread
 {
     private Car car;
     private double fuelConsumption; // ml/s
 
+    /**
+     * Construtor da classe CarFuelManager.
+     * @param car
+     */
     public CarFuelManager(Car car) {
         this.car = car;
-        this.fuelConsumption = 0; // ml/s
+        this.fuelConsumption = 0;
     }
 
     @Override

@@ -35,11 +35,11 @@ public class MobilityCompany extends Thread
 
     /**
      * Construtor da classe MobilityCompany
-     * @param _companyHost String - 
-     * @param _bankPort 
-     * @param _serverSocket 
-     * @param _routes 
-     * @param _sumo 
+     * @param _companyHost String - Host para a conexao como cliente.
+     * @param _bankPort int - Porta para conexao como cliente.
+     * @param _serverSocket ServerSocket - Socket para conexao do servidor.
+     * @param _routes ArrayList<RouteN> - Rotas para distribuicao.
+     * @param _sumo SumoTraciConnection - Objeto sumo.
      */
     public MobilityCompany(String _companyHost, int _bankPort, ServerSocket _serverSocket, ArrayList<RouteN> _routes, SumoTraciConnection _sumo)
     {
@@ -66,18 +66,21 @@ public class MobilityCompany extends Thread
             Socket socketCli = new Socket(this.companyHost, this.bankPort);
             saidaCli = new DataOutputStream(socketCli.getOutputStream());
 
+            // Cria os canais de comunicação Thread com cada cliente da MobilityCompany
             CompanyChannelCreator ccc = new CompanyChannelCreator(socketCli, serverSocket, account);
             ccc.start();
             ccc.join();
+
+            // Cria a Thread de atualizacao dos relatorios do Excel
             ExcelCompany ec = new ExcelCompany(this);
             ec.start();
 
             boolean fimRotasNotificado = false; // evita que a mensagem "Rotas terminadas" seja enviado continuamente
 
-            while (routesAvailable || !routesInExe.isEmpty()) // || !routesInExe.isEmpty() IMP trocar para pagamentos
+            while (routesAvailable || !routesInExe.isEmpty())
             {
                 sleep(EnvSimulator.ACQUISITION_RATE);
-                if(routesToExe.isEmpty() && !fimRotasNotificado) // && routesInExe.isEmpty()
+                if(routesToExe.isEmpty() && !fimRotasNotificado)
                 {
                     System.out.println("Distribuicao de rotas terminadas");
                     routesAvailable = false;
@@ -98,31 +101,43 @@ public class MobilityCompany extends Thread
         }
     }
 
-    public String getAccountLogin() {
-        return account.getLogin();
-    }
-
-    public boolean isCarsRepportEmpty() {
+    /**
+     * Retorna se o atributo carsRepport esta vazio.
+     * @return boolean.
+     */
+    public boolean isCarsRepportEmpty()
+    {
         return carsRepport.isEmpty();
     }
 
+    /**
+     * Adiciona um DrivingData na lista carsRepport.
+     * @param _repport DrivingData - Dado dos carros para registro.
+     */
     public static synchronized void addRepport(DrivingData _repport)
     {
         carsRepport.add(_repport);
     }
 
+    /**
+     * Remove o primeiro elemento da lista carsRepport.
+     * @return DrivingData - Primeiro elemento da lista.
+     */
     public DrivingData removeRepport() {
         return carsRepport.remove(0);
     }
 
+    /**
+     * Retorna se a lista de rotas em execucao esta vazia.
+     * @return Primeiro elemento da lista de rotas em execucao.
+     */
     public static boolean isRoutesInExeEmpty() {
         return routesInExe.isEmpty();
     }
 
-    
     /**
-     * Libera uma rota para o cliente que a solicitou. Para isso, remove de routesToExe e adiciona em routesInExe
-     * @return route RouteN - Rota do topo da ArrayList de rotas
+     * Libera uma rota para o cliente que a solicitou. Para isso, remove de routesToExe e adiciona em routesInExe (synchronized).
+     * @return route RouteN - Rota do topo da ArrayList de rotas.
      */
     public static synchronized RouteN liberarRota()
     {
@@ -138,6 +153,10 @@ public class MobilityCompany extends Thread
         return route;
     }
 
+    /**
+     * Transfere a rota em execucao terminada na lista de rotas executadas (synchronized).
+     * @param _routeID String - ID da rota executada.
+     */
     public static synchronized void arquivarRota(String _routeID)
     {
         System.out.println("Arquivando rota: " + _routeID);
@@ -151,10 +170,12 @@ public class MobilityCompany extends Thread
         }
     }
 
-    public static boolean areRoutesAvailable() {
-        return routesAvailable;
-    }
-
+    /**
+     * Retorna se um carro esta na lista de veiculos do sumo (synchronized).
+     * @param _idCar String - ID do carro para analise.
+     * @param _sumo SumoTraciConnection - Objeto sumo.
+     * @return boolean.
+     */
     public static synchronized boolean estaNoSUMO(String _idCar, SumoTraciConnection _sumo)
 	{
         try
@@ -168,21 +189,11 @@ public class MobilityCompany extends Thread
         }
 	}
 
-    public static int getRoutesToExeSize()
-    {
-        return routesToExe.size();
-    }
-
-    public static int getRoutesInExeSize()
-    {
-        return routesInExe.size();
-    }
-
-    public static int getRoutesExecutedSize()
-    {
-        return routesExecuted.size();
-    }
-
+    /**
+     * Converte para JSON e criptografa a mensagem para envio.
+     * @param _bankService BankService - Objeto representando a transacao bancaria.
+     * @throws Exception - Excecao em caso de erro na escrita ou criptografia.
+     */
     private void write(BankService _bankService) throws Exception
 	{
 		String jsMsg = JSONconverter.bankServiceToString(_bankService);
@@ -190,4 +201,48 @@ public class MobilityCompany extends Thread
 		saidaCli.writeInt(msgEncrypt.length);
 		saidaCli.write(msgEncrypt);
 	}
+
+    /**
+     * Retorna o numero de rotas para executar.
+     * @return int - Numero de rotas para execucao.
+     */
+    public static int getRoutesToExeSize()
+    {
+        return routesToExe.size();
+    }
+
+    /**
+     * Retorna o numero de rotas em execucao.
+     * @return int - Numero de rotas em execucao.
+     */
+    public static int getRoutesInExeSize()
+    {
+        return routesInExe.size();
+    }
+
+    /**
+     * Retorna o numero de rotas executadas.
+     * @return int - Numero de rotas executadas.
+     */
+    public static int getRoutesExecutedSize()
+    {
+        return routesExecuted.size();
+    }
+
+    /**
+     * Retorna o login da conta da company.
+     * @return String - Login da conta.
+     */
+    public String getAccountLogin()
+    {
+        return account.getLogin();
+    }
+
+    /**
+     * Get booleano para o atributo routesAvailable.
+     * @return boolean
+     */
+    public static boolean areRoutesAvailable() {
+        return routesAvailable;
+    }
 }

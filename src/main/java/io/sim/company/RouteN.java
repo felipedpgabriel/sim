@@ -66,13 +66,19 @@ public class RouteN implements Serializable
         return routes;
     }
 
-    public String getRouteID()
-    {
+    /**
+     * Get padrao para o atributo routeID.
+     * @return String - ID da rota.
+     */
+    public String getRouteID() {
         return routeID;
     }
 
-    public String getEdges()
-    {
+    /**
+     * Get padrao para o atributo edges.
+     * @return String - Edges da rota.
+     */
+    public String getEdges() {
         return edges;
     }
 }

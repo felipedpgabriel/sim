@@ -3,12 +3,10 @@ package io.sim.company;
 import java.io.DataOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-// import java.net.Socket;
 import java.util.ArrayList;
 
 import de.tudresden.sumo.cmd.Vehicle;
 import de.tudresden.sumo.objects.SumoStringList;
-import io.sim.simulation.EnvSimulator;
 import io.sim.bank.Account;
 import io.sim.bank.AlphaBank;
 import io.sim.bank.BankService;
@@ -16,6 +14,7 @@ import io.sim.driver.DrivingData;
 import io.sim.messages.Cryptography;
 import io.sim.messages.JSONconverter;
 import io.sim.repport.ExcelCompany;
+import io.sim.simulation.EnvSimulator;
 import it.polito.appeal.traci.SumoTraciConnection;
 
 public class MobilityCompany extends Thread
@@ -27,27 +26,33 @@ public class MobilityCompany extends Thread
     // Atributos de servidor
     private static ServerSocket serverSocket;
     private static Account account;
-    // Atributos de sincronizacao
-    private static Thread oWatch;
     // Atributos da classe
     private static ArrayList<RouteN> routesToExe;
     private static ArrayList<RouteN> routesInExe;
     private static ArrayList<RouteN> routesExecuted;
-    private static boolean routesAvailable = true;
+    private static boolean routesAvailable;
     private static ArrayList<DrivingData> carsRepport;
 
+    /**
+     * Construtor da classe MobilityCompany
+     * @param _companyHost String - 
+     * @param _bankPort 
+     * @param _serverSocket 
+     * @param _routes 
+     * @param _sumo 
+     */
     public MobilityCompany(String _companyHost, int _bankPort, ServerSocket _serverSocket, ArrayList<RouteN> _routes, SumoTraciConnection _sumo)
     {
-        oWatch = new Thread();
+        this.companyHost = _companyHost;
+        this.bankPort = _bankPort;
+        serverSocket = _serverSocket;
+        account = new Account(100000.0, "MobilityCompany", "mc123");
         routesToExe = new ArrayList<RouteN>();
+        routesToExe = _routes;
         routesInExe = new ArrayList<RouteN>();
         routesExecuted = new ArrayList<RouteN>();
+        routesAvailable = true;
         carsRepport = new ArrayList<DrivingData>();
-        account = new Account(100000.0, "MobilityCompany", "mc123");
-        companyHost = _companyHost;
-        bankPort = _bankPort;
-        serverSocket = _serverSocket;
-        routesToExe = _routes;
     }
 
     @Override
@@ -115,39 +120,33 @@ public class MobilityCompany extends Thread
     }
 
     
-    /**Libera uma rota para o cliente que a solicitou. Para isso, remove de routesToExe e adiciona em routesInExe
+    /**
+     * Libera uma rota para o cliente que a solicitou. Para isso, remove de routesToExe e adiciona em routesInExe
      * @return route RouteN - Rota do topo da ArrayList de rotas
      */
-    public static RouteN liberarRota()
+    public static synchronized RouteN liberarRota()
     {
-        synchronized (oWatch)
+        if(!routesAvailable) // entrou no liberarRota(), mas acabou durante a espera
         {
-            if(!routesAvailable) // entrou no liberarRota(), mas acabou durante a espera
-            {
-                System.out.println("SMC - Sem mais rotas para liberar.");
-                RouteN route = new RouteN("-1", "00000");
-                // saida.writeUTF(routeNtoString(route));
-                return route;
-            }
-            RouteN route = routesToExe.remove(0);
-            routesInExe.add(route); // mudar para routesInExe.add(car.getID(),route) ou route.getID()
-            System.out.println("SMC - Liberando rota:\n" + route.getRouteID());
+            System.out.println("SMC - Sem mais rotas para liberar.");
+            RouteN route = new RouteN("-1", "00000");
             return route;
         }
+        RouteN route = routesToExe.remove(0);
+        routesInExe.add(route);
+        System.out.println("SMC - Liberando rota:\n" + route.getRouteID());
+        return route;
     }
 
-    public static void arquivarRota(String _routeID)
+    public static synchronized void arquivarRota(String _routeID)
     {
-        synchronized (oWatch)
+        System.out.println("Arquivando rota: " + _routeID);
+        for(int i=0;i<routesInExe.size();i++)
         {
-            System.out.println("Arquivando rota: " + _routeID);
-            for(int i=0;i<routesInExe.size();i++)
+            if(routesInExe.get(i).getRouteID().equals(_routeID))
             {
-                if(routesInExe.get(i).getRouteID().equals(_routeID))
-                {
-                    routesExecuted.add(routesInExe.remove(i));
-                    break;
-                }
+                routesExecuted.add(routesInExe.remove(i));
+                break;
             }
         }
     }
@@ -156,18 +155,16 @@ public class MobilityCompany extends Thread
         return routesAvailable;
     }
 
-    public static boolean estaNoSUMO(String _idCar, SumoTraciConnection _sumo)
+    public static synchronized boolean estaNoSUMO(String _idCar, SumoTraciConnection _sumo)
 	{
-        synchronized(oWatch)
+        try
         {
-            try {
-                SumoStringList lista;
-                lista = (SumoStringList) _sumo.do_job_get(Vehicle.getIDList()); // TODO IllegalStateException
-                return lista.contains(_idCar);
-            } catch (Exception e) {
-                // e.printStackTrace();
-                return false;
-            }
+            SumoStringList lista;
+            lista = (SumoStringList) _sumo.do_job_get(Vehicle.getIDList()); // TODO IllegalStateException
+            return lista.contains(_idCar);
+        } catch (Exception e) {
+            // e.printStackTrace();
+            return false;
         }
 	}
 

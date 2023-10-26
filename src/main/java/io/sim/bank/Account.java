@@ -26,6 +26,24 @@ public class Account
     }
 
     /**
+     * Adiciona um valor ao saldo da conta (recebimento).
+     * @param _valor double - Valor a ser adicionado ao saldo.
+     */
+    public void recieve(double _valor)
+    {
+        this.setSaldo(this.saldo + _valor);
+    }
+
+    /**
+     * Subtrai um valor do saldo da conta (pagamento).
+     * @param _valor double - Valor a ser subtraido do saldo.
+     */
+    public void pay(double _valor)
+    {
+        this.setSaldo(this.saldo - _valor);
+    }
+
+    /**
      * Get padrao para o atributo login.
      * @return String - Login da conta.
      */
@@ -59,23 +77,5 @@ public class Account
         synchronized(oWatch) {
             this.saldo = _newSaldo;
         }
-    }
-
-    /**
-     * Adiciona um valor ao saldo da conta (recebimento).
-     * @param _valor double - Valor a ser adicionado ao saldo.
-     */
-    public void recieve(double _valor)
-    {
-        this.setSaldo(this.saldo + _valor);
-    }
-
-    /**
-     * Subtrai um valor do saldo da conta (pagamento).
-     * @param _valor double - Valor a ser subtraido do saldo.
-     */
-    public void pay(double _valor)
-    {
-        this.setSaldo(this.saldo - _valor);
     }
 }

@@ -5,12 +5,12 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-import io.sim.simulation.EnvSimulator;
 import io.sim.bank.Account;
 import io.sim.bank.AlphaBank;
 import io.sim.driver.DrivingData;
 import io.sim.messages.Cryptography;
 import io.sim.messages.JSONconverter;
+import io.sim.simulation.EnvSimulator;
 
 /**
  * Classe que representa o canal de comunicacao com a empresa (Thread especifica para cada cliente).
@@ -46,12 +46,15 @@ public class CompanyChannel extends Thread
     {
         try
         {
+            // Variaveis de entrada e saida do servidor
             entradaServ = new DataInputStream(socketServ.getInputStream());
             saidaServ = new DataOutputStream(socketServ.getOutputStream());
 
             String mensagem = "";
             double previusDistance = 0;
-            while(!mensagem.equals("encerrado")) // Loop do sistema
+
+            // Loop do sistema
+            while(!mensagem.equals("encerrado"))
             {
                 DrivingData ddIn = (DrivingData) read();
                 // Verifica distancia para pagamento
@@ -63,10 +66,11 @@ public class CompanyChannel extends Thread
                     EnvSimulator.RUN_PRICE);
                 }
                 mensagem = ddIn.getCarState(); // Le solicitacao do cliente
+                // Analise dos estados do Car
                 if (mensagem.equals("aguardando"))
                 {
                     previusDistance = 0;
-                    if(!MobilityCompany.areRoutesAvailable()) // routesToExe.isEmpty()
+                    if(!MobilityCompany.areRoutesAvailable())
                     {
                         System.out.println("CC - Sem mais rotas para liberar.");
                         RouteN route = new RouteN("-1", "00000");
@@ -144,7 +148,7 @@ public class CompanyChannel extends Thread
     }
 
     /**
-     * Descriptografa, converte de JSON e le a mensagem
+     * Descriptografa, converte de JSON e le a mensagem recebida.
      * @return DrivingData - Dados de direcao lidos.
      * @throws Exception - Excecao em caso de erro na leitura.
      */

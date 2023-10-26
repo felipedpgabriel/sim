@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import io.sim.simulation.EnvSimulator;
 import io.sim.bank.Account;
+import io.sim.simulation.EnvSimulator;
 
 /**
  * Classe para criar os canais de comunicacao Thread com cada cliente de MobilityCompany.
@@ -36,10 +36,12 @@ public class CompanyChannelCreator extends Thread
         {
             try
             {
-                System.out.println("CC - Aguardando conexao " + (i + 1));
+                // Aguarda a conexao de uma nova conta
+                System.out.println("CC - Aguardando conexao " + (i + 1)); // TODO retirar futuramente
                 Socket socket = serverSocket.accept();
-                System.out.println("Carro conectado");
+                System.out.println("Carro conectado"); // TODO retirar futuramente
 
+                // Cria um novo canal de comunicacao com o cliente e inicia a Thread
                 CompanyChannel channel = new CompanyChannel(this.socketCli, socket, this.account);
                 channel.start();
             }

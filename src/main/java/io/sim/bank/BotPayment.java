@@ -12,8 +12,10 @@ import io.sim.messages.JSONconverter;
  */
 public class BotPayment extends Thread
 {
+    // Atributos de cliente
     private Socket socket;
     private DataOutputStream saida;
+    // Atributos para criacao de BankService
     private String loginOrigem;
     private String senhaOrigem;
     private String loginDestino;

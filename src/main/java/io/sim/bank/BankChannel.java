@@ -1,7 +1,6 @@
 package io.sim.bank;
 
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.net.Socket;
 
 import io.sim.messages.Cryptography;
@@ -31,21 +30,21 @@ public class BankChannel extends Thread
     {
         try
         {
-            // Variaveis de entrada e saida do servidor
+            // Variavel de saida do servidor
             entrada = new DataInputStream(socket.getInputStream());
-            DataOutputStream saida = new DataOutputStream(socket.getOutputStream());
 
             String service = "";
             while(!service.equals("Encerrar"))
             {
                 BankService bankService = (BankService) read();
                 service = bankService.getService();
-
+                
+                // Thread cliente encerrada
                 if(service.equals("Encerrar"))
                 {
                     System.out.println("Encerrando canal BC.");
                     break;
-                }
+                } // Operacao de pagamento
                 else if(service.equals("Pagamento"))
                 {
                     AlphaBank.transfer(bankService);
@@ -54,7 +53,6 @@ public class BankChannel extends Thread
             }
 
             entrada.close();
-            saida.close();
             socket.close();
         }
         catch (Exception e)
@@ -65,7 +63,7 @@ public class BankChannel extends Thread
     }
 
     /**
-     * Le e descriptografa a mensagem recebida (tambem resolve JSON).
+     * Descriptografa, converte de JSON e le a mensagem recebida.
      * @return BankService - Servico bancario recebido.
      * @throws Exception - Excecao em caso de erro na leitura ou descriptografia.
      */

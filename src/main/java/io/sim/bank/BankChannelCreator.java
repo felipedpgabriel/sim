@@ -33,7 +33,7 @@ public class BankChannelCreator extends Thread
                 // Aguarda a conexao de uma nova conta
                 Socket socket = serverSocket.accept(); 
 
-                // Cria um novo canal de comunicacao com o cliente e inicia a thread
+                // Cria um novo canal de comunicacao com o cliente e inicia a Thread
                 BankChannel channel = new BankChannel("BC" + (i + 1), socket);
                 channel.start();
             }

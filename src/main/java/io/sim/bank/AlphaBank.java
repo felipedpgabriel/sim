@@ -5,8 +5,8 @@ import java.net.Socket;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 
-import io.sim.simulation.EnvSimulator;
 import io.sim.repport.ExcelBank;
+import io.sim.simulation.EnvSimulator;
 
 /**
  * Classe do Banco que contem as contas e gerencia as transacoes financeiras.
@@ -48,6 +48,8 @@ public class AlphaBank extends Thread
             BankChannelCreator bcc = new BankChannelCreator(serverSocket, numAccounts);
             bcc.start();
             bcc.join();
+
+            // Cria a Thread de atualizacao dos relatorios do Excel
             ExcelBank eb = new ExcelBank(this);
             eb.start();
 
@@ -62,6 +64,7 @@ public class AlphaBank extends Thread
                 }
             }
 
+            // Aguarda a Thread do Excel finalizar
             eb.join();
         }
         catch (InterruptedException e)
@@ -76,7 +79,8 @@ public class AlphaBank extends Thread
      * Verifica se a lista bankServices esta vazia.
      * @return boolean
      */
-    public boolean isBankServicesEmpty() {
+    public boolean isBankServicesEmpty()
+    {
         return bankServices.isEmpty();
     }
     
@@ -84,16 +88,9 @@ public class AlphaBank extends Thread
      * Remove o primeiro item de bankServices.
      * @return BankService - Servico removido.
      */
-    public BankService removeServices() {
+    public BankService removeServices()
+    {
         return bankServices.remove(0);
-    }
-
-    /**
-     * Get booleano para o atributo accountsEnded.
-     * @return boolean
-     */
-    public static boolean isAccountsEnded() {
-        return accountsEnded;
     }
 
     /**
@@ -133,7 +130,7 @@ public class AlphaBank extends Thread
     }
 
     /**
-     * Realiza uma operacao de transferencia: tira um valor de uma conta e adiciona em outra.
+     * Realiza uma operacao de transferencia: tira um valor de uma conta e adiciona em outra (synchronized).
      * @param _bankService BankService - Servico com as informacoes para transferencia.
      */
     public static synchronized void transfer(BankService _bankService)
@@ -146,7 +143,6 @@ public class AlphaBank extends Thread
             destino.recieve(_bankService.getValor());
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
             _bankService.setTimeStamp(timestamp);
-            // System.out.println("R$ " + _bankService.getValor() + " de " + origem.getLogin() + " para " + destino.getLogin());
             System.out.println(origem.getLogin() + ": R$" + origem.getSaldo() + " | " + destino.getLogin() + ": R$" + destino.getSaldo());
         }
         else
@@ -155,7 +151,8 @@ public class AlphaBank extends Thread
         }
     }
 
-    /**Remove a conta da lista, para indicar que uma instancia Cliente foi encerrada.
+    /**
+     * Remove a conta da lista, para indicar que uma instancia Cliente foi encerrada (synchronized).
      * @param _login String - Login da conta a ser encerrada.
      */
     public static synchronized void encerrarConta(String _login)
@@ -165,26 +162,35 @@ public class AlphaBank extends Thread
         System.out.println("Encerrando conta de " + _login);
     }
 
-    /**Muda o atributo conectionsInit, para a logica de aguardar o encerramento das contas.
-     * @param _conectionsInit boolean 
-     */
-    public static void setConectionsInit(boolean _conectionsInit)
-    {
-        AlphaBank.conectionsInit = _conectionsInit;
-    }
-
-    /**Cria um bote de pagamento para as Threads da MobilityCompany.
+    /**
+     * Cria um bot de pagamento para as Threads da MobilityCompany.
      * @param socket Socket - Canal de comunicacao de cliente.
      * @param _loginOrigem String - Login do pagador.
      * @param _senhaOrigem String - Senha da conta do pagador.
      * @param _loginDestino String - Login do recebedor.
-     * @param _valor double - Valor para transferencia
+     * @param _valor double - Valor para transferencia.
      */
     public static synchronized void payment(Socket socket, String _loginOrigem, String _senhaOrigem, String _loginDestino,
     double _valor)
     {
         BotPayment bot = new BotPayment(socket, _loginOrigem, _senhaOrigem, _loginDestino, _valor);
         bot.start();
+    }
+
+    /**
+     * Set padrao para o atributo conectionsInit
+     * @param _conectionsInit boolean 
+     */
+    public static void setConectionsInit(boolean _conectionsInit){
+        AlphaBank.conectionsInit = _conectionsInit;
+    }
+
+    /**
+     * Get padrao para o atributo accountsEnded.
+     * @return boolean
+     */
+    public static boolean isAccountsEnded() {
+        return accountsEnded;
     }
 
 }

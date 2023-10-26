@@ -35,6 +35,17 @@ public class BankService implements Serializable
     }
 
     /**
+     * Cria um serviço bancario para encerramento.
+     * @param _service String - Tipo de servico (Encerrar).
+     * @return BankService - Servico bancario para encerramento.
+     */
+    public static BankService createService(String _service)
+    {
+        BankService bankService = new BankService(_service, "", "", 0, "");
+        return bankService;
+    }
+
+    /**
      * Get padrao para o atributo service.
      * @return String - Tipo de servico.
      */
@@ -86,19 +97,7 @@ public class BankService implements Serializable
      * Set padrao para o atributo timestamp.
      * @param _timestamp Timestamp - Carimbo de data/hora.
      */
-    public void setTimeStamp(Timestamp _timestamp)
-    {
+    public void setTimeStamp(Timestamp _timestamp) {
         this.timestamp = _timestamp;
-    }
-
-    /**
-     * Cria um serviço bancario para encerramento.
-     * @param _service String - Tipo de servico (Encerrar).
-     * @return BankService - Servico bancario para encerramento.
-     */
-    public static BankService createService(String _service)
-    {
-        BankService bankService = new BankService(_service, "", "", 0, "");
-        return bankService;
     }
 }

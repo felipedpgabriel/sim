@@ -1,7 +1,7 @@
-#GAT 108 - Automação Avançada 
+# GAT 108 - Automação Avançada 
 Universidade Federal de Lavras - UFLA | Engenharia de Controle e Automação
 
-##Avaliação 1
+## Avaliação 1
 
 Este projeto simula o funcionamento de uma companhia de mobilidade, segundo o diagrama abaixo:
 
@@ -9,7 +9,7 @@ Este projeto simula o funcionamento de uma companhia de mobilidade, segundo o di
 
 Usa como base o repositório [21lab-technology/sim](https://github.com/21lab-technology/sim).
 
-##Avaliação 2
+## Avaliação 2
 
-*Uso de reconciliação para definir a velocidade mais adequada para o veículo em cada trecho (considerando o tempo para cumprir a rota e o consumo).
-*Teste de escalonamento de tarefas.
+* Uso de reconciliação para definir a velocidade mais adequada para o veículo em cada trecho (considerando o tempo para cumprir a rota e o consumo).
+* Teste de escalonamento de tarefas.

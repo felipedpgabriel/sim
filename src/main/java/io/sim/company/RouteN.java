@@ -81,4 +81,12 @@ public class RouteN implements Serializable
     public String getEdges() {
         return edges;
     }
+
+    /**
+     * Set padrao para o atributo routeID.
+     * @param newID String - novo ID da rota.
+     */
+    public void setRouteID(String newID) {
+        this.routeID = newID;
+    }
 }

@@ -136,6 +136,7 @@ public class MobilityCompany extends Thread
     }
 
     /**
+     * ALTERADO PARA AV2
      * Libera uma rota para o cliente que a solicitou. Para isso, remove de routesToExe e adiciona em routesInExe (synchronized).
      * @return route RouteN - Rota do topo da ArrayList de rotas.
      */

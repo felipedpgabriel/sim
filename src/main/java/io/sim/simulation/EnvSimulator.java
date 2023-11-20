@@ -26,7 +26,7 @@ public class EnvSimulator extends Thread
 	// Quantidades 
 	private static final String ROTAS_XML = "data/dadosAV2.xml"; // "data/dadosav2.xml"
 	private static final int NUM_BOMBAS = 2;
-	public static final int NUM_DRIVERS = 1; // ideal 100
+	public static final int NUM_DRIVERS = 1; // 100 AV1 e 1 AV2
 	// Atributos Carros
 	private static final int FUEL_TYPE = 2;
 	// private static final int FUEL_PREFERENTIAL = 2; NAO USADO
@@ -44,6 +44,9 @@ public class EnvSimulator extends Thread
 	// Tempos
 	private static final long FUEL_TIME = 120; // ideal 120 [s]
 	public static final int ACQUISITION_RATE = 300; // Tempo padrao de sleeps [ms]
+	// Configura extracao de rotas
+	private static final int AV = 2; // 1 ou 2
+	private static final int AV2_cicle = 100; // ideal 100
 
     /**Construtor vazio
 	 * 
@@ -74,8 +77,28 @@ public class EnvSimulator extends Thread
 			String lHost = "127.0.0.1"; // Host padrao para todos os clientes
 			
 			// Extraindo rotas
-			ArrayList<RouteN> routes = RouteN.extractRoutes(ROTAS_XML);
-			System.out.println("ES - " + routes.size() + " rotas disponiveis.");
+			ArrayList<RouteN> routes = new ArrayList<RouteN>();
+			int av = AV;
+			if(av == 1)
+			{
+				routes = RouteN.extractRoutes(ROTAS_XML);
+				System.out.println("ES - " + routes.size() + " rotas disponiveis.");
+			}
+			else if(av == 2)
+			{
+				ArrayList<RouteN> aux_routes = new ArrayList<RouteN>();
+				for(int i = 0; i<AV2_cicle; i++)
+				{
+					aux_routes = RouteN.extractRoutes(ROTAS_XML);
+					aux_routes.get(0).setRouteID(Integer.toString(i));
+					routes.add(i, aux_routes.get(0));
+				}
+			}
+			else
+			{
+				System.err.println("Avaliacao invalida! Selecione 1 ou 2 para AV.");
+				System.exit(0);
+			}
 
 			// Iniciando Servidores
 			ServerSocket bankServer = new ServerSocket(PORT_BANK);
@@ -94,7 +117,7 @@ public class EnvSimulator extends Thread
 
 			for(int i=0;i<NUM_DRIVERS;i++) // Cria Cars e Drivers
 			{
-				SumoColor color = new SumoColor(0, 255, 0, 126);// TODO funcao para cria cor
+				SumoColor color = new SumoColor(0, 82, 159, 126);// TODO funcao para cria cor
 				String driverID = "D" + (i+1);
 				Car car = new Car(true,lHost,PORT_COMPANY, ("CAR" + (i+1)), driverID, color, sumo, FUEL_TYPE,
 				PERSON_CAPACITY, PERSON_NUMBER);

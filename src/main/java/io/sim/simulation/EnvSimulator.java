@@ -43,10 +43,10 @@ public class EnvSimulator extends Thread
 	public static final double PAYABLE_DISTANCE = 1000; // ideal 1000 [m]
 	// Tempos
 	private static final long FUEL_TIME = 120; // ideal 120 [s]
-	public static final int ACQUISITION_RATE = 300; // Tempo padrao de sleeps [ms]
+	public static final int ACQUISITION_RATE = 50; // Tempo padrao de sleeps [ms]
 	// Configura extracao de rotas
 	private static final int AV = 2; // 1 ou 2
-	private static final int AV2_cicle = 100; // ideal 100
+	private static final int AV2_cicle = 1; // ideal 100
 
     /**Construtor vazio
 	 * 
@@ -93,10 +93,12 @@ public class EnvSimulator extends Thread
 					aux_routes.get(0).setRouteID(Integer.toString(i));
 					routes.add(i, aux_routes.get(0));
 				}
+				System.out.println("ES - Rodando rotas " + routes.size() + " vezes.");
 			}
 			else
 			{
 				System.err.println("Avaliacao invalida! Selecione 1 ou 2 para AV.");
+				sumo.close();
 				System.exit(0);
 			}
 

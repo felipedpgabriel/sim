@@ -23,7 +23,7 @@ public class ExcelCompany extends Thread
         try
         {
             long sleepTime = EnvSimulator.ACQUISITION_RATE/EnvSimulator.NUM_DRIVERS;
-            while(!MobilityCompany.isRoutesInExeEmpty() || !company.isCarsRepportEmpty()) // company.isAlive()
+            while(!MobilityCompany.isServiceEnded() || !company.isCarsRepportEmpty()) // company.isAlive()
             {
                 if(!company.isCarsRepportEmpty())
                 {

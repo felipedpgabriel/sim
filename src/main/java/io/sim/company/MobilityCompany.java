@@ -77,7 +77,7 @@ public class MobilityCompany extends Thread
 
             boolean fimRotasNotificado = false; // evita que a mensagem "Rotas terminadas" seja enviado continuamente
 
-            while (routesAvailable || !routesInExe.isEmpty())
+            while (!isServiceEnded())
             {
                 sleep(EnvSimulator.ACQUISITION_RATE);
                 if(routesToExe.isEmpty() && !fimRotasNotificado)
@@ -99,6 +99,11 @@ public class MobilityCompany extends Thread
         {
             e.printStackTrace();
         }
+    }
+
+    public static boolean isServiceEnded()
+    {
+        return !routesAvailable && routesInExe.isEmpty();
     }
 
     /**

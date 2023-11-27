@@ -24,7 +24,7 @@ public class EnvSimulator extends Thread
 	private static final int PORT_COMPANY = 11111;
 	private static final int PORT_BANK = 22222;
 	// Quantidades 
-	private static final String ROTAS_XML = "data/dadosAV2.xml"; // "data/dadosav2.xml"
+	private static final String ROTAS_XML = "data/dados3.xml"; // "data/dadosav2.xml" | dados3 10 edges para teste
 	private static final int NUM_BOMBAS = 2;
 	public static final int NUM_DRIVERS = 1; // 100 AV1 e 1 AV2
 	// Atributos Carros

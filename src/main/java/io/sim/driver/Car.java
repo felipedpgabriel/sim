@@ -45,6 +45,7 @@ public class Car extends Vehicle implements Runnable
 	private double speedDefault;
 	private boolean finished;
 	private boolean abastecendo;
+	private int av;
 
 	/**
 	 * Construtor da classe Car.
@@ -58,10 +59,11 @@ public class Car extends Vehicle implements Runnable
 	 * @param _fuelType int - Tipo de combustivel do Car.
 	 * @param _personCapacity int - Capacidade de pessoas para transporte.
 	 * @param _personNumber int - Numero de pessoas no Car.
+	 * @param _av int - Indica qual avaliacao a simulacao se refere.
 	 * @throws Exception
 	 */
 	public Car(boolean _carOn, String _carHost,int _servPort, String _carID, String _driverLoginID, SumoColor _carColor, 
-	SumoTraciConnection _sumo, int _fuelType, int _personCapacity, int _personNumber) throws Exception
+	SumoTraciConnection _sumo, int _fuelType, int _personCapacity, int _personNumber, int _av) throws Exception
 	{
 		this.carHost = _carHost;
 		this.servPort = _servPort;
@@ -79,6 +81,7 @@ public class Car extends Vehicle implements Runnable
 		this.speedDefault = EnvSimulator.SPEED_DEFAULT/3.6;
 		this.finished = false;
 		this.abastecendo = false;
+		this.av = _av;
 	}
 
 	@Override
@@ -231,7 +234,7 @@ public class Car extends Vehicle implements Runnable
 				// -2^30
 				
 				// 1/*averageFuelConsumption (calcular)*/,
-				this.sumo.do_job_set(Vehicle.setSpeedMode(this.carID, 31));
+				this.sumo.do_job_set(Vehicle.setSpeedMode(this.carID, 31)); // TODO mudar para 27
 				this.setSpeed(carSpeed);
 
 			} else {
@@ -310,15 +313,23 @@ public class Car extends Vehicle implements Runnable
      * @return double - Distancia atualizada em metros.
      * @throws Exception
      */
-	private double updateDistance(double _previousLat, double _previousLon,double _currentLat, double _currentLon) throws Exception {
+	private double updateDistance(double _previousLat, double _previousLon,double _currentLat, double _currentLon) throws Exception
+	{
 
 		double deslocamento = calcDesloc(_previousLat, _previousLon, _currentLat, _currentLon);
 		this.distanceCovered += deslocamento;
-
-		if (this.distanceCovered > (this.carRepport.getDistance() + EnvSimulator.PAYABLE_DISTANCE)) {
-			return this.carRepport.getDistance() + (EnvSimulator.PAYABLE_DISTANCE);
+		if(this.av == 2)
+		{
+			return this.distanceCovered;
 		}
-		return this.carRepport.getDistance();
+		else
+		{
+			if (this.distanceCovered > (this.carRepport.getDistance() + EnvSimulator.PAYABLE_DISTANCE))
+			{
+				return this.carRepport.getDistance() + (EnvSimulator.PAYABLE_DISTANCE);
+			}
+			return this.carRepport.getDistance();
+		}
 	} 
 
 	/**

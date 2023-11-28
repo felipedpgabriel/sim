@@ -17,7 +17,7 @@ public class CarTest {
         SumoColor color = new SumoColor(0, 255, 0, 126);
         SumoTraciConnection sumo = new SumoTraciConnection("sumo-gui", "map/map.sumo.cfg");
         car = new Car(true, "127.0.0.1", 11111, "CAR1", "D1", color,
-        sumo, 2, 1, 1);
+        sumo, 2, 1, 1,1);
     }
 
     @Test

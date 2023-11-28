@@ -46,7 +46,7 @@ public class EnvSimulator extends Thread
 	public static final int ACQUISITION_RATE = 50; // Tempo padrao de sleeps [ms]
 	// Configura extracao de rotas
 	private static final int AV = 2; // 1 ou 2
-	private static final int AV2_cicle = 1; // ideal 100
+	private static final int AV2_cicle = 2; // ideal 100
 
     /**Construtor vazio
 	 * 
@@ -122,7 +122,7 @@ public class EnvSimulator extends Thread
 				SumoColor color = new SumoColor(0, 82, 159, 126);// TODO funcao para cria cor
 				String driverID = "D" + (i+1);
 				Car car = new Car(true,lHost,PORT_COMPANY, ("CAR" + (i+1)), driverID, color, sumo, FUEL_TYPE,
-				PERSON_CAPACITY, PERSON_NUMBER);
+				PERSON_CAPACITY, PERSON_NUMBER, AV);
 				Driver driver = new Driver(lHost, PORT_BANK, driverID, car, ACQUISITION_RATE);
 				drivers.add(driver);
 			}

@@ -15,6 +15,4 @@ Usa como base o repositório [21lab-technology/sim](https://github.com/21lab-tec
 * Teste de escalonamento de tarefas.
 
 * TO DO:
-* #1 alterar planilha DrivingData para pegar a distancia ser registrada mais precisamente (sem a condição de 1 Km), para utilizá-la para a separação dos dados.
 * #2 editar a planilha: criar uma aba nova para os dados calculados (tempo e dist), calcular desvio padrao, e ler planilha para usala na função de reconciliação.
-* #PLUS fazer isso a cada iteração.

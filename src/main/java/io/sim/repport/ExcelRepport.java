@@ -120,4 +120,10 @@ public class ExcelRepport
 
         workbook.write(outputStream);
     }
+
+    // TODO funcao para fazer desvio padrao
+    // public static void setStandartDev()
+    // {
+    //     workbook.write(outputStream);
+    // }
 }

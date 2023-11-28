@@ -16,3 +16,4 @@ Usa como base o repositório [21lab-technology/sim](https://github.com/21lab-tec
 
 * TO DO:
 * #2 editar a planilha: criar uma aba nova para os dados calculados (tempo e dist), calcular desvio padrao, e ler planilha para usala na função de reconciliação.
+* #3 falta definir o fluxo (por edge)

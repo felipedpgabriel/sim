@@ -31,6 +31,7 @@ public class ExcelCompany extends Thread
                 }
                 sleep(sleepTime);
             }
+            ExcelRepport.setStandartDev();
         }
         catch (EncryptedDocumentException | IOException | InterruptedException e)
         {

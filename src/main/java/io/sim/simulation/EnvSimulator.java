@@ -134,6 +134,8 @@ public class EnvSimulator extends Thread
 			iniciaDrivers(drivers);
 			aguardaDrivers(drivers);
 			fuelStation.setStationOn(false);
+			System.out.println("Encerrando SUMO");
+			sumo.close();
 			company.join();
 			bank.join();
 			companyServer.close();

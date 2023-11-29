@@ -1,6 +1,7 @@
 package io.sim.repport;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -121,9 +122,17 @@ public class ExcelRepport
         workbook.write(outputStream);
     }
 
-    // TODO funcao para fazer desvio padrao
-    // public static void setStandartDev()
-    // {
-    //     workbook.write(outputStream);
-    // }
+    public static void setStandartDev() throws EncryptedDocumentException, IOException
+    {
+        FileInputStream inputStream = new FileInputStream(FILE_NAME_DD);
+        Workbook workbook = WorkbookFactory.create(inputStream);
+        FileOutputStream outputStream = new FileOutputStream(FILE_NAME_DD);
+        Sheet sheet = workbook.createSheet("Reconciliacao");
+
+        Row row = sheet.createRow(0);
+
+        row.createCell(0).setCellFormula("DESVPAD.P(A1:A2)");
+
+        workbook.write(outputStream);
+    }
 }

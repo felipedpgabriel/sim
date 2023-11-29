@@ -17,7 +17,7 @@ public class TimeStep extends Thread
     @Override
     public void run()
     {
-        while(true)
+        while(!this.sumo.isClosed())
         {
             try
             {

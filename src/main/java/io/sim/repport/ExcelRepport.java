@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import io.sim.bank.BankService;
@@ -158,28 +159,37 @@ public class ExcelRepport
         FileOutputStream outputStream = new FileOutputStream(FILE_NAME_DD);
         Sheet sheet = workbook.getSheet("Fluxos");
 
+        // FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
+
         Row rowMed = sheet.createRow(EnvSimulator.AV2_CICLE + 2);
         Row rowDP = sheet.createRow(EnvSimulator.AV2_CICLE + 3);
 
         int nFlow = _edgesSize/EnvSimulator.FLOW_SIZE;
         char colum = 'A';
-        String media = "MÉDIA(";
-        String desvpad = "DESVPAD.P(";
+        String media = "AVERAGE("; // MÉDIA
+        String desvpad = "SQRT(VARP(";
+        // Cell aux_Cell;
         for(int i=0; i<nFlow; i++)
         {
             String med = media + colum + "2:" + colum + String.valueOf(1 + EnvSimulator.AV2_CICLE) + ")";
-            String dp = desvpad + colum + "2:" + colum + String.valueOf(1 + EnvSimulator.AV2_CICLE) + ")";
+            String dp = desvpad + colum + "2:" + colum + String.valueOf(1 + EnvSimulator.AV2_CICLE) + "))";
             rowMed.createCell(i).setCellFormula(med); 
             rowDP.createCell(i).setCellFormula(dp);
+
+            // teste
+            // aux_Cell = rowMed.getCell(i);
+            // evaluator.evaluateFormulaCell(aux_Cell);
+            // aux_Cell = rowDP.getCell(i);
+            // evaluator.evaluateFormulaCell(aux_Cell);
             colum ++;
         }
         String med_f = media + colum + "2:" + colum + String.valueOf(1 + EnvSimulator.AV2_CICLE) + ")";
-        String dp_f = desvpad + colum + "2:" + colum + String.valueOf(1 + EnvSimulator.AV2_CICLE) + ")";
+        String dp_f = desvpad + colum + "2:" + colum + String.valueOf(1 + EnvSimulator.AV2_CICLE) + "))";
         rowMed.createCell(nFlow).setCellFormula(med_f);
         rowDP.createCell(nFlow).setCellFormula(dp_f);
 
         workbook.write(outputStream);
 
-        System.out.println(rowMed.getCell(nFlow).getCellFormula());
+        XSSFFormulaEvaluator.evaluateAllFormulaCells(workbook);
     }
 }

@@ -123,6 +123,20 @@ public class ExcelRepport
         workbook.write(outputStream);
     }
 
+    public static void headerCreatorFlow(Sheet _sheet, int _nFlow)
+    {
+        Row row = _sheet.createRow(0);
+        String time = "t";
+        String distance = "d";
+        for(int i=0; i<_nFlow; i++)
+        {
+            row.createCell(i).setCellValue(time + String.valueOf(i+1));
+            row.createCell(i+_nFlow+2).setCellValue(distance + String.valueOf(i+1));
+        }
+        row.createCell(_nFlow).setCellValue("T");
+        row.createCell(_nFlow).setCellValue("D");
+    }
+
     public static void setFlowParam(int _edgesSize) throws EncryptedDocumentException, IOException
     {
         FileInputStream inputStream = new FileInputStream(FILE_NAME_DD);
@@ -130,9 +144,10 @@ public class ExcelRepport
         FileOutputStream outputStream = new FileOutputStream(FILE_NAME_DD);
         Sheet sheet = workbook.createSheet("Fluxos");
 
-        // TODO cabecalho
-
         int nFlow = _edgesSize/EnvSimulator.FLOW_SIZE;
+
+        headerCreatorFlow(sheet, nFlow);
+        // TODO adicionar contas para distancia
         int passo = nFlow + 1;
         int rownum = 1;
 
@@ -159,16 +174,20 @@ public class ExcelRepport
         FileOutputStream outputStream = new FileOutputStream(FILE_NAME_DD);
         Sheet sheet = workbook.getSheet("Fluxos");
 
-        // FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
-
+        // Cabecalhos
         Row rowMed = sheet.createRow(EnvSimulator.AV2_CICLE + 2);
-        Row rowDP = sheet.createRow(EnvSimulator.AV2_CICLE + 3);
+        rowMed.createCell(0).setCellValue("Média");
+        Row rowDP = sheet.createRow(EnvSimulator.AV2_CICLE + 4);
+        rowDP.createCell(0).setCellValue("Desvio Padrão");
+
+        rowMed = sheet.createRow(EnvSimulator.AV2_CICLE + 3);
+        rowDP = sheet.createRow(EnvSimulator.AV2_CICLE + 5);
 
         int nFlow = _edgesSize/EnvSimulator.FLOW_SIZE;
         char colum = 'A';
-        String media = "AVERAGE("; // MÉDIA
+        String media = "AVERAGE(";
         String desvpad = "SQRT(VARP(";
-        // Cell aux_Cell;
+
         for(int i=0; i<nFlow; i++)
         {
             String med = media + colum + "2:" + colum + String.valueOf(1 + EnvSimulator.AV2_CICLE) + ")";
@@ -176,11 +195,6 @@ public class ExcelRepport
             rowMed.createCell(i).setCellFormula(med); 
             rowDP.createCell(i).setCellFormula(dp);
 
-            // teste
-            // aux_Cell = rowMed.getCell(i);
-            // evaluator.evaluateFormulaCell(aux_Cell);
-            // aux_Cell = rowDP.getCell(i);
-            // evaluator.evaluateFormulaCell(aux_Cell);
             colum ++;
         }
         String med_f = media + colum + "2:" + colum + String.valueOf(1 + EnvSimulator.AV2_CICLE) + ")";
@@ -190,6 +204,6 @@ public class ExcelRepport
 
         workbook.write(outputStream);
 
-        XSSFFormulaEvaluator.evaluateAllFormulaCells(workbook);
+        XSSFFormulaEvaluator.evaluateAllFormulaCells(workbook); // atualiza o valor das formulas
     }
 }

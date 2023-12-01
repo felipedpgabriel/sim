@@ -3,6 +3,8 @@ package io.sim.company;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -22,6 +24,7 @@ public class RouteN implements Serializable
 {
     private String edges;
     private String routeID;
+    private ArrayList<String> edgesList;
 
     /**Contrutor da classe RouteN.
      * 
@@ -32,6 +35,7 @@ public class RouteN implements Serializable
     {
         this.edges = edges;
         this.routeID = routeID;
+        this.edgesList =  this.splitEdgesList();
     }
 
     /**Extrai as rotas no formato XML para RouteN e adiciona em uma lista.
@@ -66,6 +70,14 @@ public class RouteN implements Serializable
         return routes;
     }
 
+    private ArrayList<String> splitEdgesList()
+    {
+        List<String> vetString = Arrays.asList(edges.split("\\s+"));
+        ArrayList<String> alString = new ArrayList<>(vetString);
+
+        return alString;
+    }
+
     /**
      * Get padrao para o atributo routeID.
      * @return String - ID da rota.
@@ -88,5 +100,13 @@ public class RouteN implements Serializable
      */
     public void setRouteID(String newID) {
         this.routeID = newID;
+    }
+
+    /**
+     * Get padrao para o atributo edgesList.
+     * @return String[] - Lista de edges da rota.
+     */
+    public ArrayList<String> getEdgesList(){
+        return edgesList;
     }
 }

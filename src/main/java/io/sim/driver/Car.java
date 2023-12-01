@@ -119,6 +119,15 @@ public class Car extends Vehicle implements Runnable
 					Thread.sleep(EnvSimulator.ACQUISITION_RATE);
 				}
 				// atualiza informacoes iniciais
+				if(av == 2)
+				{
+					this.carState = "fluxo atingido";
+					this.carRepport.setTimestamp(System.nanoTime());
+					this.carRepport.setCarState(this.carState);
+					this.carRepport.setRouteIDSUMO(this.route.getRouteID());
+					write(this.carRepport);
+				}
+				
 				String edgeAtual = (String) this.sumo.do_job_get(Vehicle.getRoadID(this.carID));
 				double[] coordGeo = this.convertGeo();
 				double previousLat = coordGeo[0];
@@ -131,7 +140,7 @@ public class Car extends Vehicle implements Runnable
 					{
 						System.out.println(this.carID + " acabou a rota " + this.route.getRouteID());
 						this.carState = "finalizado";
-						this.carRepport = this.updateDrivingData(this.carState);
+						this.carRepport.setCarState(this.carState); //= this.updateDrivingData(this.carState);
 						write(this.carRepport);
 						this.carOn = false;
 						break;
@@ -151,8 +160,13 @@ public class Car extends Vehicle implements Runnable
 						{
 							previousLat = carRepport.getLatitude();
 							previousLon = carRepport.getLongitude();
-							write(this.carRepport);
 							edgeAtual = (String) this.sumo.do_job_get(Vehicle.getRoadID(this.carID));
+							if(av == 2 && parseFlowReached(edgeAtual))
+							{
+								this.carState = "fluxo atingido";
+								this.carRepport.setCarState(this.carState);
+							}
+							write(this.carRepport);
 						}
 					}
 				}
@@ -234,7 +248,6 @@ public class Car extends Vehicle implements Runnable
 				// -2^30
 				
 				// 1/*averageFuelConsumption (calcular)*/,
-				this.sumo.do_job_set(Vehicle.setSpeedMode(this.carID, 31)); // TODO mudar para 27
 				this.setSpeed(carSpeed);
 
 			} else {
@@ -378,6 +391,7 @@ public class Car extends Vehicle implements Runnable
 
 	public void setSpeed(double _speed) throws Exception
 	{
+		this.sumo.do_job_set(Vehicle.setSpeedMode(this.carID, 27)); // [0 1 1 0 1 1]
 		this.sumo.do_job_set(Vehicle.setSpeed(this.carID, _speed));
 	}
 
@@ -387,6 +401,32 @@ public class Car extends Vehicle implements Runnable
 		byte[] msgEncrypt = Cryptography.encrypt(jsMsg);
 		saida.writeInt(msgEncrypt.length);
 		saida.write(msgEncrypt);
+
+		// chegou em um fluxo
+		if(av == 2 && this.carState.equals("fluxo atingido"))
+		{
+			this.updateFlowList();
+		}
+	}
+
+	private boolean parseFlowReached(String _currentEdge)
+	{
+		if(this.route.getEdgesList().isEmpty())
+		{
+			return false;
+		}
+		else
+		{
+			return this.route.getEdgesList().get(0).equals(_currentEdge);
+		}
+	}
+
+	private void updateFlowList()
+	{
+		for(int i=0; i<EnvSimulator.FLOW_SIZE;i++)
+		{
+			this.route.getEdgesList().remove(0);
+		}
 	}
 
 	private RouteN read() throws Exception
@@ -400,14 +440,7 @@ public class Car extends Vehicle implements Runnable
 	private boolean isRouteFineshed(String _edgeAtual, String _edgeFinal)
 	{
 		boolean taNoSUMO = MobilityCompany.estaNoSUMO(this.carID, this.sumo); //TODO IllegalStateException
-		if(!taNoSUMO && (_edgeFinal.equals(_edgeAtual)))
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+		return !taNoSUMO && (_edgeFinal.equals(_edgeAtual));
 	}
 
 	private String getEdgeFinal()

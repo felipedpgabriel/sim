@@ -68,7 +68,8 @@ public class Driver extends Thread
                 }
                 else if(carState.equals("rodando") && !initRoute)
                 {
-                    System.out.println(this.driverID + " rota "+ this.car.getRoute().getRouteID() +" iniciada");
+                    System.out.println(this.driverID + " iniciando: rota "+ this.car.getRoute().getRouteID() + " | " + 
+                    (this.car.getRoute().getEdgesList().size() + EnvSimulator.FLOW_SIZE) + " edges");
                     this.routesInExe.add(this.car.getRoute());
                     initRoute = true; 
                 }

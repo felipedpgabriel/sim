@@ -60,6 +60,7 @@ public class MobilityCompany extends Thread
     {
         try
         {
+            int edgesSize = routesToExe.get(0).getEdgesList().size();
             System.out.println("MobilityCompany iniciada...");
             
             AlphaBank.setConectionsInit(true);
@@ -72,7 +73,7 @@ public class MobilityCompany extends Thread
             ccc.join();
 
             // Cria a Thread de atualizacao dos relatorios do Excel
-            ExcelCompany ec = new ExcelCompany(this);
+            ExcelCompany ec = new ExcelCompany(this, edgesSize);
             ec.start();
 
             boolean fimRotasNotificado = false; // evita que a mensagem "Rotas terminadas" seja enviado continuamente

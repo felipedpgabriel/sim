@@ -45,8 +45,9 @@ public class EnvSimulator extends Thread
 	private static final long FUEL_TIME = 120; // ideal 120 [s]
 	public static final int ACQUISITION_RATE = 50; // Tempo padrao de sleeps [ms]
 	// Configura extracao de rotas
-	private static final int AV = 2; // 1 ou 2
-	private static final int AV2_cicle = 2; // ideal 100
+	public static final int AV = 2; // 1 ou 2
+	public static final int AV2_CICLE = 2; // ideal 100
+	public static final int FLOW_SIZE = 2; // tamanho do fluxo (qtd de edges)
 
     /**Construtor vazio
 	 * 
@@ -87,10 +88,10 @@ public class EnvSimulator extends Thread
 			else if(av == 2)
 			{
 				ArrayList<RouteN> aux_routes = new ArrayList<RouteN>();
-				for(int i = 0; i<AV2_cicle; i++)
+				for(int i = 0; i<AV2_CICLE; i++)
 				{
 					aux_routes = RouteN.extractRoutes(ROTAS_XML);
-					aux_routes.get(0).setRouteID(Integer.toString(i));
+					aux_routes.get(0).setRouteID(Integer.toString(i+1));
 					routes.add(i, aux_routes.get(0));
 				}
 				System.out.println("ES - Rodando rotas " + routes.size() + " vezes.");

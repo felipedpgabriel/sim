@@ -40,10 +40,6 @@ public class DrivingData implements Serializable
 		this.latitude = _latitude;
 	}
 
-	// public void setAverageFuelConsumption(double _averageFuelConsumption) {
-	// 	this.averageFuelConsumption = _averageFuelConsumption;
-	// }
-
 	public String getCarState() {
 		return carState;
 	}
@@ -60,12 +56,20 @@ public class DrivingData implements Serializable
 		return timestamp;
 	}
 
+	public void setTimestamp(long _timestamp) {
+		this.timestamp = _timestamp;
+	}
+
 	public String getCarID() {
 		return carID;
 	}
 
 	public String getRouteIDSUMO() {
 		return routeIDSUMO;
+	}
+
+	public void setRouteIDSUMO(String routeIDSUMO) {
+		this.routeIDSUMO = routeIDSUMO;
 	}
 
 	public double getSpeed() {

@@ -10,11 +10,13 @@ import io.sim.company.MobilityCompany;
 public class ExcelCompany extends Thread
 {
     private MobilityCompany company;
+    private int edgesSize;
     
-    public ExcelCompany(MobilityCompany _company)
+    public ExcelCompany(MobilityCompany _company, int _edgesSize)
     {
         super("ExcelCompany");
         this.company = _company;
+        this.edgesSize = _edgesSize;
     }
 
     @Override
@@ -31,7 +33,8 @@ public class ExcelCompany extends Thread
                 }
                 sleep(sleepTime);
             }
-            ExcelRepport.setStandartDev();
+            ExcelRepport.setFlowParam(this.edgesSize);
+            ExcelRepport.setRecParam(this.edgesSize);
         }
         catch (EncryptedDocumentException | IOException | InterruptedException e)
         {

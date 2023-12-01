@@ -1,7 +1,6 @@
 package io.sim.repport;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,6 +12,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import io.sim.bank.BankService;
 import io.sim.driver.Driver;
 import io.sim.driver.DrivingData;
+import io.sim.simulation.EnvSimulator;
 
 public class ExcelRepport 
 {
@@ -122,17 +122,64 @@ public class ExcelRepport
         workbook.write(outputStream);
     }
 
-    public static void setStandartDev() throws EncryptedDocumentException, IOException
+    public static void setFlowParam(int _edgesSize) throws EncryptedDocumentException, IOException
     {
         FileInputStream inputStream = new FileInputStream(FILE_NAME_DD);
         Workbook workbook = WorkbookFactory.create(inputStream);
         FileOutputStream outputStream = new FileOutputStream(FILE_NAME_DD);
-        Sheet sheet = workbook.createSheet("Reconciliacao");
+        Sheet sheet = workbook.createSheet("Fluxos");
 
-        Row row = sheet.createRow(0);
+        // TODO cabecalho
 
-        row.createCell(0).setCellFormula("DESVPAD.P(A1:A2)");
+        int nFlow = _edgesSize/EnvSimulator.FLOW_SIZE;
+        int passo = nFlow + 1;
+        int rownum = 1;
+
+        for(int i=2; i<(passo*EnvSimulator.AV2_CICLE + 1); i+= passo)
+        {
+            Row row = sheet.createRow(rownum);
+            for(int j=0; j<nFlow; j++)
+            {
+                String t_i = "Drivers!A" + String.valueOf(j + i + 1) + " - Drivers!A" + String.valueOf(j+i);
+                row.createCell(j).setCellFormula("10^-6*(" + t_i + ")/" + String.valueOf(EnvSimulator.ACQUISITION_RATE));
+            }
+            String t_i = "Drivers!A" + String.valueOf(nFlow + i) + " - Drivers!A" + String.valueOf(i);
+            row.createCell(nFlow).setCellFormula("10^-6*(" + t_i + ")/" + String.valueOf(EnvSimulator.ACQUISITION_RATE));
+            rownum++;
+        }
 
         workbook.write(outputStream);
+    }
+
+    public static void setRecParam(int _edgesSize) throws EncryptedDocumentException, IOException
+    {
+        FileInputStream inputStream = new FileInputStream(FILE_NAME_DD);
+        Workbook workbook = WorkbookFactory.create(inputStream);
+        FileOutputStream outputStream = new FileOutputStream(FILE_NAME_DD);
+        Sheet sheet = workbook.getSheet("Fluxos");
+
+        Row rowMed = sheet.createRow(EnvSimulator.AV2_CICLE + 2);
+        Row rowDP = sheet.createRow(EnvSimulator.AV2_CICLE + 3);
+
+        int nFlow = _edgesSize/EnvSimulator.FLOW_SIZE;
+        char colum = 'A';
+        String media = "MÉDIA(";
+        String desvpad = "DESVPAD.P(";
+        for(int i=0; i<nFlow; i++)
+        {
+            String med = media + colum + "2:" + colum + String.valueOf(1 + EnvSimulator.AV2_CICLE) + ")";
+            String dp = desvpad + colum + "2:" + colum + String.valueOf(1 + EnvSimulator.AV2_CICLE) + ")";
+            rowMed.createCell(i).setCellFormula(med); 
+            rowDP.createCell(i).setCellFormula(dp);
+            colum ++;
+        }
+        String med_f = media + colum + "2:" + colum + String.valueOf(1 + EnvSimulator.AV2_CICLE) + ")";
+        String dp_f = desvpad + colum + "2:" + colum + String.valueOf(1 + EnvSimulator.AV2_CICLE) + ")";
+        rowMed.createCell(nFlow).setCellFormula(med_f);
+        rowDP.createCell(nFlow).setCellFormula(dp_f);
+
+        workbook.write(outputStream);
+
+        System.out.println(rowMed.getCell(nFlow).getCellFormula());
     }
 }

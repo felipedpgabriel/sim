@@ -26,6 +26,7 @@ public class CompanyChannel extends Thread
     // Atributos da classe
     private Account account;
     private boolean rotaFinalizada;
+    private int av;
 
     /**
      * Construtor da classe CompanyChannel.
@@ -39,6 +40,7 @@ public class CompanyChannel extends Thread
         this.socketServ = _socketServ;
         this.account = _account;
         rotaFinalizada = false;
+        this.av = EnvSimulator.AV;
     }
 
     @Override
@@ -86,15 +88,12 @@ public class CompanyChannel extends Thread
                 }
                 else if(mensagem.equals("finalizado"))
                 {
+                    MobilityCompany.addRepport(ddIn);
                     String routeID = ddIn.getRouteIDSUMO();
                     MobilityCompany.arquivarRota(routeID);
                     System.out.println("Rotas para executar: " + MobilityCompany.getRoutesToExeSize() +"\nRotas em execucao: " 
                     + MobilityCompany.getRoutesInExeSize() + "\nRotas executadas: "+ MobilityCompany.getRoutesExecutedSize());
                     rotaFinalizada = true;
-                }
-                else if(mensagem.equals("rodando") || mensagem.equals("abastecendo"))
-                {
-                    MobilityCompany.addRepport(ddIn);
                 }
                 else if (mensagem.equals("encerrado"))
                 {
@@ -107,6 +106,21 @@ public class CompanyChannel extends Thread
                         rotaFinalizada = true;
                     }
                     break;
+                }
+                else if(av == 2)
+                {
+                    if(mensagem.equals("fluxo atingido"))
+                    {
+                        System.out.println("Atingiu o fluxo"); // TODO tirar
+                        MobilityCompany.addRepport(ddIn);
+                    }
+                }
+                else if(av == 1)
+                {
+                    if(mensagem.equals("rodando") || mensagem.equals("abastecendo"))
+                    {
+                        MobilityCompany.addRepport(ddIn);
+                    }
                 }
             }
 

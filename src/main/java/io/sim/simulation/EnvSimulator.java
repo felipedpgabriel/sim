@@ -46,7 +46,7 @@ public class EnvSimulator extends Thread
 	public static final int ACQUISITION_RATE = 100; // Tempo padrao de sleeps [ms]
 	// Configura extracao de rotas
 	public static final int AV = 2; // 1 ou 2
-	public static final int AV2_CICLE = 3; // ideal 100
+	public static final int AV2_CICLE = 4; // ideal 100
 	public static final int FLOW_SIZE = 2; // tamanho do fluxo (qtd de edges)
 
     /**Construtor vazio

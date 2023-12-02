@@ -197,33 +197,25 @@ public class ExcelRepport
         char columT1 = 'A';
         char columT2 = 'A';
         boolean columT_ValDouble = false;
-        String columT = "";
+        String columT = String.valueOf(columT1);
             // Variaveis distancia
         char columD1 = columT1;
         columD1 += (nFlow + 2);
         char columD2 = columT2;
-        columD2 += (nFlow + 2);
+        columD2 += Math.floor((nFlow + 2)/26);
         boolean columD_ValDouble = false;
-        String columD = "";
+        String columD = String.valueOf(columD1);;
 
         for(int i=0; i<nFlow; i++)
         {
             if(columT_ValDouble)
             {
-                columT = String.valueOf(columT2 + columT1);
-            }
-            else
-            {
-                columT = String.valueOf(columT1);
+                columT = String.valueOf(columT2) + String.valueOf(columT1);
             }
 
             if(columD_ValDouble)
             {
-                columD = String.valueOf(columD2 + columD1);
-            }
-            else
-            {
-                columD = String.valueOf(columD1);
+                columD = String.valueOf(columD2) + String.valueOf(columD1);
             }
 
             String med = media + columT + "2:" + columT + String.valueOf(1 + EnvSimulator.AV2_CICLE) + ")";
@@ -253,6 +245,7 @@ public class ExcelRepport
             {
                 columT1++;
             }
+            columT = String.valueOf(columT1);
 
             if(columD1 == 'Z')
             {
@@ -270,8 +263,20 @@ public class ExcelRepport
             {
                 columD1++;
             }
+            columD = String.valueOf(columD1);
             
         }
+        
+        if(columT_ValDouble)
+        {
+            columT = String.valueOf(columT2) + String.valueOf(columT1);
+        }
+
+        if(columD_ValDouble)
+        {
+            columD = String.valueOf(columD2) + String.valueOf(columD1);
+        }
+
         String med_f = media + columT + "2:" + columT + String.valueOf(1 + EnvSimulator.AV2_CICLE) + ")";
         String dp_f = desvpad + columT + "2:" + columT + String.valueOf(1 + EnvSimulator.AV2_CICLE) + "))";
         rowMed.createCell(nFlow).setCellFormula(med_f);
@@ -286,5 +291,5 @@ public class ExcelRepport
         XSSFFormulaEvaluator.evaluateAllFormulaCells(workbook); // atualiza o valor das formulas
     }
 
-    
+
 }

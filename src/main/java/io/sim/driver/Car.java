@@ -116,7 +116,7 @@ public class Car extends Vehicle implements Runnable
 				this.carOn = true;
 				while(!MobilityCompany.estaNoSUMO(this.carID, this.sumo)) //esperar estar no SUMO
 				{
-					Thread.sleep(EnvSimulator.ACQUISITION_RATE);
+					Thread.sleep(EnvSimulator.ACQUISITION_RATE/2);
 				}
 				// atualiza informacoes iniciais
 				if(av == 2)
@@ -231,13 +231,21 @@ public class Car extends Vehicle implements Runnable
 					this.carState = "rodando";
 					carSpeed = this.speedDefault;
 				}
-				
+
+				double sumoSensorSpeed = 0;
+				double sumoSensorFuelConsumption = 0;
+				double sumoSensorCO2Emission = 0;
+				while(!MobilityCompany.estaNoSUMO(this.carID, this.sumo))
+				{
+					Thread.sleep(EnvSimulator.ACQUISITION_RATE/10);
+				}
+				sumoSensorSpeed = (double) this.sumo.do_job_get(Vehicle.getSpeed(this.carID));
+				sumoSensorFuelConsumption = (double) this.sumo.do_job_get(Vehicle.getFuelConsumption(this.carID));
+				sumoSensorCO2Emission = (double) this.sumo.do_job_get(Vehicle.getCO2Emission(this.carID));
 				// Criacao dos dados de conducao do veiculo
-				repport = updateDrivingData(this.carState, this.driverLoginID, System.nanoTime(), this.carID,
-				(String) this.sumo.do_job_get(Vehicle.getRouteID(this.carID)), (double) this.sumo.do_job_get(Vehicle.getSpeed(this.carID)),
-				this.updateDistance(currentLat,currentLon,_initiLat, _initLon),
-				(double) this.sumo.do_job_get(Vehicle.getFuelConsumption(this.carID)), this.fuelType,
-				(double) this.sumo.do_job_get(Vehicle.getCO2Emission(this.carID)), currentLon, currentLat);
+				repport = updateDrivingData(this.carState, this.driverLoginID, System.nanoTime(), this.carID, this.route.getRouteID(),
+				sumoSensorSpeed, this.updateDistance(currentLat,currentLon,_initiLat, _initLon), sumoSensorFuelConsumption, this.fuelType,
+				sumoSensorCO2Emission, currentLon, currentLat);
 						
 				// Vehicle's fuel consumption in ml/s during this time step,
 				// to get the value for one step multiply with the step length; error value:

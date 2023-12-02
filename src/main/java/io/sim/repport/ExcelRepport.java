@@ -134,7 +134,7 @@ public class ExcelRepport
             row.createCell(i+_nFlow+2).setCellValue(distance + String.valueOf(i+1));
         }
         row.createCell(_nFlow).setCellValue("T");
-        row.createCell(_nFlow).setCellValue("D");
+        row.createCell(2*_nFlow +2).setCellValue("D");
     }
 
     public static void setFlowParam(int _edgesSize) throws EncryptedDocumentException, IOException
@@ -147,7 +147,6 @@ public class ExcelRepport
         int nFlow = _edgesSize/EnvSimulator.FLOW_SIZE;
 
         headerCreatorFlow(sheet, nFlow);
-        // TODO adicionar contas para distancia
         int passo = nFlow + 1;
         int rownum = 1;
 
@@ -157,10 +156,15 @@ public class ExcelRepport
             for(int j=0; j<nFlow; j++)
             {
                 String t_i = "Drivers!A" + String.valueOf(j + i + 1) + " - Drivers!A" + String.valueOf(j+i);
-                row.createCell(j).setCellFormula("10^-6*(" + t_i + ")/" + String.valueOf(EnvSimulator.ACQUISITION_RATE));
+                String d_i = "Drivers!E" + String.valueOf(j + i + 1) + " - Drivers!E" + String.valueOf(j+i);
+                row.createCell(j).setCellFormula("10^-7*(" + t_i + ")/" + String.valueOf(EnvSimulator.ACQUISITION_RATE));
+                row.createCell(j+nFlow+2).setCellFormula(d_i);
             }
-            String t_i = "Drivers!A" + String.valueOf(nFlow + i) + " - Drivers!A" + String.valueOf(i);
-            row.createCell(nFlow).setCellFormula("10^-6*(" + t_i + ")/" + String.valueOf(EnvSimulator.ACQUISITION_RATE));
+            String t_total = "Drivers!A" + String.valueOf(nFlow + i) + " - Drivers!A" + String.valueOf(i);
+            String d_total = "Drivers!E" + String.valueOf(nFlow + i) + " - Drivers!E" + String.valueOf(i);
+            row.createCell(nFlow).setCellFormula("10^-7*(" + t_total + ")/" + String.valueOf(EnvSimulator.ACQUISITION_RATE));
+            row.createCell(2*nFlow + 2).setCellFormula(d_total);
+
             rownum++;
         }
 
@@ -169,6 +173,7 @@ public class ExcelRepport
 
     public static void setRecParam(int _edgesSize) throws EncryptedDocumentException, IOException
     {
+        // Configuracoes iniciais
         FileInputStream inputStream = new FileInputStream(FILE_NAME_DD);
         Workbook workbook = WorkbookFactory.create(inputStream);
         FileOutputStream outputStream = new FileOutputStream(FILE_NAME_DD);
@@ -180,30 +185,106 @@ public class ExcelRepport
         Row rowDP = sheet.createRow(EnvSimulator.AV2_CICLE + 4);
         rowDP.createCell(0).setCellValue("Desvio Padrão");
 
+        // Linhas para media e desvio padrao
         rowMed = sheet.createRow(EnvSimulator.AV2_CICLE + 3);
         rowDP = sheet.createRow(EnvSimulator.AV2_CICLE + 5);
 
+        // Inicializando variaveis
         int nFlow = _edgesSize/EnvSimulator.FLOW_SIZE;
-        char colum = 'A';
         String media = "AVERAGE(";
         String desvpad = "SQRT(VARP(";
+            // Variaveis tempo
+        char columT1 = 'A';
+        char columT2 = 'A';
+        boolean columT_ValDouble = false;
+        String columT = "";
+            // Variaveis distancia
+        char columD1 = columT1;
+        columD1 += (nFlow + 2);
+        char columD2 = columT2;
+        columD2 += (nFlow + 2);
+        boolean columD_ValDouble = false;
+        String columD = "";
 
         for(int i=0; i<nFlow; i++)
         {
-            String med = media + colum + "2:" + colum + String.valueOf(1 + EnvSimulator.AV2_CICLE) + ")";
-            String dp = desvpad + colum + "2:" + colum + String.valueOf(1 + EnvSimulator.AV2_CICLE) + "))";
+            if(columT_ValDouble)
+            {
+                columT = String.valueOf(columT2 + columT1);
+            }
+            else
+            {
+                columT = String.valueOf(columT1);
+            }
+
+            if(columD_ValDouble)
+            {
+                columD = String.valueOf(columD2 + columD1);
+            }
+            else
+            {
+                columD = String.valueOf(columD1);
+            }
+
+            String med = media + columT + "2:" + columT + String.valueOf(1 + EnvSimulator.AV2_CICLE) + ")";
+            String dp = desvpad + columT + "2:" + columT + String.valueOf(1 + EnvSimulator.AV2_CICLE) + "))";
             rowMed.createCell(i).setCellFormula(med); 
             rowDP.createCell(i).setCellFormula(dp);
 
-            colum ++;
+            med = media + columD + "2:" + columD + String.valueOf(1 + EnvSimulator.AV2_CICLE) + ")";
+            dp = desvpad + columD + "2:" + columD + String.valueOf(1 + EnvSimulator.AV2_CICLE) + "))";
+            rowMed.createCell(i + nFlow + 2).setCellFormula(med); 
+            rowDP.createCell(i + nFlow + 2).setCellFormula(dp);
+
+            // Atualiza valor das colunas | nao considera que passe da coluna ZZ
+            if(columT1 == 'Z')
+            {
+                columT1 = 'A';
+                if(columT_ValDouble)
+                {
+                    columT2++;
+                }
+                else
+                {
+                    columT_ValDouble = true;
+                }
+            }
+            else
+            {
+                columT1++;
+            }
+
+            if(columD1 == 'Z')
+            {
+                columD1 = 'A';
+                if(columD_ValDouble)
+                {
+                    columD2++;
+                }
+                else
+                {
+                    columD_ValDouble = true;
+                }
+            }
+            else
+            {
+                columD1++;
+            }
+            
         }
-        String med_f = media + colum + "2:" + colum + String.valueOf(1 + EnvSimulator.AV2_CICLE) + ")";
-        String dp_f = desvpad + colum + "2:" + colum + String.valueOf(1 + EnvSimulator.AV2_CICLE) + "))";
+        String med_f = media + columT + "2:" + columT + String.valueOf(1 + EnvSimulator.AV2_CICLE) + ")";
+        String dp_f = desvpad + columT + "2:" + columT + String.valueOf(1 + EnvSimulator.AV2_CICLE) + "))";
         rowMed.createCell(nFlow).setCellFormula(med_f);
         rowDP.createCell(nFlow).setCellFormula(dp_f);
+        med_f = media + columD + "2:" + columD + String.valueOf(1 + EnvSimulator.AV2_CICLE) + ")";
+        dp_f = desvpad + columD + "2:" + columD + String.valueOf(1 + EnvSimulator.AV2_CICLE) + "))";
+        rowMed.createCell(2*nFlow + 2).setCellFormula(med_f);
+        rowDP.createCell(2*nFlow + 2).setCellFormula(dp_f);
 
         workbook.write(outputStream);
 
         XSSFFormulaEvaluator.evaluateAllFormulaCells(workbook); // atualiza o valor das formulas
     }
+
+    
 }

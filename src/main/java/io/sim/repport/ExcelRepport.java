@@ -363,7 +363,6 @@ public class ExcelRepport
         }
 
         workbook.write(outputStream);
-        // XSSFFormulaEvaluator.evaluateAllFormulaCells(workbook); // atualiza o valor das formulas
     }
 
     public static double[][] getRecParam(int _edgesSize, int _measureSample) throws EncryptedDocumentException, IOException

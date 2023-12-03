@@ -24,7 +24,7 @@ public class EnvSimulator extends Thread
 	private static final int PORT_COMPANY = 11111;
 	private static final int PORT_BANK = 22222;
 	// Quantidades 
-	private static final String ROTAS_XML = "data/dados3.xml"; // "data/dadosav2.xml" | dados3 10 edges para teste
+	private static final String ROTAS_XML = "data/dadosAV2.xml"; // "data/dadosAV2.xml" | dados3 10 edges para teste
 	private static final int NUM_BOMBAS = 2;
 	public static final int NUM_DRIVERS = 1; // 100 AV1 e 1 AV2
 	// Atributos Carros
@@ -46,7 +46,7 @@ public class EnvSimulator extends Thread
 	public static final int ACQUISITION_RATE = 50; // Tempo padrao de sleeps [ms]
 	// Configura extracao de rotas
 	public static final int AV = 2; // 1 ou 2
-	public static final int AV2_CICLE = 3; // ideal 100
+	public static final int AV2_CICLE = 100; // ideal 100
 	public static final int FLOW_SIZE = 2; // tamanho do fluxo (qtd de edges)
 
     /**Construtor vazio

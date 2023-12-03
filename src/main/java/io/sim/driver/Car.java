@@ -96,7 +96,10 @@ public class Car extends Vehicle implements Runnable
             saida = new DataOutputStream(socket.getOutputStream());
 
 			CarFuelManager cfm = new CarFuelManager(this); 
-			cfm.start();
+			if(this.av == 1)
+			{
+				cfm.start();
+			}
 
 			while(!finished)
 			{
@@ -149,7 +152,10 @@ public class Car extends Vehicle implements Runnable
 					if(!isRouteFineshed(edgeAtual, edgeFinal))
 					{
 						this.carRepport = this.atualizaSensores(previousLat, previousLon); // TODO tentar trocar para TransportService
-						cfm.setFuelConsumption(this.carRepport.getFuelConsumption()/800);
+						if(this.av == 1)
+						{
+							cfm.setFuelConsumption(this.carRepport.getFuelConsumption()/800);
+						}
 						if(this.carRepport.getCarState().equals("finalizado"))
 						{
 							write(this.carRepport);
@@ -435,9 +441,16 @@ public class Car extends Vehicle implements Runnable
 
 	private void updateFlowList()
 	{
-		for(int i=0; i<EnvSimulator.FLOW_SIZE;i++)
+		if(this.route.getEdgesList().size() < EnvSimulator.FLOW_SIZE)
 		{
-			this.route.getEdgesList().remove(0);
+			this.route.getEdgesList().clear();
+		}
+		else
+		{
+			for(int i=0; i<EnvSimulator.FLOW_SIZE;i++)
+			{
+				this.route.getEdgesList().remove(0);
+			}
 		}
 	}
 

@@ -160,6 +160,10 @@ public class Car extends Vehicle implements Runnable
 						{
 							previousLat = carRepport.getLatitude();
 							previousLon = carRepport.getLongitude();
+							while(!MobilityCompany.estaNoSUMO(this.carID, this.sumo))
+							{
+								Thread.sleep(EnvSimulator.ACQUISITION_RATE/10);
+							}
 							edgeAtual = (String) this.sumo.do_job_get(Vehicle.getRoadID(this.carID));
 							if(av == 2 && parseFlowReached(edgeAtual))
 							{

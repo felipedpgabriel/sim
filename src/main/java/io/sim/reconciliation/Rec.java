@@ -43,16 +43,12 @@ public class Rec extends Thread{
 				Ad[i] = -1;
 			}
 		}
-		System.out.println(measureT.length);
-		System.out.println(stdevT.length);
-		System.out.println(At.length);
+
 		Reconciliation recT = new Reconciliation(this.measureT, this.stdevT, At);
 		System.out.println("Tempos reconciliados:");
 		double[] reconciledT = recT.getReconciledFlow();
 		recT.printMatrix(reconciledT);
-		System.out.println(measureD);
-		System.out.println(stdevD);
-		System.out.println(Ad);
+
 		Reconciliation recD = new Reconciliation(this.measureD, this.stdevD, Ad);
 		System.out.println("Distancias reconciliados:");
 		double[] reconciledD = recD.getReconciledFlow();

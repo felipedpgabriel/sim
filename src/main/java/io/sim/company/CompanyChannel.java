@@ -111,7 +111,6 @@ public class CompanyChannel extends Thread
                 {
                     if(mensagem.equals("fluxo atingido"))
                     {
-                        // System.out.println("Atingiu o fluxo"); // TODO tirar
                         MobilityCompany.addRepport(ddIn);
                     }
                 }

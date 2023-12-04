@@ -39,7 +39,7 @@ public class ExcelCompany extends Thread
             {
                 ExcelRepport.setFlowParam(this.edgesSize);
                 ExcelRepport.setStatistics(this.edgesSize);
-                double[][] recParam = ExcelRepport.getRecParam(this.edgesSize, 2);
+                double[][] recParam = ExcelRepport.getRecParam(this.edgesSize, 50);
 
                 Rec rec = new Rec(recParam[0], recParam[1], recParam[2], recParam[3]);
                 rec.start();

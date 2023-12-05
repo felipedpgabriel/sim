@@ -11,9 +11,5 @@ Usa como base o repositório [21lab-technology/sim](https://github.com/21lab-tec
 
 ## Avaliação 2
 
-* Uso de reconciliação para definir a velocidade mais adequada para o veículo em cada trecho (considerando o tempo para cumprir a rota e o consumo).
-* Teste de escalonamento de tarefas.
-
-* TO DO:
-* #2 editar a planilha: criar uma aba nova para os dados calculados (tempo e dist), calcular desvio padrao, e ler planilha para usala na função de reconciliação.
-* #3 falta definir o fluxo (por edge)
+* Parte 1 Uso de reconciliação para definir a velocidade mais adequada para o veículo em cada trecho.
+* Parte 2 Teste de escalonamento de tarefas.

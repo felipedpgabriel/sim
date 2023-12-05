@@ -12,6 +12,7 @@ import io.sim.company.MobilityCompany;
 import io.sim.company.RouteN;
 import io.sim.messages.Cryptography;
 import io.sim.messages.JSONconverter;
+import io.sim.repport.ExcelRepport;
 import io.sim.simulation.EnvSimulator;
 import it.polito.appeal.traci.SumoTraciConnection;
 import it.polito.appeal.traci.TraCIException;
@@ -46,6 +47,10 @@ public class Car extends Vehicle implements Runnable
 	private boolean finished;
 	private boolean abastecendo;
 	private int av;
+	// Escalonamento
+    private long initRunTime;
+    private long endRunTime;
+    private long birthTime;
 
 	/**
 	 * Construtor da classe Car.
@@ -65,6 +70,7 @@ public class Car extends Vehicle implements Runnable
 	public Car(boolean _carOn, String _carHost,int _servPort, String _carID, String _driverLoginID, SumoColor _carColor, 
 	SumoTraciConnection _sumo, int _fuelType, int _personCapacity, int _personNumber, int _av) throws Exception
 	{
+		this.birthTime = System.nanoTime();
 		this.carHost = _carHost;
 		this.servPort = _servPort;
 		this.carState = "aguardando";
@@ -87,6 +93,7 @@ public class Car extends Vehicle implements Runnable
 	@Override
 	public void run()
 	{
+		this.initRunTime = System.nanoTime();
 		System.out.println(this.carID + " iniciado.");
 		try
 		{
@@ -194,6 +201,8 @@ public class Car extends Vehicle implements Runnable
 			entrada.close();
 			saida.close();
 			socket.close();
+			this.endRunTime = System.nanoTime();
+			ExcelRepport.updateSSScheduling("Car", this.initRunTime, this.endRunTime, this.birthTime);
         }
 		catch (TraCIException e)
 		{

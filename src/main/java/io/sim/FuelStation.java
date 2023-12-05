@@ -9,6 +9,7 @@ import io.sim.bank.BankService;
 import io.sim.driver.Car;
 import io.sim.messages.Cryptography;
 import io.sim.messages.JSONconverter;
+import io.sim.repport.ExcelRepport;
 import io.sim.simulation.EnvSimulator;
     
 import java.net.Socket;
@@ -29,6 +30,10 @@ public class FuelStation extends Thread
     private static long fuelTime;
     private static Semaphore semaphore;
     private boolean stationOn;
+    // Escalonamento
+    private long initRunTime;
+    private long endRunTime;
+    private long birthTime;
 
     /**
      * Construtor da classe FuelStation.
@@ -41,6 +46,7 @@ public class FuelStation extends Thread
     public FuelStation(String _stationHost, int _bankPort, int _numBombas, long _fuelTime)
     {
         super("FuelStation");
+        this.birthTime = System.nanoTime();
         this.stationHost = _stationHost;
         this.bankPort = _bankPort;
         this.account = new Account(0.00, "FuelStation", "fs123");
@@ -58,6 +64,7 @@ public class FuelStation extends Thread
     @Override
     public void run()
     {
+        this.initRunTime = System.nanoTime();
         try
         {
             System.out.println("Iniciando FuelStation");
@@ -73,6 +80,8 @@ public class FuelStation extends Thread
             System.out.println("FuelStation encerrada...");
             System.out.println("Saldo Station: " + account.getSaldo());
             AlphaBank.encerrarConta(account.getLogin());
+            this.endRunTime = System.nanoTime();
+			ExcelRepport.updateSSScheduling("FuelStation", this.initRunTime, this.endRunTime, this.birthTime);
         } catch (Exception e) {
             e.printStackTrace();
         }

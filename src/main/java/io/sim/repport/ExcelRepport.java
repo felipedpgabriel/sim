@@ -10,6 +10,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import io.sim.App;
 import io.sim.bank.BankService;
 import io.sim.driver.Driver;
 import io.sim.driver.DrivingData;
@@ -19,7 +20,54 @@ public class ExcelRepport
 {
     private static final String FILE_NAME_DD = "DrivingDataRepport.xlsx";
     private static final String FILE_NAME_BS = "BankServiceRepport.xlsx";
+    private static final String FILE_NAME_S = "Scheduling.xlsx";
     
+    public static void ssSchedulingCreator() throws IOException
+    {
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Escalonamento");
+        headerCreatorS(sheet);
+        FileOutputStream outputStream = new FileOutputStream(FILE_NAME_S);
+        workbook.write(outputStream);
+
+        System.out.println("Planilha Scheduling criada");
+        workbook.close();
+    }
+
+    private static void headerCreatorS(Sheet _sheet )
+    {
+        Row row = _sheet.createRow(0);
+
+        row.createCell(0).setCellValue("Tarefas");
+        row.createCell(1).setCellValue("Ji");
+        row.createCell(2).setCellValue("Ci");
+        row.createCell(3).setCellValue("Pi");
+        row.createCell(4).setCellValue("Di");
+    }
+
+    public static synchronized void updateSSScheduling(String _threadName,long _initRunTime, long _endRunTime, long _birthTime) throws EncryptedDocumentException, IOException
+    {
+        FileInputStream inputStream = new FileInputStream(FILE_NAME_S);
+        Workbook workbook = WorkbookFactory.create(inputStream);
+        FileOutputStream outputStream = new FileOutputStream(FILE_NAME_S);
+        Sheet sheet = workbook.getSheetAt(0);
+
+        int lastRowNum = sheet.getLastRowNum();
+        Row ceil = sheet.createRow(lastRowNum + 1);
+
+        double Ji = (_initRunTime - App.INIT_APP_TIME) * Math.pow(10, -9);
+        double Ci = (_endRunTime - _initRunTime) * Math.pow(10, -9);
+        double Pi = (_initRunTime - _birthTime) * Math.pow(10, -9);
+
+        ceil.createCell(0).setCellValue(_threadName);
+        ceil.createCell(1).setCellValue(Ji);
+        ceil.createCell(2).setCellValue(Ci);
+        ceil.createCell(3).setCellValue(Pi);
+        ceil.createCell(4).setCellFormula("C" + String.valueOf(lastRowNum+2) + "*1.1"); 
+
+        workbook.write(outputStream);
+    }
+
     public static void ssDrivingDataCreator() throws IOException
     {
         Workbook workbook = new XSSFWorkbook();

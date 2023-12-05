@@ -10,6 +10,7 @@ import io.sim.bank.AlphaBank;
 import io.sim.driver.DrivingData;
 import io.sim.messages.Cryptography;
 import io.sim.messages.JSONconverter;
+import io.sim.repport.ExcelRepport;
 import io.sim.simulation.EnvSimulator;
 
 /**
@@ -27,6 +28,10 @@ public class CompanyChannel extends Thread
     private Account account;
     private boolean rotaFinalizada;
     private int av;
+    // Escalonamento
+    private long initRunTime;
+    private long endRunTime;
+    private long birthTime;
 
     /**
      * Construtor da classe CompanyChannel.
@@ -36,6 +41,7 @@ public class CompanyChannel extends Thread
      */
     public CompanyChannel(Socket _socketCli, Socket _socketServ, Account _account)
     {
+        this.birthTime = System.nanoTime();
         this.socketCli = _socketCli;
         this.socketServ = _socketServ;
         this.account = _account;
@@ -46,6 +52,7 @@ public class CompanyChannel extends Thread
     @Override
     public void run()
     {
+        this.initRunTime = System.nanoTime();
         try
         {
             // Variaveis de entrada e saida do servidor
@@ -127,6 +134,8 @@ public class CompanyChannel extends Thread
             entradaServ.close();
             saidaServ.close();
             socketServ.close();
+            this.endRunTime = System.nanoTime();
+            ExcelRepport.updateSSScheduling("CompanyChannel", this.initRunTime, this.endRunTime, this.birthTime);
         }
         catch (IOException e)
         {

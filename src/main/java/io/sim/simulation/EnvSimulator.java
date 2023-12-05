@@ -45,7 +45,7 @@ public class EnvSimulator extends Thread
 	private static final long FUEL_TIME = 120; // ideal 120 [s]
 	public static final int ACQUISITION_RATE = 50; // Tempo padrao de sleeps [ms]
 	// Configura extracao de rotas
-	public static final int AV = 2; // 1 ou 2
+	public static final int AV = 1; // 1 ou 2
 	public static final int AV2_CICLE = 100; // ideal 100
 	public static final int FLOW_SIZE = 2; // tamanho do fluxo (qtd de edges)
 
@@ -131,6 +131,7 @@ public class EnvSimulator extends Thread
 			// Cria as planilhas de Excel
 			ExcelRepport.ssDrivingDataCreator();
 			ExcelRepport.ssBankServiceCreator(company.getAccountLogin(), drivers, fuelStation.getAccountLogin());
+			ExcelRepport.ssSchedulingCreator();
 			
 			iniciaDrivers(drivers);
 			aguardaDrivers(drivers);

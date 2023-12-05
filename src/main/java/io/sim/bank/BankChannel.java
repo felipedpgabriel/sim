@@ -5,6 +5,7 @@ import java.net.Socket;
 
 import io.sim.messages.Cryptography;
 import io.sim.messages.JSONconverter;
+import io.sim.repport.ExcelRepport;
 
 /**
  * Classe que representa o canal de comunicacao com o banco (Thread especifica apra cada cliente).
@@ -13,6 +14,11 @@ public class BankChannel extends Thread
 {
     private Socket socket;
     private DataInputStream entrada;
+
+    // Escalonamento
+    private long initRunTime;
+    private long endRunTime;
+    private long birthTime;
     
     /**
      * Construtor da classe BankChannel.
@@ -22,12 +28,14 @@ public class BankChannel extends Thread
     public BankChannel(String nome, Socket _socket)
     {
         super(nome);
+        this.birthTime = System.nanoTime();
         this.socket = _socket;
     }
 
     @Override
     public void run()
     {
+        this.initRunTime = System.nanoTime();
         try
         {
             // Variavel de saida do servidor
@@ -54,6 +62,8 @@ public class BankChannel extends Thread
 
             entrada.close();
             socket.close();
+            this.endRunTime = System.nanoTime();
+            ExcelRepport.updateSSScheduling("BankChannel", this.initRunTime, this.endRunTime, this.birthTime);
         }
         catch (Exception e)
         {

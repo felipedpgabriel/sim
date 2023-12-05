@@ -14,6 +14,7 @@ import io.sim.driver.DrivingData;
 import io.sim.messages.Cryptography;
 import io.sim.messages.JSONconverter;
 import io.sim.repport.ExcelCompany;
+import io.sim.repport.ExcelRepport;
 import io.sim.simulation.EnvSimulator;
 import it.polito.appeal.traci.SumoTraciConnection;
 
@@ -32,6 +33,10 @@ public class MobilityCompany extends Thread
     private static ArrayList<RouteN> routesExecuted;
     private static boolean routesAvailable;
     private static ArrayList<DrivingData> carsRepport;
+    // Escalonamento
+    private long initRunTime;
+    private long endRunTime;
+    private long birthTime;
 
     /**
      * Construtor da classe MobilityCompany
@@ -43,6 +48,7 @@ public class MobilityCompany extends Thread
      */
     public MobilityCompany(String _companyHost, int _bankPort, ServerSocket _serverSocket, ArrayList<RouteN> _routes, SumoTraciConnection _sumo)
     {
+        this.birthTime = System.nanoTime();
         this.companyHost = _companyHost;
         this.bankPort = _bankPort;
         serverSocket = _serverSocket;
@@ -58,6 +64,7 @@ public class MobilityCompany extends Thread
     @Override
     public void run()
     {
+        this.initRunTime = System.nanoTime();
         try
         {
             int edgesSize = routesToExe.get(0).getEdgesList().size();
@@ -95,7 +102,9 @@ public class MobilityCompany extends Thread
             AlphaBank.encerrarConta(account.getLogin());
             ec.join();
             System.out.println("MobilityCompany encerrada...");
-            }
+            this.endRunTime = System.nanoTime();
+            ExcelRepport.updateSSScheduling("MobilityCompany", this.initRunTime, this.endRunTime, this.birthTime);
+        }
         catch (Exception e)
         {
             e.printStackTrace();

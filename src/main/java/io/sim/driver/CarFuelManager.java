@@ -1,5 +1,6 @@
 package io.sim.driver;
 
+import io.sim.repport.ExcelRepport;
 import io.sim.simulation.EnvSimulator;
 
 /**
@@ -9,12 +10,17 @@ public class CarFuelManager extends Thread
 {
     private Car car;
     private double fuelConsumption; // ml/s
+    // Escalonamento
+    private long initRunTime;
+    private long endRunTime;
+    private long birthTime;
 
     /**
      * Construtor da classe CarFuelManager.
      * @param car
      */
     public CarFuelManager(Car car) {
+        this.birthTime = System.nanoTime();
         this.car = car;
         this.fuelConsumption = 0;
     }
@@ -22,6 +28,7 @@ public class CarFuelManager extends Thread
     @Override
     public void run()
     {
+        this.initRunTime = System.nanoTime();
         System.out.println("Iniciando FuelManager");
         while(!this.car.isFinished())
         {
@@ -42,6 +49,8 @@ public class CarFuelManager extends Thread
                         sleep(1000); // consumo por segundo
                     }
                 }
+                this.endRunTime = System.nanoTime();
+                ExcelRepport.updateSSScheduling("CarFuelManager", this.initRunTime, this.endRunTime, this.birthTime);
             }
             catch (Exception e) {
                     e.printStackTrace();

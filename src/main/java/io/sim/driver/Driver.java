@@ -15,6 +15,7 @@ import io.sim.bank.BotPayment;
 import io.sim.company.RouteN;
 import io.sim.messages.Cryptography;
 import io.sim.messages.JSONconverter;
+import io.sim.repport.ExcelRepport;
 
 public class Driver extends Thread
 {
@@ -31,9 +32,14 @@ public class Driver extends Thread
     private ArrayList<RouteN> routesExecuted;
     private ArrayList<RouteN> routesInExe;
     private boolean initRoute;
+    // Escalonamento
+    private long initRunTime;
+    private long endRunTime;
+    private long birthTime;
 
     public Driver(String driverHost, int servPort, String driverID, Car car, long acquisitionRate)
     {
+        this.birthTime = System.nanoTime();
         account = new Account(41.10/2, driverID, (driverID + "123"));
         this.driverHost = driverHost;
         this.servPort = servPort;
@@ -48,6 +54,7 @@ public class Driver extends Thread
     @Override
     public void run()
     {
+        this.initRunTime = System.nanoTime();
         try {
             Socket socket = new Socket(this.driverHost, this.servPort);
             DataInputStream entrada = new DataInputStream(socket.getInputStream());
@@ -100,6 +107,8 @@ public class Driver extends Thread
 			socket.close();
             System.out.println("Saldo "+ this.driverID+": "+this.account.getSaldo());
             AlphaBank.encerrarConta(this.account.getLogin());
+            this.endRunTime = System.nanoTime();
+			ExcelRepport.updateSSScheduling("Driver", this.initRunTime, this.endRunTime, this.birthTime);
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (IOException e) {

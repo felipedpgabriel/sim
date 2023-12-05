@@ -10,15 +10,22 @@ import io.sim.bank.AlphaBank;
 public class ExcelBank extends Thread
 {
     private AlphaBank bank;
+    // Escalonamento
+    private long initRunTime;
+    private long endRunTime;
+    private long birthTime;
     
-    public ExcelBank(AlphaBank _bank) {
+    public ExcelBank(AlphaBank _bank)
+    {
         super("ExcelBank");
+        this.birthTime = System.nanoTime();
         this.bank = _bank;
     }
 
     @Override
     public void run()
     {
+        this.initRunTime = System.nanoTime();
         try
         {
             long sleepTime = EnvSimulator.ACQUISITION_RATE/3;
@@ -30,6 +37,8 @@ public class ExcelBank extends Thread
                 }
                 sleep(sleepTime);
             }
+            this.endRunTime = System.nanoTime();
+			ExcelRepport.updateSSScheduling("ExcelBank", this.initRunTime, this.endRunTime, this.birthTime);
         }
         catch (EncryptedDocumentException | IOException | InterruptedException e)
         {

@@ -12,10 +12,15 @@ public class ExcelCompany extends Thread
 {
     private MobilityCompany company;
     private int edgesSize;
+    // Escalonamento
+    private long initRunTime;
+    private long endRunTime;
+    private long birthTime;
     
     public ExcelCompany(MobilityCompany _company, int _edgesSize)
     {
         super("ExcelCompany");
+        this.birthTime = System.nanoTime();
         this.company = _company;
         this.edgesSize = _edgesSize;
     }
@@ -23,6 +28,7 @@ public class ExcelCompany extends Thread
     @Override
     public void run()
     {
+        this.initRunTime = System.nanoTime();
         try
         {
             int av = EnvSimulator.AV;
@@ -45,6 +51,8 @@ public class ExcelCompany extends Thread
                 rec.start();
                 rec.join();
             }
+            this.endRunTime = System.nanoTime();
+			ExcelRepport.updateSSScheduling("ExcelCompany", this.initRunTime, this.endRunTime, this.birthTime);
         }
         catch (EncryptedDocumentException | IOException | InterruptedException e)
         {

@@ -1,11 +1,14 @@
 package io.sim;
 
-import java.io.IOException;
+//////// POS PROCESSAMENTO ////////
+// import java.io.IOException;
 
-import org.apache.poi.EncryptedDocumentException;
+// import org.apache.poi.EncryptedDocumentException;
 
-import io.sim.reconciliation.Rec;
-import io.sim.repport.ExcelRepport;
+// import io.sim.reconciliation.Rec;
+// import io.sim.repport.ExcelRepport;
+
+//////// SISTEMA PRINCIPAL ////////
 import io.sim.simulation.EnvSimulator;
 
 /**
@@ -13,7 +16,8 @@ import io.sim.simulation.EnvSimulator;
  */
 public class App
 {
-   public static void main( String[] args ) throws InterruptedException
+    public static final long INIT_APP_TIME = System.nanoTime();
+    public static void main( String[] args ) throws InterruptedException
    {
         //////// SISTEMA PRINCIPAL ////////
         System.out.println("Inicia a simulacao");
@@ -35,5 +39,5 @@ public class App
     //         // TODO Auto-generated catch block
     //         e.printStackTrace();
     //     }
-    // }
+    }
 }

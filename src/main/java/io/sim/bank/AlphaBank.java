@@ -1,11 +1,15 @@
 package io.sim.bank;
 
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 
+import org.apache.poi.EncryptedDocumentException;
+
 import io.sim.repport.ExcelBank;
+import io.sim.repport.ExcelRepport;
 import io.sim.simulation.EnvSimulator;
 
 /**
@@ -21,6 +25,10 @@ public class AlphaBank extends Thread
     private static ArrayList<BankService> bankServices;
     private static boolean conectionsInit;
     private static boolean accountsEnded;
+    // Escalonamento
+    private long initRunTime;
+    private long endRunTime;
+    private long birthTime;
 
     /**
      * Contrutor da classe AlphaBank.
@@ -29,6 +37,7 @@ public class AlphaBank extends Thread
      */
     public AlphaBank(ServerSocket serverSocket, int numAccounts)
     {
+        this.birthTime = System.nanoTime();
         this.serverSocket = serverSocket;
         this.numAccounts = numAccounts;
         accounts = new ArrayList<Account>();
@@ -40,6 +49,7 @@ public class AlphaBank extends Thread
     @Override
     public void run()
     {
+        this.initRunTime = System.nanoTime();
         try
         {
             System.out.println("AlphaBank iniciado...");
@@ -66,9 +76,17 @@ public class AlphaBank extends Thread
 
             // Aguarda a Thread do Excel finalizar
             eb.join();
+            this.endRunTime = System.nanoTime();
+            ExcelRepport.updateSSScheduling("AlphaBank", this.initRunTime, this.endRunTime, this.birthTime);
         }
         catch (InterruptedException e)
         {
+            e.printStackTrace();
+        } catch (EncryptedDocumentException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
